@@ -51,8 +51,8 @@ A user would:
     - If user enters contract address and tokenId, frontend uses that to query the smart contract and get the image URL
     - If user selects an image from their library, frontend uses nft.storage to upload the photo to IPFS. This is probably better handled by the backend, but choosing to do it on the frontend for now to help distribute the work. 
     - Frontend sends the image url to the backend
-        - `POST /api/profile/picture/`
-        - `{'url': 'https://ipfs.io/ipfs/<cid>'}`
+        - `POST /api/profile/image/`
+        - `{'image': 'https://ipfs.io/ipfs/<cid>'}`
     - Frontend receives an updated Profile from the backend
         - `200 OK`
             - See 'Profile JSON' below
@@ -155,7 +155,7 @@ A user would:
 Profile JSON
 ```
 {
-    "picture": "SOME URL",
+    "image": "SOME URL",
     "socials": {
         "website": "SOME URL",
         "twitter": "SOME URL",
