@@ -155,9 +155,7 @@ A user would:
 Profile JSON
 ```
 {
-    "picture": {
-        "url": "SOME URL"
-    },
+    "picture": "SOME URL",
     "socials": {
         "website": "SOME URL",
         "twitter": "SOME URL",
