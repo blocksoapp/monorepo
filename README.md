@@ -56,8 +56,8 @@ A user would:
       - Frontend stores the bio blurb to send to the backend later with the image and socials
    - Link Website, Twitter, Telegram, Discord, Opensea, Looksrare, Snapshot.
       - Frontend stores the links to send to the backend later with the image and bio
-   - Frontend sends the bio, image, and socials to the backend
-             - `POST /api/<address>/profile/`
+   - Frontend sends the bio, image, and socials to the backend  
+             - `POST /api/<address>/profile/`  
              - `{"bio": "bio text",
                  "image": "image url",
                  "socials": {
@@ -69,13 +69,13 @@ A user would:
                    "looksrare": "SOME URL",
                    "snapshot": "SOME URL"
                  }
-                }`
-         - Frontend receives created Profile
-             - `201 OK`
-                 - See 'Profile JSON' below
-                 - Show success feedback
-             - `400 BAD REQUEST`
-                 - Show error feedback
+                }`  
+   - Frontend receives created Profile  
+       - `201 OK`  
+           - See 'Profile JSON' below  
+           - Show success feedback  
+       - `400 BAD REQUEST`  
+           - Show error feedback  
 
  - Follow other wallets.
     - Frontend sends public address to follow to the backend
