@@ -45,31 +45,37 @@ A user would:
         - `401 UNAUTHORIZED`
             - Don't worry about this for now.
 
- - Upload a profile pic or select an NFT they own.
-    - Frontend asks the user for the contract address and tokenId of an NFT they own, OR
-        for them to select an image to upload.
-    - If user enters contract address and tokenId, frontend uses that to query the smart contract and get the image URL
-    - If user selects an image from their library, frontend uses nft.storage to upload the photo to IPFS. This is probably better handled by the backend, but choosing to do it on the frontend for now to help distribute the work. 
-    - Frontend sends the image url to the backend
-        - `POST /api/profile/image/`
-        - `{'image': 'https://ipfs.io/ipfs/<cid>'}`
-    - Frontend receives an updated Profile from the backend
-        - `200 OK`
-            - See 'Profile JSON' below
-            - Show success feedback
-        - `400 BAD REQUEST`
-            - Show error feedback
-
- - Write a bio blurb
-    - Frontend sends bio as text to the backend
-        - `POST /api/profile/bio/`
-        - `{"bio": "bio text"}`
-    - Frontend receives updated Profile
-        - `200 OK`
-            - See 'Profile JSON' below
-            - Show success feedback
-        - `400 BAD REQUEST`
-            - Show error feedback
+ - Create a profile
+   - Upload a profile pic or select an NFT they own.
+      - Frontend asks the user for the contract address and tokenId of an NFT they own, OR
+          for them to select an image to upload.
+      - If user enters contract address and tokenId, frontend uses that to query the smart contract and get the image URL
+      - If user selects an image from their library, frontend uses nft.storage to upload the photo to IPFS. This should be handled by the backend, but choosing to do it on the frontend for now to help distribute the work. 
+      - Frontend stores the image url to send to the backend later with the bio and socials
+   - Write a bio blurb
+      - Frontend stores the bio blurb to send to the backend later with the image and socials
+   - Link Website, Twitter, Telegram, Discord, Opensea, Looksrare, Snapshot.
+      - Frontend stores the links to send to the backend later with the image and bio
+   - Frontend sends the bio, image, and socials to the backend
+             - `POST /api/<address>/profile/`
+             - `{"bio": "bio text",
+                 "image": "image url",
+                 "socials": {
+                   "website": "SOME URL",
+                   "twitter": "SOME URL",
+                   "discord": "SOME URL",
+                   "telegram": "SOME URL",
+                   "opensea": "SOME URL",
+                   "looksrare": "SOME URL",
+                   "snapshot": "SOME URL"
+                 }
+                }`
+         - Frontend receives created Profile
+             - `201 OK`
+                 - See 'Profile JSON' below
+                 - Show success feedback
+             - `400 BAD REQUEST`
+                 - Show error feedback
 
  - Follow other wallets.
     - Frontend sends public address to follow to the backend
@@ -136,20 +142,6 @@ A user would:
             - `400 BAD REQUEST`
                 - Show error feedback
 
- - Link their Website, Twitter, Instagram, Opensea, Looksrare.
-    - Frontend sends request with URLs of website, twitter, instagram, opensea, looksrare
-        - `POST /api/socials/`
-        - ```{"website": "SOME URL",
-        "twitter": "SOME URL",
-        "instagram": "SOME URL",
-        "opensea": "SOME URL",
-        "looksrare": "SOME URL"}```
-    - Frontend receives updated Profile
-        - `200 OK`
-            - Show success feedback
-            - See "Profile JSON" below.
-        - `400 BAD REQUEST`
-            - Show error feedback
 
 
 Profile JSON
@@ -158,10 +150,13 @@ Profile JSON
     "image": "SOME URL",
     "socials": {
         "website": "SOME URL",
+        "discord": "SOME URL",
+        "telegram": "SOME URL",
         "twitter": "SOME URL",
         "instagram": "SOME URL",
         "opensea": "SOME URL",
-        "looksrare": "SOME URL"
+        "looksrare": "SOME URL",
+        "snapshot": "SOME URL"
     },
     "bio": "bio description",
     "numFollowers": "num of followers",
