@@ -80,3 +80,21 @@ class ProfileSerializer(serializers.ModelSerializer):
         socials = Socials.objects.create(profile=profile, **socials)
 
         return profile
+
+    def update(self, instance, validated_data):
+        """ Updates a Profile. """
+
+        # update nested socials
+        if "socials" in validated_data:
+            socials_serializer = self.fields["socials"]
+            socials_instance = instance.socials
+            socials_data = validated_data.pop("socials")
+            socials_serializer.update(socials_instance, socials_data)
+
+        # update other attributes
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # save the changes and return them
+        instance.save()
+        return instance

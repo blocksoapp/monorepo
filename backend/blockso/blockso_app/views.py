@@ -25,3 +25,13 @@ class ProfileCreateRetrieveUpdate(
         """ Create a Profile for the given address. """
 
         return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """ Update a Profile for the given address. """
+
+        return self.update(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """ Retrieve the Profile of the given address. """
+
+        return self.retrieve(request, *args, **kwargs)
