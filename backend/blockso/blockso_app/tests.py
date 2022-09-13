@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 class ProfileTests(APITestCase):
     # test:
-    # - creating profile
+    # - updating profile
     # - retrieving profile
     # - following another user 
 
@@ -47,11 +47,10 @@ class ProfileTests(APITestCase):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         expected = req_data
-
-        # TODO add posts to expected result after creating their model
         expected.update({
             "address": self.test_addr,
             "numFollowers": 0,
             "numFollowing": 0,
+            "posts": []
         })
         self.assertDictEqual(resp.data, expected)

@@ -35,8 +35,8 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile"
     )
-    bio = models.TextField()
-    image = models.URLField()
+    bio = models.TextField(blank=False)
+    image = models.URLField(blank=False)
 
 
 class Socials(models.Model):
@@ -69,3 +69,24 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name="dest"
     )
+
+
+class Post(models.Model):
+    """ Represents a Post created by a user. """
+
+    author = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name="posts"
+    )
+    text = models.TextField(blank=False)
+    imgUrl = models.URLField(blank=False)
+    isShare = models.BooleanField(blank=False)
+    isQuote = models.BooleanField(blank=False)
+    refPost = models.ForeignKey(
+        to="self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created = models.DateTimeField(auto_now_add=True)
