@@ -15,7 +15,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Profile
+from .models import Follow, Profile
 from . import serializers
 
 
@@ -77,6 +77,29 @@ def auth_logout(request):
 
     logout(request)
     return Response(200)
+
+
+class FollowCreateDestroy(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports following/unfollowing users. """
+
+    serializer_class = serializers.FollowSerializer
+    queryset = Follow.objects.all()
+    lookup_url_kwarg = "address"
+    lookup_field = "dest"
+
+    def post(self, request, *args, **kwargs):
+        """ Signed in user follows the given address. """
+
+        return self.create(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """ Signed in user unfollows the given address. """
+
+        return self.destroy(request, *args, **kwargs)
 
 
 class ProfileCreateRetrieveUpdate(

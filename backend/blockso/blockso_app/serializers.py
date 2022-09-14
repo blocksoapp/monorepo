@@ -77,8 +77,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         address = Web3.toChecksumAddress(address)
         
         # create User, Socials, Profile
-        User = get_user_model()
-        user, _ = User.objects.get_or_create(pk=address)
+        user_model = get_user_model()
+        user, _ = user_model.objects.get_or_create(pk=address)
         socials = validated_data.pop("socials")
         profile = Profile.objects.create(user=user, **validated_data)
         socials = Socials.objects.create(profile=profile, **socials)
@@ -102,3 +102,51 @@ class ProfileSerializer(serializers.ModelSerializer):
         # save the changes and return them
         instance.save()
         return instance
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """ Follow model serializer. """
+
+    class Meta:
+        model = Follow
+        exclude = ["src", "dest"]
+
+
+    def create(self, validated_data):
+        """ Creates a Follow. """
+
+        # get the signed in user
+        user = self.context.get("request").user
+
+        # get address from the URL
+        address = self.context.get("view").kwargs["address"]
+        address = Web3.toChecksumAddress(address)
+        user_model = get_user_model()
+        to_follow = user_model.objects.get(ethereum_address=address)
+        
+        # signed in user follows the address given in the url
+        follow = Follow.objects.create(
+            src=user,
+            dest=to_follow
+        )
+
+        return follow
+
+    def destroy(self, validated_data):
+        """ Deletes a Follow. """
+
+        # get the signed in user
+        user = self.context.get("request").user
+
+        # get address from the URL
+        address = self.context.get("view").kwargs["address"]
+        address = Web3.toChecksumAddress(address)
+        
+        # signed in user unfollows the address given in the url
+        follow = Follow.objects.get(
+            src_id=user.ethereum_address,
+            dest_id=address
+        )
+        follow.delete()
+
+        return None 

@@ -10,6 +10,7 @@ from siwe.siwe import SiweMessage
 import eth_account
 
 # our imports
+from .models import Follow
 
 
 class BaseTest(APITestCase):
@@ -52,14 +53,6 @@ class BaseTest(APITestCase):
             "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         }
 
-
-class AuthTests(BaseTest):
-    """
-    Tests authentication using ETH wallet.
-    Auth is based on https://eips.ethereum.org/EIPS/eip-4361
-    and https://github.com/payton/django-siwe-auth/blob/main/siwe_auth/views.py
-    """
-
     def _do_login(self):
         """
         Utility function to get a nonce, sign a message, and do a login.
@@ -90,6 +83,13 @@ class AuthTests(BaseTest):
 
         # return response
         return resp
+
+class AuthTests(BaseTest):
+    """
+    Tests authentication using ETH wallet.
+    Auth is based on https://eips.ethereum.org/EIPS/eip-4361
+    and https://github.com/payton/django-siwe-auth/blob/main/siwe_auth/views.py
+    """
 
     def test_nonce(self):
         """
@@ -215,3 +215,65 @@ class ProfileTests(BaseTest):
             "posts": []
         })
         self.assertDictEqual(resp.data, expected)
+
+
+class FollowTests(BaseTest):
+    """
+    Tests follow related behavior.
+    """
+
+    def setUp(self):
+        """ Runs before each test. """
+
+        super().setUp()
+        self.test_signer_2 = eth_account.Account.create()
+
+    def test_follow(self):
+        """
+        Assert that a user can follow another.
+        """
+        # prepare test
+        self._do_login()  # create user 1 and log them in
+
+        # create user 2
+        url = f"/api/{self.test_signer_2.address}/profile/"
+        self.client.post(url, self.create_data)
+
+        # make request for user 1 to follow user 2
+        url = f"/api/{self.test_signer_2.address}/follow/"
+        resp = self.client.post(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        follow = Follow.objects.get(
+            src_id=self.test_signer.address,
+            dest_id=self.test_signer_2.address
+        )
+        self.assertIsNotNone(follow)
+
+    def test_unfollow(self):
+        """
+        Assert that a user can unfollow another.
+        """
+        # prepare test
+        self._do_login()  # create user 1 and log them in
+
+        # create user 2
+        url = f"/api/{self.test_signer_2.address}/profile/"
+        self.client.post(url, self.create_data)
+
+        # make request for user 1 to follow user 2
+        url = f"/api/{self.test_signer_2.address}/follow/"
+        resp = self.client.post(url)
+
+        # make request for user 1 to UNFOLLOW user 2
+        url = f"/api/{self.test_signer_2.address}/follow/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+        with self.assertRaises(Follow.DoesNotExist):
+            Follow.objects.get(
+                src_id=self.test_signer.address,
+                dest_id=self.test_signer_2.address
+            )
