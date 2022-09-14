@@ -1,7 +1,9 @@
 # std lib imports
 
 # third party imports
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from web3 import Web3
 
 # our imports
 from .models import Follow, Post, Profile, Socials, User
@@ -43,7 +45,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         """ Returns the address of the User associated with the Profile. """
 
         user = getattr(obj, "user")
-        return user.address
+        return user.ethereum_address
 
     def get_num_followers(self, obj):
         """ Returns the profile's follower count. """
@@ -72,9 +74,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         # get address from the URL
         address = self.context.get("view").kwargs["address"].lower()
+        address = Web3.toChecksumAddress(address)
         
         # create User, Socials, Profile
-        user = User.objects.create(address=address)
+        User = get_user_model()
+        user, _ = User.objects.get_or_create(pk=address)
         socials = validated_data.pop("socials")
         profile = Profile.objects.create(user=user, **validated_data)
         socials = Socials.objects.create(profile=profile, **socials)

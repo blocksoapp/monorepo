@@ -36,6 +36,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=lambda v: v.split(','))
 # Application definition
 
 INSTALLED_APPS = [
+    'siwe_auth.apps.SiweAuthConfig',  # Adds django-siwe-auth
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -141,11 +142,14 @@ CORS_ALLOWED_ORIGINS = config(
 )
 CORS_ALLOW_CREDENTIALS = True
 
+
 # cross-site request forgery config
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
 
+
 # session cookie config
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
+
 
 # django-rest-framework config
 REST_FRAMEWORK = {
@@ -156,3 +160,16 @@ REST_FRAMEWORK = {
 }
 handler500 = 'rest_framework.exceptions.server_error'
 handler400 = 'rest_framework.exceptions.bad_request'
+
+
+# Sign-In with Ethereum config
+AUTH_USER_MODEL = "siwe_auth.Wallet"
+AUTHENTICATION_BACKENDS = [
+    "siwe_auth.backend.SiweBackend"
+]
+CREATE_GROUPS_ON_AUTHN = False  # defaults to False
+CREATE_ENS_PROFILE_ON_AUTHN = False  # defaults to True
+CUSTOM_GROUPS = []  # see "Group Plugins" section
+SESSION_COOKIE_AGE = config("SESSION_COOKIE_AGE", cast=int)
+PROVIDER = config("ETH_PROVIDER", cast=str)
+AUTH_NONCE_AGE = config("AUTH_NONCE_AGE", cast=int)

@@ -1,6 +1,10 @@
-from django.db import models
+# std lib imports
 
-# Create your models here.
+# third party imports
+from django.db import models
+from django.conf import settings
+
+# our imports
 
 
 class User(models.Model):
@@ -31,7 +35,7 @@ class Profile(models.Model):
     """ Represents the profile of a user. """
 
     user = models.OneToOneField(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="profile"
     )
@@ -60,12 +64,12 @@ class Follow(models.Model):
     """ Represents the follower-followed relationship between users. """
 
     src = models.ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="src"
     )
     dest = models.ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="dest"
     )
@@ -75,7 +79,7 @@ class Post(models.Model):
     """ Represents a Post created by a user. """
 
     author = models.ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="posts"
     )
