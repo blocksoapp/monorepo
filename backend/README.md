@@ -13,3 +13,6 @@ Make sure you have the requirements above installed, then run the `build.sh` scr
 
 ## How to Run Tests  
 `python manage.py test`
+
+## Tech Debt & Notes  
+1. Make sure the authed user can only create profiles for themselves

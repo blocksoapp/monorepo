@@ -7,7 +7,9 @@ import secrets
 # third party imports
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, \
+    IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import generics, mixins
 from siwe_auth.models import Nonce
@@ -72,6 +74,7 @@ def auth_login(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def auth_logout(request):
     """ Terminates the user's session. """
 
@@ -86,6 +89,7 @@ class FollowCreateDestroy(
 
     """ View that supports following/unfollowing users. """
 
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.FollowSerializer
     queryset = Follow.objects.all()
     lookup_url_kwarg = "address"
@@ -110,6 +114,7 @@ class ProfileCreateRetrieveUpdate(
 
     """ View that supports creating, retrieving, and updating Profiles. """
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.ProfileSerializer
     queryset = Profile.objects.all()
     lookup_url_kwarg = "address"

@@ -56,11 +56,10 @@ class BaseTest(APITestCase):
     def _do_login(self):
         """
         Utility function to get a nonce, sign a message, and do a login.
+        Returns the response of the login request.
+        Note: the authentication backend creates a user if one
+        does not already exist for the wallet doing the authentication.
         """
-        # create user
-        url = f"/api/{self.test_signer.address}/profile/"
-        self.client.post(url, self.create_data)
-
         # get nonce from backend
         resp = self.client.get("/api/auth/nonce/")
         self.siwe_message_data["nonce"] = resp.data["nonce"]
@@ -83,6 +82,19 @@ class BaseTest(APITestCase):
 
         # return response
         return resp
+
+    def _create_profile(self):
+        """
+        Utility function to create a Profile using
+        the given test data.
+        This function will usually be called after authenticating
+        with the _do_login function above.
+        """
+        # create user
+        url = f"/api/{self.test_signer.address}/profile/"
+        resp = self.client.post(url, self.create_data)
+        return resp
+
 
 class AuthTests(BaseTest):
     """
@@ -110,6 +122,7 @@ class AuthTests(BaseTest):
         """
         Assert that a user can create a session by signing a message.
         """
+        # do login
         resp = self._do_login()
 
         # make assertions
@@ -149,6 +162,7 @@ class ProfileTests(BaseTest):
         Assert that the created profile info is returned as JSON.
         """
         # prepare test
+        self._do_login()
         url = f"/api/{self.test_signer.address}/profile/"
 
         # make POST request
@@ -171,8 +185,8 @@ class ProfileTests(BaseTest):
         Assert that the updated profile info is returned as JSON.
         """
         # prepare test
-        url = f"/api/{self.test_signer.address}/profile/"
-        self.client.post(url, self.create_data)  # create profile
+        self._do_login()
+        self._create_profile()
 
         # change some profile info
         update_data = self.create_data
@@ -181,6 +195,7 @@ class ProfileTests(BaseTest):
         update_data["socials"]["website"] = "https://newsite.com"
 
         # make PUT request
+        url = f"/api/{self.test_signer.address}/profile/"
         resp = self.client.put(url, update_data)
 
         # make assertions
@@ -199,10 +214,11 @@ class ProfileTests(BaseTest):
         Assert that a profile is retreived successfully.
         """
         # prepare test
-        url = f"/api/{self.test_signer.address}/profile/"
-        self.client.post(url, self.create_data)  # create profile
+        self._do_login()
+        self._create_profile()
 
         # make GET request
+        url = f"/api/{self.test_signer.address}/profile/"
         resp = self.client.get(url)
 
         # make assertions
@@ -233,7 +249,9 @@ class FollowTests(BaseTest):
         Assert that a user can follow another.
         """
         # prepare test
-        self._do_login()  # create user 1 and log them in
+        # create user 1 and log them in
+        self._do_login()
+        self._create_profile()
 
         # create user 2
         url = f"/api/{self.test_signer_2.address}/profile/"
@@ -256,7 +274,9 @@ class FollowTests(BaseTest):
         Assert that a user can unfollow another.
         """
         # prepare test
-        self._do_login()  # create user 1 and log them in
+        # create user 1 and log them in
+        self._do_login()
+        self._create_profile()
 
         # create user 2
         url = f"/api/{self.test_signer_2.address}/profile/"
