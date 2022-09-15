@@ -1,9 +1,10 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useEnsName } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { Button } from 'react-bootstrap'
 
-function Account() {
+function DisplayConnection() {
   const { address, isConnected } = useAccount()
+  const {data: ensName } = useEnsName({ address })
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   })
@@ -12,11 +13,11 @@ function Account() {
   if (isConnected)
     return (
       <div>
-        Connected to {address}
+        Connected to {ensName ? `${ensName} (${address})` : address}
         <Button onClick={() => disconnect()}>Disconnect</Button>
       </div>
     )
   return <Button onClick={() => connect()}>Connect Wallet</Button>
 }
 
-export default Account
+export default DisplayConnection

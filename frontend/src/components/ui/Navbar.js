@@ -2,13 +2,14 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import Account from '../authentication/Account';
+import DisplayConnection from '../authentication/DisplayConnection';
+import Account from '../authentication/DisplayConnection';
 
 function NavbarComponent() {
   return (
     <Navbar bg="light" expand="lg">
       <Container>
-        <Navbar.Brand href="#home">Block.So</Navbar.Brand>
+        <Navbar.Brand href="#home">Blockso</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
@@ -25,7 +26,7 @@ function NavbarComponent() {
                 Separated link
               </NavDropdown.Item>
             </NavDropdown>
-            <Account/>
+            <DisplayConnection/>
           </Nav>
         </Navbar.Collapse>
       </Container>
