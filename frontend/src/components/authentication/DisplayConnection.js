@@ -13,11 +13,11 @@ function DisplayConnection() {
   if (isConnected)
     return (
       <div>
-        Connected to {ensName ? `${ensName} (${address})` : address}
         <Button onClick={() => disconnect()}>Disconnect</Button>
+        Connected: {ensName ? `${ensName} (${address})` : address}
       </div>
     )
-  return <Button onClick={() => connect()}>Connect Wallet</Button>
+  return <><Button onClick={() => connect()}>Connect Wallet</Button></>
 }
 
 export default DisplayConnection

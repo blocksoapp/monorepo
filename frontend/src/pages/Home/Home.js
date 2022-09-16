@@ -1,15 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Container } from 'react-bootstrap'
-import SignInButton from '../../components/authentication/SignInButton';
+import { useAccount } from 'wagmi'
 import Search from '../../components/form/Search'
+import WalletFeed from './WalletFeed/WalletFeed';
 
-function Home() {
-  
+function Home() {  
     return (
         <div>
           <Container>
             <h1>Home Page</h1>
-            <SignInButton/>
             <Search/>
           </Container>
         </div>

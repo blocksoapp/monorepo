@@ -22,6 +22,7 @@ function getCookie(name) {
 function SignInButton() {
     const [nonceData, setNonceData] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
+    const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
 
 // Fetch nonce from backend + update nonce state
     const fetchNonce = async () => {
@@ -48,52 +49,79 @@ function SignInButton() {
     const { signMessageAsync } = useSignMessage()
 
     const signIn = async () => {
+      try {
         // Check validity of chain/address
         const chainId = activeChain.id
         if (!address || !chainId) return
-
         setIsLoading(true)
+
          // Create SIWE message with pre-fetched nonce and sign with wallet
         var message = new SiweMessage({
-        address: address,
-        domain: window.location.host ,
-        version: '1',
-        chainId,
-        uri: 'http://localhost:8000/api/auth/login/' ,
-        nonce: nonceData
-      })
-      message = message.prepareMessage();
-      const signature = await signMessageAsync({
-        message: message,
-      })
+          address: address,
+          statement: 'Hello I am,',
+          domain: window.location.host ,
+          version: '1',
+          chainId,
+          uri: 'http://localhost:8000/api/auth/login/' ,
+          nonce: nonceData
+        })
+        message = message.prepareMessage();
+        const signature = await signMessageAsync({
+          message: message,
+        })
 
-      console.log(message)
+        console.log(message)
+        console.log(signature)
 
        // Login / Verify signature
-       const loginRes = await fetch('http://localhost:8000/api/auth/login/', {
-        method: 'POST',
-        body: JSON.stringify({ message: message, signature: signature }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-      })
-      console.log({res: await loginRes.json() })
-
-      if (!loginRes.ok) {
-        throw new Error('Error verifying message') 
-      } else if (loginRes.ok) {
+        const loginRes = await fetch('http://localhost:8000/api/auth/login/', {
+          method: 'POST',
+          body: JSON.stringify({ message: message, signature: signature }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': getCookie('csrftoken')
+          },
+          credentials: 'include'
+        })
+        
+        if (!loginRes.ok) {
+          throw new Error('Error verifying message') 
+        } else if (loginRes.ok) {
+          setIsLoading(false)
+          //console.log({res: await loginRes.json() })
+          console.log('res is ok')
+          setIsAuthenticated(true)
+          return {address}
+        }
+      } catch (error) {
         setIsLoading(false)
+        setNonceData(undefined)
+        fetchNonce()
       }
-      
+    }
+
+    const signOut = async () => {
+      try {
+        const logoutRes = await fetch('http://localhost:8000/api/auth/logout/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': getCookie('csrftoken')
+          },
+          credentials: 'include'
+        })
+        if(logoutRes.ok) 
+        setIsAuthenticated(false)
+      } catch (error) {
+        console.log(error)
+      }
     }
 
   return (
-    <div>
-        <Button onClick={signIn}>Sign in with Ethereum</Button>
-        nonce: {nonceData}
-        address: {address}
+    <div className='border'>
+      { !isAuthenticated ? 
+        <Button disabled={!nonceData || isLoading} onClick={signIn}> Sign In</Button> :
+        <Button onClick={signOut}>Logout</Button> }
     </div>
   );
 }

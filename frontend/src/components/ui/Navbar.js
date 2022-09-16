@@ -3,7 +3,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import DisplayConnection from '../authentication/DisplayConnection';
-import Account from '../authentication/DisplayConnection';
+import SignInButton from '../authentication/SignInButton';
 
 function NavbarComponent() {
   return (
@@ -26,7 +26,10 @@ function NavbarComponent() {
                 Separated link
               </NavDropdown.Item>
             </NavDropdown>
-            <DisplayConnection/>
+              <div>
+              <SignInButton/>
+              <DisplayConnection/>
+              </div>
           </Nav>
         </Navbar.Collapse>
       </Container>
