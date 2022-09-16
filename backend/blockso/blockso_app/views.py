@@ -66,9 +66,9 @@ def auth_login(request):
     if wallet is not None:
         if wallet.is_active:
             login(request, wallet)
-            return Response(200)
+            return Response(status=200)
         else:
-            return Response(401)
+            return Response(status=401)
 
     return Response(status=403)
 
@@ -79,7 +79,7 @@ def auth_logout(request):
     """ Terminates the user's session. """
 
     logout(request)
-    return Response(200)
+    return Response(status=200)
 
 
 class FollowCreateDestroy(
