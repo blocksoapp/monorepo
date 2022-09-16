@@ -3,6 +3,22 @@ import { Button } from 'react-bootstrap'
 import { useAccount, useNetwork, useSignMessage, useEnsName } from 'wagmi'
 import { SiweMessage } from 'siwe'
 
+function getCookie(name) {
+  if (!document.cookie) {
+    return null;
+  }
+
+  const xsrfCookies = document.cookie.split(';')
+    .map(c => c.trim())
+    .filter(c => c.startsWith(name + '='));
+
+  if (xsrfCookies.length === 0) {
+    return null;
+  }
+  return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+}
+
+
 function SignInButton() {
     const [nonceData, setNonceData] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
@@ -38,7 +54,7 @@ function SignInButton() {
 
         setIsLoading(true)
          // Create SIWE message with pre-fetched nonce and sign with wallet
-        const message = new SiweMessage({
+        var message = new SiweMessage({
         address: address,
         domain: window.location.host ,
         version: '1',
@@ -46,8 +62,9 @@ function SignInButton() {
         uri: 'http://localhost:8000/api/auth/login/' ,
         nonce: nonceData
       })
+      message = message.prepareMessage();
       const signature = await signMessageAsync({
-        message: message.prepareMessage(),
+        message: message,
       })
 
       console.log(message)
@@ -55,10 +72,12 @@ function SignInButton() {
        // Login / Verify signature
        const loginRes = await fetch('http://localhost:8000/api/auth/login/', {
         method: 'POST',
-        body: JSON.stringify({ siwe_message: message, signature: signature }),
+        body: JSON.stringify({ message: message, signature: signature }),
         headers: {
           'Content-Type': 'application/json',
-        }
+          'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
       })
       console.log({res: await loginRes.json() })
 
