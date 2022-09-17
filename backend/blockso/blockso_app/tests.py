@@ -248,7 +248,7 @@ class ProfileTests(BaseTest):
 
     def test_retrieve_profile(self):
         """
-        Assert that a profile is retreived successfully.
+        Assert that a profile is retrieved successfully.
         """
         # prepare test
         self._do_login()
@@ -268,6 +268,31 @@ class ProfileTests(BaseTest):
             "posts": []
         })
         self.assertDictEqual(resp.data, expected)
+
+    def test_retrieve_user(self):
+        """
+        Assert that a user can get their own info once logged in.
+        """
+        # prepare test
+        self._do_login()
+
+        # make request
+        resp = self.client.get("/api/user/")
+
+        # make assertions
+        # assert that the user receives information about themselves
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.data["address"],
+            self.test_signer.address
+        )
+        self.assertIsNone(resp.data["profile"])
+
+        # create user profile
+        self._create_profile()
+        resp = self.client.get("/api/user/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNotNone(resp.data["profile"])
 
 
 class FollowTests(BaseTest):
