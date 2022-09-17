@@ -294,6 +294,18 @@ class ProfileTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
         self.assertIsNotNone(resp.data["profile"])
 
+    def test_retrieve_user_unauthed(self):
+        """
+        Assert that a user cannot get their own info
+        if they are not logged in.
+        """
+        # prepare test
+        # make request
+        resp = self.client.get("/api/user/")
+        
+        # assert 403
+        self.assertEqual(resp.status_code, 403)
+
 
 class FollowTests(BaseTest):
     """
