@@ -21,8 +21,10 @@ function getCookie(name) {
 
 function SignInButton() {
     const [nonceData, setNonceData] = useState('')
+    const [addressSiwe, setAddressSiwe] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
+    const [error, setError] = useState(Error)
 
 // Fetch nonce from backend + update nonce state
     const fetchNonce = async () => {
@@ -52,7 +54,7 @@ function SignInButton() {
       try {
         // Check validity of chain/address
         const chainId = activeChain.id
-        if (!address || !chainId) return
+        if (!address || !chainId) return 
         setIsLoading(true)
 
          // Create SIWE message with pre-fetched nonce and sign with wallet
@@ -88,14 +90,14 @@ function SignInButton() {
           throw new Error('Error verifying message') 
         } else if (loginRes.ok) {
           setIsLoading(false)
-          //console.log({res: await loginRes.json() })
           console.log('res is ok')
           setIsAuthenticated(true)
-          return {address}
+          setAddressSiwe(address)
         }
       } catch (error) {
         setIsLoading(false)
         setNonceData(undefined)
+        setError(error)
         fetchNonce()
       }
     }
@@ -118,10 +120,11 @@ function SignInButton() {
     }
 
   return (
-    <div className='border'>
+    <div className='pb-1'>
       { !isAuthenticated ? 
         <Button disabled={!nonceData || isLoading} onClick={signIn}> Sign In</Button> :
-        <Button onClick={signOut}>Logout</Button> }
+        <Button onClick={signOut}>Sign out</Button> }
+        {addressSiwe}
     </div>
   );
 }

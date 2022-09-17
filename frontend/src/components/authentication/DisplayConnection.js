@@ -17,7 +17,7 @@ function DisplayConnection() {
         Connected: {ensName ? `${ensName} (${address})` : address}
       </div>
     )
-  return <><Button onClick={() => connect()}>Connect Wallet</Button></>
+  return <><Button onClick={() => connect()}>Connect</Button></>
 }
 
 export default DisplayConnection
