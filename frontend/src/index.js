@@ -3,11 +3,11 @@ import ReactDOM from 'react-dom/client';
 import NavbarComponent from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
 import './index.css';
-import Explore from './pages/Explore';
-import Home from './pages/Home/Home'
+import App from './App';
 
 import { WagmiConfig, createClient } from 'wagmi'
 import { getDefaultProvider } from 'ethers'
+
 
 /* Establishing a client for wagmi */
 const client = createClient({
@@ -20,7 +20,7 @@ root.render(
     <>
     <WagmiConfig client={client}> 
       <NavbarComponent/>
-      <Home />
+      <App />
     </WagmiConfig>
     <Footer/>
     </>

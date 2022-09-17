@@ -11,7 +11,6 @@ function Home() {
           <Container>
             <h1>Home Page</h1>
             <Search/>
-            
           </Container>
         </div>
       );
