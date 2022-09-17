@@ -176,3 +176,7 @@ CUSTOM_GROUPS = []  # see "Group Plugins" section
 SESSION_COOKIE_AGE = config("SESSION_COOKIE_AGE", cast=int)
 PROVIDER = config("ETH_PROVIDER", cast=str)
 AUTH_NONCE_AGE = config("AUTH_NONCE_AGE", cast=int)
+
+
+# covalent api config
+COVALENT_API_KEY = config("COVALENT_API_KEY", cast=str)
