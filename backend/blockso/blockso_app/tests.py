@@ -43,6 +43,7 @@ class BaseTest(APITestCase):
                 "snapshot": "https://snapshot.org/nullbitx8.eth"
             }
         }
+
         # common data for authentication
         cls.siwe_message_data = {
             "address": cls.test_signer.address,
@@ -53,6 +54,13 @@ class BaseTest(APITestCase):
             "nonce": "",
             "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         }
+
+        # sample tx history json
+        with open(
+            "./blockso_app/covalent-tx-history-sample.json",
+            "r"
+        ) as fobj:
+            cls.tx_history_resp_data = fobj.read() 
 
     def setUp(self):
         """ Runs before each test. """
@@ -112,7 +120,15 @@ class BaseTest(APITestCase):
         This function will usually be called after authenticating
         with the _do_login function above.
         """
-        # create user
+        # register a response for a covalent API request that
+        # is made after creating a profile
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address),
+            body=self.tx_history_resp_data
+        )
+
+        # create profile
         url = f"/api/{self.test_signer.address}/profile/"
         resp = self.client.post(url, self.create_data)
         return resp
@@ -185,10 +201,9 @@ class ProfileTests(BaseTest):
         """
         # prepare test
         self._do_login()
-        url = f"/api/{self.test_signer.address}/profile/"
 
         # make POST request
-        resp = self.client.post(url, self.create_data)
+        resp = self._create_profile()
 
         # make assertions
         self.assertEqual(resp.status_code, 201)
@@ -266,6 +281,13 @@ class FollowTests(BaseTest):
         super().setUp()
         self.test_signer_2 = eth_account.Account.create()
 
+        # register response for getting tx history
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer_2.address),
+            body=self.tx_history_resp_data
+        )
+
     def test_follow(self):
         """
         Assert that a user can follow another.
@@ -327,26 +349,13 @@ class TransactionParsingTests(BaseTest):
     and using it to create Posts.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """ Runs once before all tests. """
-
-        super(TransactionParsingTests, cls).setUpClass()
-
-        # read in sample tx history json
-        with open(
-            "./blockso_app/covalent-tx-history-sample.json",
-            "r"
-        ) as fobj:
-            cls.tx_history_resp_data = fobj.read() 
-
     def setUp(self):
         """ Runs before each test. """
 
         super().setUp()
 
         # register response for getting tx history
-        self.covalent_tx_history_response = self.mock_responses.add(
+        self.mock_responses.add(
             responses.GET,
             jobs.get_tx_history_url(self.test_signer.address),
             body=self.tx_history_resp_data

@@ -15,4 +15,5 @@ Make sure you have the requirements above installed, then run the `build.sh` scr
 `python manage.py test`
 
 ## Tech Debt & Notes  
-1. Make sure the authed user can only create profiles for themselves
+1. Make sure the authed user can only create profiles for themselves.  
+2. Revisit when users' tx history should be fetched and transformed to posts.  

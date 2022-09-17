@@ -18,7 +18,7 @@ from web3 import Web3
 
 # our imports
 from .models import Follow, Profile
-from . import serializers
+from . import jobs, serializers
 
 
 @api_view(['GET'])
@@ -98,6 +98,9 @@ class FollowCreateDestroy(
     def post(self, request, *args, **kwargs):
         """ Signed in user follows the given address. """
 
+        # fetch and store the tx history of the person being followed
+        jobs.process_address_txs(self.kwargs["address"])
+
         return self.create(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -145,6 +148,9 @@ class ProfileCreateRetrieveUpdate(
 
     def post(self, request, *args, **kwargs):
         """ Create a Profile for the given address. """
+
+        # fetch and store the tx history of the person being followed
+        jobs.process_address_txs(self.kwargs["address"])
 
         return self.create(request, *args, **kwargs)
 
