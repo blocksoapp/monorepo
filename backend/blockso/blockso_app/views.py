@@ -6,7 +6,7 @@ import secrets
 
 # third party imports
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
@@ -18,7 +18,7 @@ from web3 import Web3
 
 # our imports
 from .models import Follow, Profile
-from . import serializers
+from . import jobs, serializers
 
 
 @api_view(['GET'])
@@ -98,6 +98,9 @@ class FollowCreateDestroy(
     def post(self, request, *args, **kwargs):
         """ Signed in user follows the given address. """
 
+        # fetch and store the tx history of the person being followed
+        jobs.process_address_txs(self.kwargs["address"])
+
         return self.create(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -146,6 +149,9 @@ class ProfileCreateRetrieveUpdate(
     def post(self, request, *args, **kwargs):
         """ Create a Profile for the given address. """
 
+        # fetch and store the tx history of the person being followed
+        jobs.process_address_txs(self.kwargs["address"])
+
         return self.create(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
@@ -155,5 +161,31 @@ class ProfileCreateRetrieveUpdate(
 
     def get(self, request, *args, **kwargs):
         """ Retrieve the Profile of the given address. """
+
+        return self.retrieve(request, *args, **kwargs)
+
+
+class UserRetrieve(
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports retrieving logged in user. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UserSerializer
+
+    def get_object(self):
+        """
+        Returns the object representing the logged in user.
+        Retrieves the logged in user from the session.
+
+        You may want to override this if you need to provide non-standard
+        queryset lookups.  Eg if objects are referenced using multiple
+        keyword arguments in the url conf.
+        """
+        return self.request.user
+
+    def get(self, request, *args, **kwargs):
+        """ Retrieve the logged in user. """
 
         return self.retrieve(request, *args, **kwargs)

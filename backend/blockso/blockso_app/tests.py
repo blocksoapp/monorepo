@@ -1,6 +1,7 @@
 # std lib imports
 from datetime import datetime
 from unittest import mock
+import json
 
 # third party imports
 from django.contrib.sessions.models import Session
@@ -8,9 +9,11 @@ from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 import eth_account
+import responses
 
 # our imports
-from .models import Follow
+from .models import Follow, Post
+from . import jobs
 
 
 class BaseTest(APITestCase):
@@ -21,16 +24,13 @@ class BaseTest(APITestCase):
         """ Runs once before all tests. """
 
         super(BaseTest, cls).setUpClass()
+        cls.maxDiff = None  # more verbose test output
 
         # create a test wallet (signer)
         cls.test_signer = eth_account.Account.create()
 
-    def setUp(self):
-        """ Runs before each test. """
-
-        super().setUp()
-        self.maxDiff = None  # more verbose test output
-        self.create_data = {
+        # common data for creating profile
+        cls.create_data = {
             "image": "https://ipfs.io/ipfs/QmRRPWG96cmgTn2qSzjwr2qvfNEuhunv6FNeMFGa9bx6mQ",
             "bio": "Hello world, I am a user.",
             "socials": {
@@ -43,8 +43,10 @@ class BaseTest(APITestCase):
                 "snapshot": "https://snapshot.org/nullbitx8.eth"
             }
         }
-        self.siwe_message_data = {
-            "address": self.test_signer.address,
+
+        # common data for authentication
+        cls.siwe_message_data = {
+            "address": cls.test_signer.address,
             "domain": "127.0.0.1",
             "version": "1",
             "chain_id": "1",
@@ -52,6 +54,34 @@ class BaseTest(APITestCase):
             "nonce": "",
             "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         }
+
+        # sample tx history json
+        with open(
+            "./blockso_app/covalent-tx-history-sample.json",
+            "r"
+        ) as fobj:
+            cls.tx_history_resp_data = fobj.read() 
+
+    def setUp(self):
+        """ Runs before each test. """
+
+        super().setUp()
+
+        # fake requests/responses
+        self.mock_responses = responses.RequestsMock()
+        self.mock_responses.start()
+
+        # clean up all mock patches
+        self.addCleanup(mock.patch.stopall)
+
+    def tearDown(self):
+        """ Runs after each test. """
+
+        super().tearDown()
+
+        # clean up fake requests/responses
+        self.mock_responses.stop()
+        self.mock_responses.reset()
 
     def _do_login(self):
         """
@@ -90,7 +120,15 @@ class BaseTest(APITestCase):
         This function will usually be called after authenticating
         with the _do_login function above.
         """
-        # create user
+        # register a response for a covalent API request that
+        # is made after creating a profile
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address),
+            body=self.tx_history_resp_data
+        )
+
+        # create profile
         url = f"/api/{self.test_signer.address}/profile/"
         resp = self.client.post(url, self.create_data)
         return resp
@@ -163,10 +201,9 @@ class ProfileTests(BaseTest):
         """
         # prepare test
         self._do_login()
-        url = f"/api/{self.test_signer.address}/profile/"
 
         # make POST request
-        resp = self.client.post(url, self.create_data)
+        resp = self._create_profile()
 
         # make assertions
         self.assertEqual(resp.status_code, 201)
@@ -211,7 +248,7 @@ class ProfileTests(BaseTest):
 
     def test_retrieve_profile(self):
         """
-        Assert that a profile is retreived successfully.
+        Assert that a profile is retrieved successfully.
         """
         # prepare test
         self._do_login()
@@ -232,6 +269,43 @@ class ProfileTests(BaseTest):
         })
         self.assertDictEqual(resp.data, expected)
 
+    def test_retrieve_user(self):
+        """
+        Assert that a user can get their own info once logged in.
+        """
+        # prepare test
+        self._do_login()
+
+        # make request
+        resp = self.client.get("/api/user/")
+
+        # make assertions
+        # assert that the user receives information about themselves
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.data["address"],
+            self.test_signer.address
+        )
+        self.assertIsNone(resp.data["profile"])
+
+        # create user profile
+        self._create_profile()
+        resp = self.client.get("/api/user/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNotNone(resp.data["profile"])
+
+    def test_retrieve_user_unauthed(self):
+        """
+        Assert that a user cannot get their own info
+        if they are not logged in.
+        """
+        # prepare test
+        # make request
+        resp = self.client.get("/api/user/")
+        
+        # assert 403
+        self.assertEqual(resp.status_code, 403)
+
 
 class FollowTests(BaseTest):
     """
@@ -243,6 +317,13 @@ class FollowTests(BaseTest):
 
         super().setUp()
         self.test_signer_2 = eth_account.Account.create()
+
+        # register response for getting tx history
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer_2.address),
+            body=self.tx_history_resp_data
+        )
 
     def test_follow(self):
         """
@@ -297,3 +378,42 @@ class FollowTests(BaseTest):
                 src_id=self.test_signer.address,
                 dest_id=self.test_signer_2.address
             )
+
+
+class TransactionParsingTests(BaseTest):
+    """
+    Tests behavior related to getting transaction history
+    and using it to create Posts.
+    """
+
+    def setUp(self):
+        """ Runs before each test. """
+
+        super().setUp()
+
+        # register response for getting tx history
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address),
+            body=self.tx_history_resp_data
+        )
+
+    def test_process_address_txs(self):
+        """
+        Assert that an address' tx history is retrieved
+        and parsed correctly.
+        Assert that the address now has Posts that
+        reflect their transaction history.
+        """
+        # set up test
+        # done in setUp and setUpClass
+
+        # call function
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make assertions
+        # assert that the correct number of Posts has been created
+        post_count = Post.objects.all().count()
+        expected = json.loads(self.tx_history_resp_data)
+        expected = len(expected["data"]["items"])
+        self.assertEqual(post_count, expected)

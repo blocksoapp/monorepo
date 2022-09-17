@@ -75,6 +75,56 @@ class Follow(models.Model):
     )
 
 
+class Transaction(models.Model):
+    """ Represents a blockchain Transaction. """
+
+    chain_id = models.PositiveSmallIntegerField(blank=False)
+    tx_hash = models.CharField(max_length=255, blank=False) 
+    block_signed_at = models.DateTimeField(blank=False)
+    tx_offset = models.PositiveSmallIntegerField(blank=False)
+    successful = models.BooleanField(blank=False)
+    from_address = models.CharField(max_length=255, blank=False)
+    to_address = models.CharField(max_length=255, blank=False)
+    value = models.CharField(max_length=255, blank=False)
+
+
+class ERC20Transfer(models.Model):
+    """ Represents an ERC20 transfer. """
+
+    tx = models.ForeignKey(
+        to=Transaction,
+        on_delete=models.CASCADE,
+        related_name="erc20_transfers",
+        blank=False
+    )
+    contract_address = models.CharField(max_length=255, blank=False)
+    contract_name = models.CharField(max_length=255, blank=False)
+    contract_ticker = models.CharField(max_length=255, blank=False)
+    logo_url = models.URLField(blank=False)
+    from_address = models.CharField(max_length=255, blank=False)
+    to_address = models.CharField(max_length=255, blank=False)
+    amount = models.CharField(max_length=255, blank=False)
+    decimals = models.PositiveSmallIntegerField(blank=False)
+
+
+class ERC721Transfer(models.Model):
+    """ Represents an ERC721 transfer. """
+
+    tx = models.ForeignKey(
+        to=Transaction,
+        on_delete=models.CASCADE,
+        related_name="erc721_transfers",
+        blank=False
+    )
+    contract_address = models.CharField(max_length=255, blank=False)
+    contract_name = models.CharField(max_length=255, blank=False)
+    contract_ticker = models.CharField(max_length=255, blank=False)
+    logo_url = models.URLField(blank=False)
+    from_address = models.CharField(max_length=255, blank=False)
+    to_address = models.CharField(max_length=255, blank=False)
+    token_id = models.PositiveIntegerField(blank=False)
+
+
 class Post(models.Model):
     """ Represents a Post created by a user. """
 
@@ -84,13 +134,19 @@ class Post(models.Model):
         related_name="posts"
     )
     text = models.TextField(blank=False)
-    imgUrl = models.URLField(blank=False)
-    isShare = models.BooleanField(blank=False)
-    isQuote = models.BooleanField(blank=False)
-    refPost = models.ForeignKey(
+    img_url = models.URLField(blank=False)
+    is_share = models.BooleanField(blank=False)
+    is_quote = models.BooleanField(blank=False)
+    ref_post = models.ForeignKey(
         to="self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True
+    )
+    ref_tx = models.ForeignKey(
+        to=Transaction,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False
     )
     created = models.DateTimeField(auto_now_add=True)

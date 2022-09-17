@@ -6,7 +6,7 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import Follow, Post, Profile, Socials, User
+from .models import Follow, Post, Profile, Socials
 
 
 class SocialsSerializer(serializers.ModelSerializer):
@@ -102,6 +102,22 @@ class ProfileSerializer(serializers.ModelSerializer):
         # save the changes and return them
         instance.save()
         return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """ User model serializer. """
+
+    class Meta:
+        model = get_user_model()
+        fields = ["address", "profile"]
+
+    profile = ProfileSerializer()
+    address = serializers.SerializerMethodField("get_address")
+
+    def get_address(self, obj):
+        """ Returns the address of the User. """
+
+        return obj.ethereum_address
 
 
 class FollowSerializer(serializers.ModelSerializer):
