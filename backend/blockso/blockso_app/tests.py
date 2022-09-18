@@ -461,6 +461,22 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
 
+    def test_get_post(self):
+        """
+        Assert that a post is retrieved successfully by any user.
+        """
+        # set up test
+        self._do_login()
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+
     def test_update_post(self):
         """
         Assert that a post is updated successfully.
