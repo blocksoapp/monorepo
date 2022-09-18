@@ -1,10 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import NavbarComponent from './components/ui/Navbar';
-import Footer from './components/ui/Footer';
 import './index.css';
 import App from './App';
-
 import { WagmiConfig, createClient } from 'wagmi'
 import { getDefaultProvider } from 'ethers'
 
@@ -18,10 +15,8 @@ const client = createClient({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <>
-    <WagmiConfig client={client}> 
-      <NavbarComponent/>
+      <WagmiConfig client={client}> 
       <App />
-    </WagmiConfig>
-    <Footer/>
+      </WagmiConfig>
     </>
 );

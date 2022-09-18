@@ -46,7 +46,7 @@ function SignInButton() {
 
 // Create a SIWE message for user to sign with nonce
     // Dependencies from wagmi
-    const { address } = useAccount()
+    const { address, isConnected } = useAccount()
     const { chain: activeChain } = useNetwork()
     const { signMessageAsync } = useSignMessage()
 
@@ -122,7 +122,7 @@ function SignInButton() {
   return (
     <div className='pb-1'>
       { !isAuthenticated ? 
-        <Button disabled={!nonceData || isLoading} onClick={signIn}> Sign In</Button> :
+        <Button disabled={!nonceData || isLoading || !isConnected } onClick={signIn}> Sign In</Button> :
         <Button onClick={signOut}>Sign out</Button> }
         {addressSiwe}
     </div>

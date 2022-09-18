@@ -1,7 +1,5 @@
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap'
+import { BrowserRouter, NavLink } from 'react-router-dom'
 import DisplayConnection from '../authentication/DisplayConnection';
 import SignInButton from '../authentication/SignInButton';
 
@@ -13,8 +11,9 @@ function NavbarComponent() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#link">Explore</Nav.Link>
+            <Nav.Link><NavLink to="/home">Home</NavLink></Nav.Link>
+            <Nav.Link><NavLink to="/explore">Explore</NavLink></Nav.Link>
+            <Nav.Link><NavLink to="/create-profile">Create Profile</NavLink></Nav.Link>
             <NavDropdown title="Profile" id="basic-nav-dropdown">
               <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
               <NavDropdown.Item href="#action/3.2">
