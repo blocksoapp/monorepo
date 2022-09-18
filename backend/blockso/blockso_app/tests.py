@@ -417,3 +417,91 @@ class TransactionParsingTests(BaseTest):
         expected = json.loads(self.tx_history_resp_data)
         expected = len(expected["data"]["items"])
         self.assertEqual(post_count, expected)
+
+
+class PostTests(BaseTest):
+    """
+    Test behavior around posts and feeds.
+    """
+
+    def setUp(self):
+        """
+        Runs before each test.
+        """
+        super().setUp()
+
+        self.create_post_data = { 
+            "text": "My first post!",
+            "imgUrl": "https://fakeimage.com/img.png",
+            "isShare": False,
+            "isQuote": False,
+            "refPost": None,
+            "refTx": None
+        }
+
+    def _create_post(self):
+        """
+        Utility function to create a post.
+        Returns the response of creating a post.
+        """
+        url = f"/api/posts/{self.test_signer.address}/"
+        resp = self.client.post(url, self.create_post_data)
+        return resp
+
+    def test_create_post(self):
+        """
+        Assert that a post is created successfully by a logged in user.
+        """
+        # set up test
+        self._do_login()
+
+        # make request
+        resp = self._create_post()
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+
+    def test_update_post(self):
+        """
+        Assert that a post is updated successfully.
+        Assert that the updated post is returned in the response.
+        """
+        # prepare test
+        self._do_login()
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        new_text = "My updated post."
+
+        # change some post info
+        update_data = self.create_post_data
+        update_data["text"] = new_text 
+
+        # make PUT request
+        url = f"/api/post/{post_id}/"
+        resp = self.client.put(url, update_data)
+
+        # make assertions
+        expected = resp.data
+        expected["text"] = new_text
+        self.assertEqual(resp.status_code, 200)
+        self.assertDictEqual(resp.data, expected)
+
+    def test_delete_post(self):
+        """
+        Assert that a post is deleted successfully.
+        """
+        # prepare test
+        self._do_login()
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # delete the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(
+            Post.objects.filter(author=self.test_signer.address).count(),
+            0
+        )

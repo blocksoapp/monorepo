@@ -134,16 +134,16 @@ class Post(models.Model):
         related_name="posts"
     )
     text = models.TextField(blank=False)
-    img_url = models.URLField(blank=False)
-    is_share = models.BooleanField(blank=False)
-    is_quote = models.BooleanField(blank=False)
-    ref_post = models.ForeignKey(
+    imgUrl = models.URLField(blank=False)
+    isShare = models.BooleanField(blank=False)
+    isQuote = models.BooleanField(blank=False)
+    refPost = models.ForeignKey(
         to="self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
-    ref_tx = models.ForeignKey(
+    refTx = models.ForeignKey(
         to=Transaction,
         on_delete=models.SET_NULL,
         null=True,
