@@ -66,12 +66,12 @@ class Follow(models.Model):
     src = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="src"
+        related_name="follow_src"
     )
     dest = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="dest"
+        related_name="follow_dest"
     )
 
 

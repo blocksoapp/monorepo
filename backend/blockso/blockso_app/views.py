@@ -194,7 +194,7 @@ class UserRetrieve(
 
 class PostCreateList(generics.ListCreateAPIView):
 
-    """ View that supports creating and listing Posts. """
+    """ View that supports creating and listing Posts of an address. """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
@@ -235,3 +235,36 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedList(generics.ListAPIView):
+
+    """ View that supports retrieving the feed of the logged in user. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.PostSerializer
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        """
+        Return Posts of logged in user and all of the users that they follow.
+        Sort the queryset in descending chronological order.
+        """
+        # get user
+        user = self.request.user
+        user_model = get_user_model()
+        user_queryset = user_model.objects.filter(
+            pk=user.ethereum_address
+        )
+        # get users they follow
+        follow_src = Follow.objects.filter(src=user)
+        users_followed = user_model.objects.filter(follow_dest__in=follow_src)
+
+        # combine the two querysets
+        users = user_queryset | users_followed
+
+        # get all posts by those users
+        queryset = Post.objects.filter(author__in=users)
+        queryset = queryset.order_by("-created")
+
+        return queryset
