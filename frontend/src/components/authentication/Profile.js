@@ -4,11 +4,12 @@ import { Button } from 'react-bootstrap'
 
 function Profile() {
 
-    const { address} = useAccount();
-    // get(self, request, *args, **kwargs): Retrieve the Profile of the given address.
+    const [addressSiwe, setAddressSiwe] = useState('')
+    const [isLoading, setIsLoading] = useState(Boolean)
+    const [error, setError] = useState(Error)
 
-    
-    /* 
+    const { address, isConnected } = useAccount();
+ 
     const handler = async () => {
         try {
             if(isConnected) {
@@ -27,7 +28,7 @@ function Profile() {
     useEffect(() => {
       handler()
     
-    }, []) */
+    }, []) 
 
   return (
     <div>
