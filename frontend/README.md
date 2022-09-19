@@ -1,5 +1,16 @@
 Blockso Frontend ReadMe Guide 
 
+## How to set up project
+1. `npm install` 
+
+
+## How to run server
+1. Create a copy of `env.example` and name it `.env`.  
+2. Edit `.env` to suit your environment.  
+3. Run the server with `npm run start`.
+
+
+## Design
 
 _Pages_
 	•	Explore Page (default when not signed-in, navigatable)

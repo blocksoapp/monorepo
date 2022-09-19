@@ -2,22 +2,9 @@ import React, {useState} from 'react'
 import { Container, Form, Button, Row, Col } from 'react-bootstrap'
 import { useAccount, useContractRead } from 'wagmi'
 import { erc721ABI } from 'wagmi'
+import { baseAPI, getCookie } from '../../utils'
 
-function getCookie(name) {
-    if (!document.cookie) {
-      return null;
-    }
-  
-    const xsrfCookies = document.cookie.split(';')
-      .map(c => c.trim())
-      .filter(c => c.startsWith(name + '='));
-  
-    if (xsrfCookies.length === 0) {
-      return null;
-    }
-    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
-  }
- 
+
 function CreateProfile() {
     const [profile, setProfile] = useState({
         image: '',
@@ -78,7 +65,8 @@ function CreateProfile() {
 
         if(!isConnected) return
 
-        const res = await fetch(`http://localhost:8000/api/${address}/profile`, {
+        const url = `${baseAPI}/${address}/profile/`
+        const res = await fetch(url, {
             method: 'POST',
             body: JSON.stringify(profile),
             headers: {
