@@ -2,21 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
 import { useAccount, useNetwork, useSignMessage, useEnsName } from 'wagmi'
 import { SiweMessage } from 'siwe'
-
-function getCookie(name) {
-  if (!document.cookie) {
-    return null;
-  }
-
-  const xsrfCookies = document.cookie.split(';')
-    .map(c => c.trim())
-    .filter(c => c.startsWith(name + '='));
-
-  if (xsrfCookies.length === 0) {
-    return null;
-  }
-  return decodeURIComponent(xsrfCookies[0].split('=')[1]);
-}
+import { baseAPI, getCookie } from '../../utils.js'
 
 
 function SignInButton() {
@@ -29,7 +15,8 @@ function SignInButton() {
 // Fetch nonce from backend + update nonce state
     const fetchNonce = async () => {
         try {
-            const nonceRes = await fetch('http://localhost:8000/api/auth/nonce/')
+            const url = `${baseAPI}/auth/nonce/`
+            const nonceRes = await fetch(url)
             const json = await nonceRes.json()
             const nonce = json.nonce
             setNonceData(nonce)
@@ -64,7 +51,7 @@ function SignInButton() {
           domain: window.location.host ,
           version: '1',
           chainId,
-          uri: 'http://localhost:8000/api/auth/login/' ,
+          uri: `${baseAPI}/auth/login/` ,
           nonce: nonceData
         })
         message = message.prepareMessage();
@@ -76,7 +63,8 @@ function SignInButton() {
         console.log(signature)
 
        // Login / Verify signature
-        const loginRes = await fetch('http://localhost:8000/api/auth/login/', {
+        const url = `${baseAPI}/auth/login/`
+        const loginRes = await fetch(url, {
           method: 'POST',
           body: JSON.stringify({ message: message, signature: signature }),
           headers: {
@@ -104,7 +92,8 @@ function SignInButton() {
 
     const signOut = async () => {
       try {
-        const logoutRes = await fetch('http://localhost:8000/api/auth/logout/', {
+        const url = `${baseAPI}/auth/logout/` 
+        const logoutRes = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
