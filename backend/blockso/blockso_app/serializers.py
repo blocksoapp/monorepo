@@ -51,13 +51,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         """ Returns the profile's follower count. """
 
         user = getattr(obj, "user")
-        return Follow.objects.filter(dest=user).count()
+        followers = user.follow_dest.all()
+        return followers.count() 
 
     def get_num_following(self, obj):
         """ Returns the profile's following count. """
 
         user = getattr(obj, "user")
-        return Follow.objects.filter(src=user).count()
+        following = user.follow_src.all()
+        return following.count() 
 
     def get_posts(self, obj):
         """
@@ -139,7 +141,7 @@ class FollowSerializer(serializers.ModelSerializer):
         address = Web3.toChecksumAddress(address)
         user_model = get_user_model()
         to_follow = user_model.objects.get(ethereum_address=address)
-        
+
         # signed in user follows the address given in the url
         follow = Follow.objects.create(
             src=user,

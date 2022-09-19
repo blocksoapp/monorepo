@@ -74,6 +74,20 @@ class Follow(models.Model):
         related_name="follow_dest"
     )
 
+    class Meta:
+        constraints = [
+            # user cannot follow someone twice
+            models.UniqueConstraint(
+                fields=['src', 'dest'],
+                name='cannot follow twice constraint'
+            ),
+            # user cannot follow themselves
+            models.CheckConstraint(
+                check=~models.Q(src__exact=models.F("dest")),
+                name="cannot follow oneself constraint"
+            ),
+        ]
+
 
 class Transaction(models.Model):
     """ Represents a blockchain Transaction. """
