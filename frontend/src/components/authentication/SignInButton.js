@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
-import { useAccount, useNetwork, useSignMessage, useEnsName } from 'wagmi'
+import { useAccount, useNetwork, useSignMessage } from 'wagmi'
 import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
 
 
 function SignInButton() {
     const [nonceData, setNonceData] = useState('')
-    const [addressSiwe, setAddressSiwe] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
     const [error, setError] = useState(Error)
@@ -17,18 +16,39 @@ function SignInButton() {
         try {
             const url = `${baseAPI}/auth/nonce/`
             const nonceRes = await fetch(url)
+            console.log('fetch nonce:', nonceRes)
             const json = await nonceRes.json()
             const nonce = json.nonce
+            console.log(nonce)
             setNonceData(nonce)
         } catch (error) {
             console.log('Could not retrieve nonce:', error)
         }
     }
 
-// useEffect to load nonce on component render - BE SURE TO REMOVE ONCLICK CALL
+// useEffect to load nonce on component render 
     useEffect(() => {
       fetchNonce()
     }, [])
+
+    // fetch user profile
+    const checkProfileExists = async () => {
+      const url = `${baseAPI}/user/`
+      const profileRes = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+      })
+      console.log('fetched profile:', profileRes)
+      // Getting 404 error "Authentication credentials were not provided."
+      const json = await profileRes.json()
+      console.log('json data:', json)
+     
+
+    }
     
 
 // Create a SIWE message for user to sign with nonce
@@ -60,7 +80,7 @@ function SignInButton() {
         })
 
         console.log(message)
-        console.log(signature)
+        console.log(isAuthenticated)
 
        // Login / Verify signature
         const url = `${baseAPI}/auth/login/`
@@ -74,19 +94,24 @@ function SignInButton() {
           credentials: 'include'
         })
         
-        if (!loginRes.ok) {
-          throw new Error('Error verifying message') 
-        } else if (loginRes.ok) {
-          setIsLoading(false)
-          console.log('res is ok')
+        if (loginRes.status === 200 ) {
           setIsAuthenticated(true)
-          setAddressSiwe(address)
-        }
+          setIsLoading(false)
+          setNonceData('')
+          console.log('res is ok:', loginRes.status)
+          // fetch route 
+          
+          
+        } 
+        else if (loginRes.status === 401 || 403) {
+          throw new Error('Error verifying message') 
+        } 
+       
       } catch (error) {
         setIsLoading(false)
-        setNonceData(undefined)
+        //setNonceData(undefined)
         setError(error)
-        fetchNonce()
+        //fetchNonce()
       }
     }
 
@@ -101,8 +126,10 @@ function SignInButton() {
           },
           credentials: 'include'
         })
-        if(logoutRes.ok) 
+
+        if(logoutRes.status === 200) 
         setIsAuthenticated(false)
+        else if(logoutRes.status === 400 || 403) console.log('logout error')
       } catch (error) {
         console.log(error)
       }
@@ -113,7 +140,7 @@ function SignInButton() {
       { !isAuthenticated ? 
         <Button disabled={!nonceData || isLoading || !isConnected } onClick={signIn}> Sign In</Button> :
         <Button onClick={signOut}>Sign out</Button> }
-        {addressSiwe}
+        <Button onClick={checkProfileExists}>CheckProfile</Button>
     </div>
   );
 }
