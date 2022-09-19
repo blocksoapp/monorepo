@@ -28,9 +28,10 @@ class BaseTest(APITestCase):
 
         # create a test wallet (signer)
         cls.test_signer = eth_account.Account.create()
+        cls.test_signer_2 = eth_account.Account.create()
 
         # common data for creating profile
-        cls.create_data = {
+        cls.create_profile_data = {
             "image": "https://ipfs.io/ipfs/QmRRPWG96cmgTn2qSzjwr2qvfNEuhunv6FNeMFGa9bx6mQ",
             "bio": "Hello world, I am a user.",
             "socials": {
@@ -44,15 +45,14 @@ class BaseTest(APITestCase):
             }
         }
 
-        # common data for authentication
-        cls.siwe_message_data = {
-            "address": cls.test_signer.address,
-            "domain": "127.0.0.1",
-            "version": "1",
-            "chain_id": "1",
-            "uri": "http://127.0.0.1/api/auth/login",
-            "nonce": "",
-            "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        # common data for creating posts
+        cls.create_post_data = { 
+            "text": "My first post!",
+            "imgUrl": "https://fakeimage.com/img.png",
+            "isShare": False,
+            "isQuote": False,
+            "refPost": None,
+            "refTx": None
         }
 
         # sample tx history json
@@ -83,7 +83,20 @@ class BaseTest(APITestCase):
         self.mock_responses.stop()
         self.mock_responses.reset()
 
-    def _do_login(self):
+    def _get_siwe_message_data(self, signer):
+        """ Returns common data used for siwe (sign in with ethereum). """
+
+        return {
+            "address": signer.address,
+            "domain": "127.0.0.1",
+            "version": "1",
+            "chain_id": "1",
+            "uri": "http://127.0.0.1/api/auth/login",
+            "nonce": "",
+            "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        }
+
+    def _do_login(self, signer):
         """
         Utility function to get a nonce, sign a message, and do a login.
         Returns the response of the login request.
@@ -92,13 +105,15 @@ class BaseTest(APITestCase):
         """
         # get nonce from backend
         resp = self.client.get("/api/auth/nonce/")
-        self.siwe_message_data["nonce"] = resp.data["nonce"]
+        nonce = resp.data["nonce"]
 
         # prepare message
-        message = SiweMessage(self.siwe_message_data).sign_message()
+        message_data = self._get_siwe_message_data(signer)
+        message_data["nonce"] = nonce
+        message = SiweMessage(message_data).sign_message()
 
         # sign message
-        signed_msg = self.test_signer.sign_message(
+        signed_msg = signer.sign_message(
             eth_account.messages.encode_defunct(text=message)
         )
 
@@ -113,7 +128,15 @@ class BaseTest(APITestCase):
         # return response
         return resp
 
-    def _create_profile(self):
+    def _do_logout(self):
+        """
+        Utility function to log out a user.
+        Returns the response of the logout request.
+        """
+        url = "/api/auth/logout/"
+        return self.client.post(url)
+
+    def _create_profile(self, signer):
         """
         Utility function to create a Profile using
         the given test data.
@@ -124,15 +147,23 @@ class BaseTest(APITestCase):
         # is made after creating a profile
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address),
+            jobs.get_tx_history_url(signer.address),
             body=self.tx_history_resp_data
         )
 
         # create profile
-        url = f"/api/{self.test_signer.address}/profile/"
-        resp = self.client.post(url, self.create_data)
+        url = f"/api/{signer.address}/profile/"
+        resp = self.client.post(url, self.create_profile_data)
         return resp
 
+    def _create_post(self, signer):
+        """
+        Utility function to create a post.
+        Returns the response of creating a post.
+        """
+        url = f"/api/posts/{signer.address}/"
+        resp = self.client.post(url, self.create_post_data)
+        return resp
 
 class AuthTests(BaseTest):
     """
@@ -161,7 +192,7 @@ class AuthTests(BaseTest):
         Assert that a user can create a session by signing a message.
         """
         # do login
-        resp = self._do_login()
+        resp = self._do_login(self.test_signer)
 
         # make assertions
         # assert that the user has a session
@@ -179,7 +210,7 @@ class AuthTests(BaseTest):
         Assert that a user can terminate their session by logging out.
         """
         # prepare test
-        self._do_login()
+        self._do_login(self.test_signer)
 
         # logout
         resp = self.client.post("/api/auth/logout/")
@@ -200,14 +231,14 @@ class ProfileTests(BaseTest):
         Assert that the created profile info is returned as JSON.
         """
         # prepare test
-        self._do_login()
+        self._do_login(self.test_signer)
 
         # make POST request
-        resp = self._create_profile()
+        resp = self._create_profile(self.test_signer)
 
         # make assertions
         self.assertEqual(resp.status_code, 201)
-        expected = self.create_data
+        expected = self.create_profile_data
         expected.update({
             "address": self.test_signer.address,
             "numFollowers": 0,
@@ -222,11 +253,11 @@ class ProfileTests(BaseTest):
         Assert that the updated profile info is returned as JSON.
         """
         # prepare test
-        self._do_login()
-        self._create_profile()
+        self._do_login(self.test_signer)
+        self._create_profile(self.test_signer)
 
         # change some profile info
-        update_data = self.create_data
+        update_data = self.create_profile_data
         update_data["image"] = "https://ipfs.io/ipfs/nonexistent"
         update_data["bio"] = "short bio"
         update_data["socials"]["website"] = "https://newsite.com"
@@ -251,8 +282,8 @@ class ProfileTests(BaseTest):
         Assert that a profile is retrieved successfully.
         """
         # prepare test
-        self._do_login()
-        self._create_profile()
+        self._do_login(self.test_signer)
+        self._create_profile(self.test_signer)
 
         # make GET request
         url = f"/api/{self.test_signer.address}/profile/"
@@ -260,7 +291,7 @@ class ProfileTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
-        expected = self.create_data
+        expected = self.create_profile_data
         expected.update({
             "address": self.test_signer.address,
             "numFollowers": 0,
@@ -274,7 +305,7 @@ class ProfileTests(BaseTest):
         Assert that a user can get their own info once logged in.
         """
         # prepare test
-        self._do_login()
+        self._do_login(self.test_signer)
 
         # make request
         resp = self.client.get("/api/user/")
@@ -289,7 +320,7 @@ class ProfileTests(BaseTest):
         self.assertIsNone(resp.data["profile"])
 
         # create user profile
-        self._create_profile()
+        self._create_profile(self.test_signer)
         resp = self.client.get("/api/user/")
         self.assertEqual(resp.status_code, 200)
         self.assertIsNotNone(resp.data["profile"])
@@ -316,7 +347,6 @@ class FollowTests(BaseTest):
         """ Runs before each test. """
 
         super().setUp()
-        self.test_signer_2 = eth_account.Account.create()
 
         # register response for getting tx history
         self.mock_responses.add(
@@ -331,12 +361,12 @@ class FollowTests(BaseTest):
         """
         # prepare test
         # create user 1 and log them in
-        self._do_login()
-        self._create_profile()
+        self._do_login(self.test_signer)
+        self._create_profile(self.test_signer)
 
         # create user 2
         url = f"/api/{self.test_signer_2.address}/profile/"
-        self.client.post(url, self.create_data)
+        self.client.post(url, self.create_profile_data)
 
         # make request for user 1 to follow user 2
         url = f"/api/{self.test_signer_2.address}/follow/"
@@ -356,12 +386,12 @@ class FollowTests(BaseTest):
         """
         # prepare test
         # create user 1 and log them in
-        self._do_login()
-        self._create_profile()
+        self._do_login(self.test_signer)
+        self._create_profile(self.test_signer)
 
         # create user 2
         url = f"/api/{self.test_signer_2.address}/profile/"
-        self.client.post(url, self.create_data)
+        self.client.post(url, self.create_profile_data)
 
         # make request for user 1 to follow user 2
         url = f"/api/{self.test_signer_2.address}/follow/"
@@ -417,3 +447,160 @@ class TransactionParsingTests(BaseTest):
         expected = json.loads(self.tx_history_resp_data)
         expected = len(expected["data"]["items"])
         self.assertEqual(post_count, expected)
+
+
+class PostTests(BaseTest):
+    """
+    Test behavior around posts.
+    """
+
+    def test_create_post(self):
+        """
+        Assert that a post is created successfully by a logged in user.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+
+        # make request
+        resp = self._create_post(self.test_signer)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+
+    def test_get_post(self):
+        """
+        Assert that a post is retrieved successfully by any user.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # make request
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+
+    def test_update_post(self):
+        """
+        Assert that a post is updated successfully.
+        Assert that the updated post is returned in the response.
+        """
+        # prepare test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        new_text = "My updated post."
+
+        # change some post info
+        update_data = self.create_post_data
+        update_data["text"] = new_text 
+
+        # make PUT request
+        url = f"/api/post/{post_id}/"
+        resp = self.client.put(url, update_data)
+
+        # make assertions
+        expected = resp.data
+        expected["text"] = new_text
+        self.assertEqual(resp.status_code, 200)
+        self.assertDictEqual(resp.data, expected)
+
+    def test_delete_post(self):
+        """
+        Assert that a post is deleted successfully.
+        """
+        # prepare test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # delete the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(
+            Post.objects.filter(author=self.test_signer.address).count(),
+            0
+        )
+
+
+class FeedTests(BaseTest):
+    """
+    Test behavior around feeds.
+    """
+
+    def test_get_feed(self):
+        """
+        Assert that a logged in user can get a feed of posts.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+
+        # make request to get a feed
+        url = "/api/feed/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, [])
+
+    def test_get_feed_does_not_follow_others(self):
+        """
+        Assert that if a user is not following anyone,
+        only their own posts will show up in their feed.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        expected_posts = [resp.data]
+
+        # make request to get a feed
+        url = "/api/feed/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_posts)
+
+    def test_get_feed_follows_others(self):
+        """
+        Assert that if a user is following others,
+        both their posts and those they follow will show up in their feed.
+        """
+        # set up test
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer_2.address),
+            body=self.tx_history_resp_data
+        )
+
+        # login user 2, create a post
+        expected = []
+        self._do_login(self.test_signer_2)
+        resp = self._create_post(self.test_signer_2)
+        expected = expected + [resp.data]
+
+        # logout user 2
+        self._do_logout()
+
+        # login user 1, create a post, and follow user 2
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        expected = [resp.data] + expected
+        url = f"/api/{self.test_signer_2.address}/follow/"
+        self.client.post(url)
+
+        # get feed of user 1
+        url = "/api/feed/"
+        resp = self.client.get(url)
+
+        # assert user 1 feed has the posts of user 1 and user 2
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data), 2)
+        self.assertDictEqual(resp.data[0], expected[0])
+        self.assertDictEqual(resp.data[1], expected[1])

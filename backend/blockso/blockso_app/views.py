@@ -8,16 +8,17 @@ import secrets
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Follow, Profile
+from .models import Follow, Post, Profile
 from . import jobs, serializers
 
 
@@ -189,3 +190,81 @@ class UserRetrieve(
         """ Retrieve the logged in user. """
 
         return self.retrieve(request, *args, **kwargs)
+
+
+class PostCreateList(generics.ListCreateAPIView):
+
+    """ View that supports creating and listing Posts of an address. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.PostSerializer
+    queryset = Post.objects.all()
+    lookup_url_kwarg = "address"
+    lookup_field = "author"
+
+
+class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """ View that supports retrieving, updating, and deleting a Post. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.PostSerializer
+    queryset = Post.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def put(self, request, *args, **kwargs):
+        """ Updates a Post with the given id. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Post
+        if instance.author != request.user:
+            raise PermissionDenied("User does not own the Post.")
+
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """ Deletes an object when a DELETE request is received. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Post
+        if instance.author != request.user:
+            raise PermissionDenied("User does not own the Post.")
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedList(generics.ListAPIView):
+
+    """ View that supports retrieving the feed of the logged in user. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.PostSerializer
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        """
+        Return Posts of logged in user and all of the users that they follow.
+        Sort the queryset in descending chronological order.
+        """
+        # get user
+        user = self.request.user
+        user_model = get_user_model()
+        user_queryset = user_model.objects.filter(
+            pk=user.ethereum_address
+        )
+        # get users they follow
+        follow_src = Follow.objects.filter(src=user)
+        users_followed = user_model.objects.filter(follow_dest__in=follow_src)
+
+        # combine the two querysets
+        users = user_queryset | users_followed
+
+        # get all posts by those users
+        queryset = Post.objects.filter(author__in=users)
+        queryset = queryset.order_by("-created")
+
+        return queryset
