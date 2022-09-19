@@ -166,3 +166,35 @@ class FollowSerializer(serializers.ModelSerializer):
         follow.delete()
 
         return None 
+
+
+class PostSerializer(serializers.ModelSerializer):
+    """ Post model serializer. """
+
+    class Meta:
+        model = Post
+        fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
+                  "refPost", "refTx", "created"]
+        read_only_fields = ["id", "author", "refPost", "refTx", "created"]
+
+    def create(self, validated_data):
+        """ Creates a Post. """
+
+        # get user from the session
+        author = self.context.get("request").user
+
+        # TODO validate business logic like ref_post and ref_tx
+
+        # create Post
+        return Post.objects.create(author=author, **validated_data)
+
+    def update(self, instance, validated_data):
+        """ Updates a Post. """
+
+        # update other attributes
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # save the changes and return them
+        instance.save()
+        return instance

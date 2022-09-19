@@ -120,10 +120,10 @@ def create_post(tx_record):
 
     # Post details that remain the same no matter the tx_record type
     object_kwargs = {
-        "img_url": "",
-        "is_share": False,
-        "is_quote": False,
-        "ref_post": None
+        "imgUrl": "",
+        "isShare": False,
+        "isQuote": False,
+        "refPost": None
     }
 
     # handle Transaction
@@ -133,7 +133,7 @@ def create_post(tx_record):
         return Post.objects.create(
             author=tx_author,
             text=text,
-            ref_tx=tx_record,
+            refTx=tx_record,
             created=tx_record.block_signed_at,
             **object_kwargs
         )
@@ -158,7 +158,7 @@ def create_post(tx_record):
         return Post.objects.create(
             author=tx_author,
             text=text,
-            ref_tx=tx_record.tx,
+            refTx=tx_record.tx,
             created=tx_record.tx.block_signed_at,
             **object_kwargs
         )
@@ -172,7 +172,7 @@ def create_post(tx_record):
         return Post.objects.create(
             author=tx_author,
             text=text,
-            ref_tx=tx_record.tx,
+            refTx=tx_record.tx,
             created=tx_record.tx.block_signed_at,
             **object_kwargs
         )
