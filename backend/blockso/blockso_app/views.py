@@ -163,6 +163,11 @@ class ProfileCreateRetrieveUpdate(
     def get(self, request, *args, **kwargs):
         """ Retrieve the Profile of the given address. """
 
+        # TODO this should create a job instead of
+        # doing the actual work in the GET request
+        # fetch and store the tx history of the person being searched
+        jobs.process_address_txs(self.kwargs["address"])
+
         return self.retrieve(request, *args, **kwargs)
 
 

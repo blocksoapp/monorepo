@@ -7,30 +7,6 @@ from django.conf import settings
 # our imports
 
 
-class User(models.Model):
-    """ Represents a user. """
-
-    address = models.CharField(
-        primary_key=True,
-        max_length=255,
-        blank=False,
-        editable=False
-    )
-
-    def clean(self, *args, **kwargs):
-        """ Clean model before storing it. """
-
-        # make address lowercase
-        self.address = self.address.lower() 
-
-    def save(self, *args, **kwargs):
-        """ Business logic on write. """
-
-        # run the clean and validation functions
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-
 class Profile(models.Model):
     """ Represents the profile of a user. """
 

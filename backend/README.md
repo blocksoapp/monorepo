@@ -18,3 +18,4 @@ Make sure you have the requirements above installed, then run the `build.sh` scr
 1. Make sure the authed user can only create profiles for themselves.  
 2. Revisit when users' tx history should be fetched and transformed to posts.  
 3. Add business logic checks for Posts that are quoted, shared, or refer to a tx.
+4. Add a job queueing system for fetching the user's tx history.
