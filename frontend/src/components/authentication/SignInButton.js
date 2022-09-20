@@ -11,6 +11,11 @@ function SignInButton() {
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
     const [error, setError] = useState(Error)
 
+    // Dependencies from wagmi
+    const { address, isConnected } = useAccount()
+    const { chain: activeChain } = useNetwork()
+    const { signMessageAsync } = useSignMessage()
+
 // Fetch nonce from backend + update nonce state
     const fetchNonce = async () => {
         try {
@@ -34,29 +39,15 @@ function SignInButton() {
     // fetch user profile
     const checkProfileExists = async () => {
       const url = `${baseAPI}/user/`
-      const profileRes = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-      })
+      const profileRes = await fetch(url)
       console.log('fetched profile:', profileRes)
       // Getting 404 error "Authentication credentials were not provided."
       const json = await profileRes.json()
       console.log('json data:', json)
-     
 
     }
     
-
 // Create a SIWE message for user to sign with nonce
-    // Dependencies from wagmi
-    const { address, isConnected } = useAccount()
-    const { chain: activeChain } = useNetwork()
-    const { signMessageAsync } = useSignMessage()
-
     const signIn = async () => {
       try {
         // Check validity of chain/address
