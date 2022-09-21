@@ -143,14 +143,6 @@ class BaseTest(APITestCase):
         This function will usually be called after authenticating
         with the _do_login function above.
         """
-        # register a response for a covalent API request that
-        # is made after creating a profile
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(signer.address),
-            body=self.tx_history_resp_data
-        )
-
         # create profile
         url = f"/api/{signer.address}/profile/"
         resp = self.client.post(url, self.create_profile_data)
@@ -277,6 +269,8 @@ class ProfileTests(BaseTest):
         })
         self.assertDictEqual(resp.data, expected)
 
+    # TODO remove or update this patch when a job queue is added
+    @mock.patch("blockso_app.jobs.process_address_txs", lambda x: None)
     def test_retrieve_profile(self):
         """
         Assert that a profile is retrieved successfully.
@@ -343,18 +337,6 @@ class FollowTests(BaseTest):
     Tests follow related behavior.
     """
 
-    def setUp(self):
-        """ Runs before each test. """
-
-        super().setUp()
-
-        # register response for getting tx history
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer_2.address),
-            body=self.tx_history_resp_data
-        )
-
     def test_follow(self):
         """
         Assert that a user can follow another.
@@ -363,12 +345,15 @@ class FollowTests(BaseTest):
         # create user 1 and log them in
         self._do_login(self.test_signer)
         self._create_profile(self.test_signer)
+        self._do_logout()
 
         # create user 2
-        url = f"/api/{self.test_signer_2.address}/profile/"
-        self.client.post(url, self.create_profile_data)
+        self._do_login(self.test_signer_2)
+        self._create_profile(self.test_signer_2)
+        self._do_logout()
 
         # make request for user 1 to follow user 2
+        self._do_login(self.test_signer)
         url = f"/api/{self.test_signer_2.address}/follow/"
         resp = self.client.post(url)
 
@@ -573,12 +558,6 @@ class FeedTests(BaseTest):
         both their posts and those they follow will show up in their feed.
         """
         # set up test
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer_2.address),
-            body=self.tx_history_resp_data
-        )
-
         # login user 2, create a post
         expected = []
         self._do_login(self.test_signer_2)

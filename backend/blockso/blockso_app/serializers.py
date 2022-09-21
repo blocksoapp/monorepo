@@ -1,4 +1,5 @@
 # std lib imports
+from datetime import datetime, timezone
 
 # third party imports
 from django.contrib.auth import get_user_model
@@ -7,6 +8,9 @@ from web3 import Web3
 
 # our imports
 from .models import Follow, Post, Profile, Socials
+
+
+UserModel = get_user_model()
 
 
 class SocialsSerializer(serializers.ModelSerializer):
@@ -79,8 +83,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         address = Web3.toChecksumAddress(address)
         
         # create User, Socials, Profile
-        user_model = get_user_model()
-        user, _ = user_model.objects.get_or_create(pk=address)
+        user, _ = UserModel.objects.get_or_create(pk=address)
         socials = validated_data.pop("socials")
         profile = Profile.objects.create(user=user, **validated_data)
         socials = Socials.objects.create(profile=profile, **socials)
@@ -110,7 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
     """ User model serializer. """
 
     class Meta:
-        model = get_user_model()
+        model = UserModel
         fields = ["address", "profile"]
 
     profile = ProfileSerializer()
@@ -139,8 +142,7 @@ class FollowSerializer(serializers.ModelSerializer):
         # get address from the URL
         address = self.context.get("view").kwargs["address"]
         address = Web3.toChecksumAddress(address)
-        user_model = get_user_model()
-        to_follow = user_model.objects.get(ethereum_address=address)
+        to_follow = UserModel.objects.get(ethereum_address=address)
 
         # signed in user follows the address given in the url
         follow = Follow.objects.create(
@@ -188,7 +190,12 @@ class PostSerializer(serializers.ModelSerializer):
         # TODO validate business logic like ref_post and ref_tx
 
         # create Post
-        return Post.objects.create(author=author, **validated_data)
+        created = datetime.now(timezone.utc)
+        return Post.objects.create(
+            author=author,
+            created=created,
+            **validated_data
+        )
 
     def update(self, instance, validated_data):
         """ Updates a Post. """

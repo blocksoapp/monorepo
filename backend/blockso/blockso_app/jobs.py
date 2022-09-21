@@ -7,13 +7,14 @@ from web3 import Web3
 import requests
 
 # our imports
-from .models import ERC20Transfer, ERC721Transfer, Post, Transaction 
+from .models import ERC20Transfer, ERC721Transfer, Post, Profile, Transaction 
 
 
 api_key = settings.COVALENT_API_KEY
 base_url = "https://api.covalenthq.com/v1"
 client = requests.Session()
 chain_id = 1
+UserModel = get_user_model()
 
 
 def get_tx_history_url(address):
@@ -23,7 +24,7 @@ def get_tx_history_url(address):
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number=1&page-size=50"
+          f"&no-logs=false&page-number=0&page-size=50"
 
     return url
 
@@ -104,20 +105,12 @@ def parse_and_create_tx(tx_data):
     return tx
 
 
-def create_post(tx_record):
+def create_post(tx_record, post_author):
     """
     Creates a Post using a db record of Transaction, ERC20Transaction,
     or ERC721Transaction.
     Returns the created object.
     """
-    # get or create user representing the post author
-    tx_author = tx_record.from_address
-    tx_author = Web3.toChecksumAddress(tx_author)
-    user_model = get_user_model()
-    tx_author, _ = user_model.objects.get_or_create(
-        ethereum_address=tx_author
-    )
-
     # Post details that remain the same no matter the tx_record type
     object_kwargs = {
         "imgUrl": "",
@@ -128,10 +121,10 @@ def create_post(tx_record):
 
     # handle Transaction
     if isinstance(tx_record, Transaction):
-        text = f"{tx_author.ethereum_address} sent a tx to "\
+        text = f"{tx_record.from_address} sent a tx to "\
                f"{tx_record.to_address}."
         return Post.objects.create(
-            author=tx_author,
+            author=post_author,
             text=text,
             refTx=tx_record,
             created=tx_record.block_signed_at,
@@ -151,12 +144,12 @@ def create_post(tx_record):
         amount = f"{pre_dot}.{post_dot}"
 
         # format text of post
-        text = f"{tx_author.ethereum_address} sent {amount} "\
+        text = f"{tx_record.from_address} sent {amount} "\
                f"{tx_record.contract_ticker} to "\
                f"{tx_record.to_address}."
 
         return Post.objects.create(
-            author=tx_author,
+            author=post_author,
             text=text,
             refTx=tx_record.tx,
             created=tx_record.tx.block_signed_at,
@@ -165,12 +158,12 @@ def create_post(tx_record):
 
     # handle ERC721Transfer
     elif isinstance(tx_record, ERC721Transfer):
-        text = f"{tx_author.ethereum_address} sent "\
+        text = f"{tx_record.from_address} sent "\
                f"{tx_record.contract_ticker} #{tx_record.token_id} to "\
                f"{tx_record.to_address}."
         
         return Post.objects.create(
-            author=tx_author,
+            author=post_author,
             text=text,
             refTx=tx_record.tx,
             created=tx_record.tx.block_signed_at,
@@ -190,6 +183,10 @@ def process_address_txs(address):
     # get tx history
     history = get_user_tx_history(address)
 
+    # create a user/profile if they do not already exist
+    user, _ = UserModel.objects.get_or_create(ethereum_address=address)
+    Profile.objects.get_or_create(user=user)
+
     # create db records based on history
     for transaction in history:
         # create a Transaction using the tx data
@@ -200,4 +197,4 @@ def process_address_txs(address):
             break
 
         # create a Post using the tx data
-        create_post(tx_record)
+        create_post(tx_record, user)

@@ -15,8 +15,8 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile"
     )
-    bio = models.TextField(blank=False)
-    image = models.URLField(blank=False)
+    bio = models.TextField(blank=False, default="")
+    image = models.URLField(blank=False, default="")
 
 
 class Socials(models.Model):
@@ -139,4 +139,4 @@ class Post(models.Model):
         null=True,
         blank=False
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(blank=False)
