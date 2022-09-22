@@ -29,6 +29,7 @@ function CreateProfileForm({ profile, setProfile, initialState }) {
       if(!isConnected) return
 
       const url = `${baseAPI}/${address}/profile/`
+      console.log("this my url: ",url)
       const res = await fetch(url, {
           method: 'POST',
           body: JSON.stringify(profile),
@@ -38,16 +39,7 @@ function CreateProfileForm({ profile, setProfile, initialState }) {
             },
             credentials: 'include'
       }) 
-
-      const json = await res.json();
-
-      if (!res.ok) {
-          throw new Error('Failed to post data') 
-      } else if(res.ok) {
-          console.log('sucess posting data')
-          // Reset profile object
-          setProfile({...initialState})
-      }
+ 
   }
 
   return (
@@ -116,7 +108,7 @@ function CreateProfileForm({ profile, setProfile, initialState }) {
 
              </Row>
         </div>
-        <Button disabled={!isConnected} variant="primary"  type="submit" onClick={handleSubmit}>
+        <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
             Submit
         </Button> 
             {!isConnected ? <Form.Text className="text-muted p-3">

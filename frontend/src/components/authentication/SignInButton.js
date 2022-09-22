@@ -22,10 +22,11 @@ function SignInButton() {
             const url = `${baseAPI}/auth/nonce/`
             const nonceRes = await fetch(url)
             console.log('fetch nonce:', nonceRes)
-            const json = await nonceRes.json()
-            const nonce = json.nonce
-            console.log(nonce)
+            const data = await nonceRes.json()
+            const nonce = data.nonce
+            console.log("this is my nonce: ",nonce)
             setNonceData(nonce)
+            console.log("this is my state nonce", nonceData)
         } catch (error) {
             console.log('Could not retrieve nonce:', error)
         }
@@ -33,7 +34,10 @@ function SignInButton() {
 
     const getUser = async () => {
       const url = `${baseAPI}/user/`
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+      })
       console.log('fetched profile:', res)
       return res
     }
@@ -68,8 +72,9 @@ function SignInButton() {
         if (!address || !chainId) return 
         setIsLoading(true)
 
-         // Create SIWE message with pre-fetched nonce and sign with wallet
-        var message = new SiweMessage({
+        console.log('nonce data before msg:', nonceData)
+
+        const messageData = {
           address: address,
           statement: 'Hello I am,',
           domain: window.location.host ,
@@ -77,14 +82,19 @@ function SignInButton() {
           chainId,
           uri: `${baseAPI}/auth/login/` ,
           nonce: nonceData
-        })
+        }
+
+        console.log('nonce data after msg:', nonceData)
+
+        console.log("message data: ", messageData)
+         // Create SIWE message with pre-fetched nonce and sign with wallet
+        var message = new SiweMessage(messageData)
+        console.log("this is my messsge: ",message)
         message = message.prepareMessage();
         const signature = await signMessageAsync({
           message: message,
         })
 
-        console.log(message)
-        console.log(isAuthenticated)
 
        // Login / Verify signature
         const url = `${baseAPI}/auth/login/`
@@ -101,7 +111,7 @@ function SignInButton() {
         if (loginRes.status === 200 ) {
           setIsAuthenticated(true)
           setIsLoading(false)
-          setNonceData('')
+          //setNonceData('')
           console.log('res is ok:', loginRes.status)
           // fetch route 
           
@@ -113,15 +123,15 @@ function SignInButton() {
        
       } catch (error) {
         setIsLoading(false)
-        setNonceData(undefined)
+        //setNonceData(undefined)
         setError(error)
-        fetchNonce()
+        //fetchNonce()
       }
     }
 
     const handleSignIn = async () => {
       await fetchNonce()
-      signIn()
+      await signIn()
     }
 
     const signOut = async () => {
@@ -136,8 +146,10 @@ function SignInButton() {
           credentials: 'include'
         })
 
-        if(logoutRes.status === 200) 
-        setIsAuthenticated(false)
+        if(logoutRes.status === 200)  {
+          setIsAuthenticated(false)
+          fetchNonce()
+        }
         else if(logoutRes.status === 400 || 403) console.log('logout error')
       } catch (error) {
         console.log(error)
@@ -155,12 +167,15 @@ function SignInButton() {
         const checkForSessionId = () => {
           console.log('running checkforsessionid func')
           // check sessionid
+          console.log("getsess id:", getCookie('sessionid'))
          if(getCookie('sessionid') !== null) {
           setIsAuthenticated(true)
           console.log('sessionid exists')
          } else {
           setIsAuthenticated(false)
           console.log('no session id, log in please')
+          console.log('fetching nonce...')
+          fetchNonce()
          }
        }
 
@@ -178,17 +193,16 @@ function SignInButton() {
 
       // useEffect to load nonce on component render 
     useEffect(() => {
-      //fetchNonce()
       handleAuthentication()
     }, []) 
 
     // useEffect to check authentication status
-
+/* onClick={async () => {await handleSignIn()}} */
 
   return (
     <div className='pb-1'>
         {isAuthenticated ? <Button onClick={signOut}>Sign out</Button> :
-        <Button id="signInButton" disabled={isLoading || !isConnected || isAuthenticated} onClick={handleSignIn}> Sign In</Button>  }
+        <Button id="signInButton" disabled={isLoading || !isConnected || isAuthenticated} onClick={signIn}> Sign In</Button>  }
         <Button id="signInButton" disabled={isLoading || isAuthenticated} onClick={handleSignIn}> Sign In static</Button> 
         <Button onClick={signOut}>Sign out static</Button>
         <Button onClick={checkProfileExists}>CheckProfile</Button>

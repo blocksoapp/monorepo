@@ -13,7 +13,7 @@ export function getCookie(name) {
       console.log('could not find cookie')
       return null;
     }
-  
+    console.log('doc cookie split ', document.cookie)
     const xsrfCookies = document.cookie.split(';')
       .map(c => c.trim())
       .filter(c => c.startsWith(name + '='));
