@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from "react-router-dom";
-import { useAccount, useEnsName } from 'wagmi'
+import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import EnsAndAddress from '../ensName.js';
 import Post from '../post.js'; 
 import { baseAPI, getCookie } from '../../utils.js'
+import Blockies from 'react-blockies';
 
 
 function Profile() {
-
-    const [isLoading, setIsLoading] = useState(Boolean)
-    const [error, setError] = useState(Error)
+    // state
     const [profileData, setProfileData] = useState({});
     const { address } = useParams();
+    const [pfpUrl, setPfpUrl] = useState(null);
+    const ensAvatar = useEnsAvatar({addressOrName: address});
  
+    // functions
+    const determineProfilePic = async () => {
+        if ("image" in profileData && profileData["image"] !== "") {
+            setPfpUrl(profileData["image"]);
+        }
+        else {
+            setPfpUrl(ensAvatar["data"]);
+        }
+    }
+
     const fetchProfile = async () => {
         const url = `${baseAPI}/${address}/profile/`;
         const res = await fetch(url);
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);
+            determineProfilePic(); 
         }
         else if (res.status === 404) {
             // TODO show 404 feedback on page
@@ -27,12 +39,6 @@ function Profile() {
         }
         else { console.log("unhandled case: ", res) }
     }
-
-    useEffect(() => {
-      fetchProfile()
-    
-    }, []) 
-
 
     const handleFollow = async () => {
         const url = `${baseAPI}/${address}/follow/`;
@@ -46,6 +52,21 @@ function Profile() {
         await fetchProfile();
     }
 
+    // effects
+    useEffect(() => {
+        fetchProfile();
+    }, [])
+
+    useEffect(() => {
+        if (pfpUrl === ensAvatar["data"]) {
+            return;
+        }
+        if (ensAvatar["data"] !== "") {
+            setPfpUrl(ensAvatar["data"]);
+        }
+    }, [pfpUrl])
+
+
   return (
     <Container fluid className="bg-light">
 
@@ -55,13 +76,24 @@ function Profile() {
             {/* Profile picture */}
             <Row className="justify-content-center">
                 <Col className="col-auto">
-                    <Image
-                        src={profileData.image}
+                    {pfpUrl === null
+                    ? <Blockies
+                        seed={address}
+                        size={30}
+                        scale={8}
+                        className="rounded-circle"
+                        color="#ff5412"
+                        bgColor="#ffb001"
+                        spotColor="#4db3e4"
+                    />
+                    : <Image
+                        src={pfpUrl}
                         roundedCircle
                         height="256px"
                         width="256px"
                         className="mb-1"
                     />
+                    }
                 </Col>
             </Row>
 
@@ -117,7 +149,7 @@ function Profile() {
                     text={post.text}
                     imgUrl={post.imgUrl}
                     created={post.created}
-                    pfp={profileData["image"]}
+                    pfp={pfpUrl}
                     refTx={post.refTx}
                 />
             ))}

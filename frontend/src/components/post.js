@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { BigNumber } from "ethers";
 import EnsAndAddress from "./ensName.js";
+import Blockies from 'react-blockies';
 
 
 function Post(props) {
@@ -88,12 +89,23 @@ function Post(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        <Image
+                                        {props.pfp === null
+                                        ? <Blockies
+                                            seed={props.author}
+                                            size={15}
+                                            scale={5}
+                                            className="rounded-circle"
+                                            color="#ff5412"
+                                            bgColor="#ffb001"
+                                            spotColor="#4db3e4"
+                                          />
+                                        : <Image
                                             src={props.pfp}
                                             height="100px"
                                             width="100px"
                                             roundedCircle
-                                        />
+                                          />
+                                        }
                                     </Col>
                                     <Col className="col-auto">
                                         <h5><EnsAndAddress address={props.author} /></h5>
@@ -165,17 +177,25 @@ function Post(props) {
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
-                                            This&nbsp;
+                                            <Link to={`/${erc20Transfers[0].from_address}/profile`}  style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
+                                                <EnsAndAddress address={erc20Transfers[0].from_address} />
+                                            </Link>
+                                            &nbsp;sent&nbsp;
                                             <a
-                                                className="text-warning"
+                                                className="text-danger"
                                                 href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ fontStyle: 'italic', color: 'black' }}
                                             >
-                                                transaction
+                                                {formatTokenAmount(erc20Transfers[0].amount, erc20Transfers[0].decimals)} {erc20Transfers[0].contract_ticker}
                                             </a>
-                                            &nbsp;seems spammy.
+                                            &nbsp;to&nbsp;
+                                            <Link to={`/${erc20Transfers[0].to_address}/profile`} style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
+                                                <EnsAndAddress address={erc20Transfers[0].to_address} />
+                                            </Link>
+                                            <br />
+                                            Note: this transaction seems spammy.
                                         </Card.Text>
                                     </Col>
                                 </Row>
