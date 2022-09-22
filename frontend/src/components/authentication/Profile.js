@@ -68,7 +68,7 @@ function Profile() {
             {/* Address and ENS */}
             <Row className="justify-content-center mt-2">
                 <Col className="col-auto text-center">
-                    <EnsAndAddress address={address} />
+                    <h5><EnsAndAddress address={address} /></h5>
                 </Col>
             </Row>
 
@@ -112,11 +112,13 @@ function Profile() {
         <Container>
             {profileData["posts"] && profileData["posts"].map(post => (
                 <Post
+                    key={post.id}
                     author={post.author}
                     text={post.text}
                     imgUrl={post.imgUrl}
                     created={post.created}
                     pfp={profileData["image"]}
+                    refTx={post.refTx}
                 />
             ))}
         </Container>

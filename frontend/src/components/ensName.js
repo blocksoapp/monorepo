@@ -8,21 +8,21 @@ function EnsAndAddress(props) {
     const abbrAddress = props.address.substr(2,5) + "..." + props.address.substr(37,5);
 
     // returns
-    if (isLoading) return <h5>Fetching ENS name…</h5>
-    if (isError) return <h5>Error fetching ENS name</h5>
+    if (isLoading) return <span>Fetching ENS name…</span>
+    if (isError) return <span>Error fetching ENS name</span>
 
     // ens name found
     if (data !== null) return (
-        <h5>{data}
+        <span>{data}
             <span className="fs-6">
                 &nbsp;({abbrAddress})
             </span>
-        </h5>
+        </span>
     )
 
     // no ens name
     else return (
-        <h5>{abbrAddress}</h5>
+        <span>{abbrAddress}</span>
     )
 }
 

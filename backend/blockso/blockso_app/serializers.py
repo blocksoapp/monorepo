@@ -7,7 +7,8 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import Follow, Post, Profile, Socials
+from .models import ERC20Transfer, ERC721Transfer, Follow, Post, \
+        Profile, Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -172,6 +173,57 @@ class FollowSerializer(serializers.ModelSerializer):
         return None 
 
 
+class ERC20TransferSerializer(serializers.ModelSerializer):
+    """ ERC20Transfer model serializer. """
+
+    class Meta:
+        model = ERC20Transfer
+        fields = ["contract_address", "contract_name", "contract_ticker",
+                  "logo_url", "from_address", "to_address", "amount",
+                  "decimals"]
+        read_only_fields = fields
+
+
+class ERC721TransferSerializer(serializers.ModelSerializer):
+    """ ERC721Transfer model serializer. """
+
+    class Meta:
+        model = ERC721Transfer
+        fields = ["contract_address", "contract_name", "contract_ticker",
+                  "logo_url", "from_address", "to_address", "token_id"]
+        read_only_fields = fields
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    """ Transaction model serializer. """
+
+    class Meta:
+        model = Transaction
+        fields = ["chain_id", "tx_hash", "block_signed_at", "tx_offset",
+                  "successful", "from_address", "to_address", "value",
+                  "erc20_transfers", "erc721_transfers"]
+        read_only_fields = fields
+
+    erc20_transfers = serializers.SerializerMethodField()
+    erc721_transfers = serializers.SerializerMethodField()
+
+    def get_erc20_transfers(self, instance):
+        """
+        Return a list serializer of all the ERC20 transfers
+        associated with the transaction.
+        """
+        transfers = instance.erc20_transfers.all()
+        return ERC20TransferSerializer(transfers, many=True).data
+
+    def get_erc721_transfers(self, instance):
+        """
+        Return a list serializer of all the ERC721 transfers
+        associated with the transaction.
+        """
+        transfers = instance.erc721_transfers.all()
+        return ERC721TransferSerializer(transfers, many=True).data
+
+
 class PostSerializer(serializers.ModelSerializer):
     """ Post model serializer. """
 
@@ -180,6 +232,18 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "created"]
         read_only_fields = ["id", "author", "refPost", "refTx", "created"]
+
+    refTx = serializers.SerializerMethodField()
+
+    def get_refTx(self, instance):
+        """ Return serialized transaction that the post refers to. """
+
+        if instance.refTx is not None:
+            return TransactionSerializer(
+                Transaction.objects.get(pk=instance.refTx.id)
+            ).data
+
+        return None
 
     def create(self, validated_data):
         """ Creates a Post. """

@@ -1,4 +1,5 @@
 # std lib imports
+import json
 
 # third party imports
 from django.conf import settings
@@ -8,13 +9,20 @@ import requests
 
 # our imports
 from .models import ERC20Transfer, ERC721Transfer, Post, Profile, Transaction 
+UserModel = get_user_model()
 
 
+# client config
 api_key = settings.COVALENT_API_KEY
 base_url = "https://api.covalenthq.com/v1"
 client = requests.Session()
 chain_id = 1
-UserModel = get_user_model()
+
+# known log signatures
+erc20_transfer_sig = "Transfer(indexed address from, "\
+                     "indexed address to, uint256 value)"
+erc721_transfer_sig = "Transfer(indexed address from, "\
+                     "indexed address to, indexed uint256 tokenId)"
 
 
 def get_tx_history_url(address):
@@ -24,7 +32,7 @@ def get_tx_history_url(address):
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number=0&page-size=50"
+          f"&no-logs=false&page-number=0&page-size=20"
 
     return url
 
@@ -66,41 +74,39 @@ def parse_and_create_tx(tx_data):
     if created is False:
         return None
 
-    # return created tx if it is not an erc20/erc721 transfer
+    # create db records for the events we support
     log_events = tx_data["log_events"]
-    if len(log_events) != 1:
-        return tx
+    for event in log_events:
+        # skip logs that havent been decoded by covalent
+        if event["decoded"] is None:
+            continue
 
-    event = log_events[0]
-    if event["decoded"]["name"] != "Transfer":
-        return tx
+        # create an erc20 transfer record
+        if event["decoded"]["signature"] == erc20_transfer_sig:
+            ERC20Transfer.objects.create(
+                tx=tx,
+                contract_address=event["sender_address"],
+                contract_name=event["sender_name"],
+                contract_ticker=event["sender_contract_ticker_symbol"],
+                logo_url=event["sender_logo_url"],
+                from_address=event["decoded"]["params"][0]["value"],
+                to_address=event["decoded"]["params"][1]["value"],
+                amount=event["decoded"]["params"][2]["value"],
+                decimals=event["sender_contract_decimals"]
+            )
 
-    # create and return an erc20 transfer record
-    if event["decoded"]["params"][2]["name"] == "value":
-        return ERC20Transfer.objects.create(
-            tx=tx,
-            contract_address=event["sender_address"],
-            contract_name=event["sender_name"],
-            contract_ticker=event["sender_contract_ticker_symbol"],
-            logo_url=event["sender_logo_url"],
-            from_address=event["decoded"]["params"][0]["value"],
-            to_address=event["decoded"]["params"][1]["value"],
-            amount=event["decoded"]["params"][2]["value"],
-            decimals=event["sender_contract_decimals"]
-        )
-
-    # create and return an erc721 transfer record
-    if event["decoded"]["params"][2]["name"] == "tokenId":
-        return ERC721Transfer.objects.create(
-            tx=tx,
-            contract_address=event["sender_address"],
-            contract_name=event["sender_name"],
-            contract_ticker=event["sender_contract_ticker_symbol"],
-            logo_url=event["sender_logo_url"],
-            from_address=event["decoded"]["params"][0]["value"],
-            to_address=event["decoded"]["params"][1]["value"],
-            token_id=event["decoded"]["params"][2]["value"],
-        )
+        # create an erc721 transfer record
+        if event["decoded"]["signature"] == erc721_transfer_sig:
+            ERC721Transfer.objects.create(
+                tx=tx,
+                contract_address=event["sender_address"],
+                contract_name=event["sender_name"],
+                contract_ticker=event["sender_contract_ticker_symbol"],
+                logo_url=event["sender_logo_url"],
+                from_address=event["decoded"]["params"][0]["value"],
+                to_address=event["decoded"]["params"][1]["value"],
+                token_id=event["decoded"]["params"][2]["value"],
+            )
 
     return tx
 
@@ -111,68 +117,21 @@ def create_post(tx_record, post_author):
     or ERC721Transaction.
     Returns the created object.
     """
-    # Post details that remain the same no matter the tx_record type
+    # Post details that remain the same
     object_kwargs = {
+        "text": "",
         "imgUrl": "",
         "isShare": False,
         "isQuote": False,
         "refPost": None
     }
 
-    # handle Transaction
-    if isinstance(tx_record, Transaction):
-        text = f"{tx_record.from_address} sent a tx to "\
-               f"{tx_record.to_address}."
-        return Post.objects.create(
-            author=post_author,
-            text=text,
-            refTx=tx_record,
-            created=tx_record.block_signed_at,
-            **object_kwargs
-        )
-
-    # handle ERC20Transfer
-    elif isinstance(tx_record, ERC20Transfer):
-
-        # format amount of tokens sent or received
-        amount = tx_record.amount
-        decimals = tx_record.decimals
-        if len(amount) <= decimals:
-            amount = ("0" * (decimals - len(amount) + 1)) + amount
-        pre_dot = amount[:decimals * -1]
-        post_dot = amount[decimals:]
-        amount = f"{pre_dot}.{post_dot}"
-
-        # format text of post
-        text = f"{tx_record.from_address} sent {amount} "\
-               f"{tx_record.contract_ticker} to "\
-               f"{tx_record.to_address}."
-
-        return Post.objects.create(
-            author=post_author,
-            text=text,
-            refTx=tx_record.tx,
-            created=tx_record.tx.block_signed_at,
-            **object_kwargs
-        )
-
-    # handle ERC721Transfer
-    elif isinstance(tx_record, ERC721Transfer):
-        text = f"{tx_record.from_address} sent "\
-               f"{tx_record.contract_ticker} #{tx_record.token_id} to "\
-               f"{tx_record.to_address}."
-        
-        return Post.objects.create(
-            author=post_author,
-            text=text,
-            refTx=tx_record.tx,
-            created=tx_record.tx.block_signed_at,
-            **object_kwargs
-        )
-
-    else:
-        raise Exception("Unhandled tx_record type: %s" % tx_record)
-
+    return Post.objects.create(
+        author=post_author,
+        refTx=tx_record,
+        created=tx_record.block_signed_at,
+        **object_kwargs
+    )
 
 def process_address_txs(address):
     """

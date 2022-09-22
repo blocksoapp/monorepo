@@ -112,7 +112,7 @@ class ERC721Transfer(models.Model):
     logo_url = models.URLField(blank=False)
     from_address = models.CharField(max_length=255, blank=False)
     to_address = models.CharField(max_length=255, blank=False)
-    token_id = models.PositiveIntegerField(blank=False)
+    token_id = models.CharField(max_length=255, blank=False)
 
 
 class Post(models.Model):
