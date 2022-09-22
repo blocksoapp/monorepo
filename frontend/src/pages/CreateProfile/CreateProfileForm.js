@@ -55,7 +55,9 @@ function CreateProfileForm({ profile, setProfile, initialState }) {
     <Container className='p-3'>
         <Form>
         
-        <FileUpload/>
+        <FileUpload
+        profile={profile}
+        setProfile={setProfile}/>
 
         <NftForm
         profile={profile}

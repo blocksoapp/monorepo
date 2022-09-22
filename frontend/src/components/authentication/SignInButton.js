@@ -31,19 +31,32 @@ function SignInButton() {
         }
     }
 
-// useEffect to load nonce on component render 
-    useEffect(() => {
-      fetchNonce()
-    }, [])
+    const getUser = async () => {
+      const url = `${baseAPI}/user/`
+      const res = await fetch(url)
+      console.log('fetched profile:', res)
+      return res
+    }
+
 
     // fetch user profile
     const checkProfileExists = async () => {
-      const url = `${baseAPI}/user/`
-      const profileRes = await fetch(url)
-      console.log('fetched profile:', profileRes)
-      // Getting 404 error "Authentication credentials were not provided."
-      const json = await profileRes.json()
-      console.log('json data:', json)
+      const fetchUser = await getUser()
+      if(fetchUser.status === 403) {
+        console.log('cannot get user, log in again')
+      } else if (fetchUser.status === 200) {
+        const json = await fetchUser.json()
+        console.log('json:', json)
+        const profile = json.profile
+        if(profile !== null) {
+          // Load wallet feet
+          console.log('here is your wallet feed')
+        } else {
+          // redirect to create profile page
+          console.log('need to create profile')
+        }
+      }
+      
 
     }
     
@@ -100,10 +113,15 @@ function SignInButton() {
        
       } catch (error) {
         setIsLoading(false)
-        //setNonceData(undefined)
+        setNonceData(undefined)
         setError(error)
-        //fetchNonce()
+        fetchNonce()
       }
+    }
+
+    const handleSignIn = async () => {
+      await fetchNonce()
+      signIn()
     }
 
     const signOut = async () => {
@@ -126,11 +144,53 @@ function SignInButton() {
       }
     }
 
+          /* 
+      0. You check if getCookie('sessionid') !== null
+      0.1. if it is not null, then make the Sign In button disabled
+      1. You GET /api/user/
+      2. If you get a 403, you make the Sign In button enabled */
+
+      const handleAuthentication = async () => {
+
+        const checkForSessionId = () => {
+          console.log('running checkforsessionid func')
+          // check sessionid
+         if(getCookie('sessionid') !== null) {
+          setIsAuthenticated(true)
+          console.log('sessionid exists')
+         } else {
+          setIsAuthenticated(false)
+          console.log('no session id, log in please')
+         }
+       }
+
+        checkForSessionId()
+        // You GET /api/user/
+        const getUserStatus = await getUser()
+        const status = await getUserStatus.status
+        if(status === 403) {
+          console.log('Not authorized to do')
+          // Enable sign in button -- remove disabled class 
+        } else return
+
+       
+      } 
+
+      // useEffect to load nonce on component render 
+    useEffect(() => {
+      //fetchNonce()
+      handleAuthentication()
+    }, []) 
+
+    // useEffect to check authentication status
+
+
   return (
     <div className='pb-1'>
-      { !isAuthenticated ? 
-        <Button disabled={!nonceData || isLoading || !isConnected } onClick={signIn}> Sign In</Button> :
-        <Button onClick={signOut}>Sign out</Button> }
+        {isAuthenticated ? <Button onClick={signOut}>Sign out</Button> :
+        <Button id="signInButton" disabled={isLoading || !isConnected || isAuthenticated} onClick={handleSignIn}> Sign In</Button>  }
+        <Button id="signInButton" disabled={isLoading || isAuthenticated} onClick={handleSignIn}> Sign In static</Button> 
+        <Button onClick={signOut}>Sign out static</Button>
         <Button onClick={checkProfileExists}>CheckProfile</Button>
     </div>
   );

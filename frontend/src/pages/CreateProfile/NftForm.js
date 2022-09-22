@@ -38,22 +38,28 @@ function NftForm({ profile, setProfile }) {
         const tokenUriResult = contract.data
           // Some results start with ipfs:// and others a direct link
         if(tokenUriResult.startsWith('ipfs://')) {
+          console.log('if ran')
           const tokenUriResultSliced = contract.data.slice(7)
-          const ipfsLink = `https://ipfs.io/ipfs/${tokenUriResultSliced}`
+          const ipfsDomain = 'https://ipfs.io/ipfs/'
+          const ipfsLink = `${ipfsDomain}${tokenUriResultSliced}`
            // Fetch ipfs metdata
           const ipfsRes = await fetch(ipfsLink)
           // Store image 
-          const ipfs = await ipfsRes.json()
-          console.log(ipfs.image)
+          const ipfsResJson = await ipfsRes.json()
+          console.log(ipfsResJson)
+          const jsonResultSliced = ipfsResJson.image.slice(7)
+          const ipfs = `${ipfsDomain}${jsonResultSliced}` 
+          console.log(ipfs)
           // set profile.image state to ipfs.image
           setProfile(prevValue => {
               return {
                   ...prevValue,
-                  image: ipfs.image
+                  image: ipfs
               }
           })
           console.log(profile)
         } else {
+          console.log('else ran')
           const ipfsRes = await fetch(tokenUriResult)
           const ipfs = await ipfsRes.json()
           console.log(ipfs.image)
@@ -69,7 +75,8 @@ function NftForm({ profile, setProfile }) {
 
   return (
     <Form.Group className="mb-3 border p-3">
-    <Form.Label>NFT TokenId</Form.Label>
+    <Form.Label>Profile Picture (NFT): </Form.Label> <br/>
+    <Form.Label>NFT TokenId</Form.Label>  
         <Form.Control onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name}/>
         <Form.Label>NFT Contract Address</Form.Label>
         <Form.Control onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name}/>
