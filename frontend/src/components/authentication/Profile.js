@@ -49,7 +49,6 @@ function Profile() {
             },
             credentials: 'include'
         });
-        await fetchProfile();
     }
 
     // effects
@@ -159,5 +158,4 @@ function Profile() {
   )
 }
 
-
-export default Profile;
+export default Profile
