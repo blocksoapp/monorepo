@@ -8,6 +8,7 @@ import {
     Row 
 } from "react-bootstrap"
 import { Link } from "react-router-dom";
+import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { BigNumber } from "ethers";
@@ -38,6 +39,8 @@ function Post(props) {
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
+    const ensAvatar = useEnsAvatar({addressOrName: props.author});
+    const [pfpUrl, setPfpUrl] = useState(props.pfp);
 
     // functions
 
@@ -65,6 +68,24 @@ function Post(props) {
         }
     }
 
+    /* 
+     * Sets the user's pfp to their ens avatar,
+     * if the user has not uploaded a profile pic.
+     * Returns null if the user does not have an
+     * ens avatar. That way a blockie will be
+     * displayed instead.
+     */
+    const determineProfilePic = (pfp) => {
+        // if no image url was passed in
+        if (pfp === null || pfp === undefined) {
+            // if user has an ens avatar then use it
+            if (ensAvatar["data"] !== null) {
+                setPfpUrl(ensAvatar["data"]);
+            }
+        }
+    }
+
+
     const formatTokenAmount = function(amount, decimals) {
         var amount = BigNumber.from(amount);
         var decimals = BigNumber.from(10).pow(decimals);
@@ -75,7 +96,9 @@ function Post(props) {
     // determine tx type on component mount
     useEffect(() => {
         determineTxType();
+        determineProfilePic(props.pfp);
     }, [])
+
 
     const render = function () {
         const dateObj = new Date(props.created);
@@ -89,7 +112,7 @@ function Post(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        {props.pfp === null
+                                        {pfpUrl === null
                                         ? <Blockies
                                             seed={props.author}
                                             size={15}
@@ -100,7 +123,7 @@ function Post(props) {
                                             spotColor="#4db3e4"
                                           />
                                         : <Image
-                                            src={props.pfp}
+                                            src={pfpUrl}
                                             height="100px"
                                             width="100px"
                                             roundedCircle

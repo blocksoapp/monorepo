@@ -123,8 +123,8 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         related_name="posts"
     )
-    text = models.TextField(blank=False)
-    imgUrl = models.URLField(blank=False)
+    text = models.TextField(blank=True)
+    imgUrl = models.URLField(blank=True)
     isShare = models.BooleanField(blank=False)
     isQuote = models.BooleanField(blank=False)
     refPost = models.ForeignKey(

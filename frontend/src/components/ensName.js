@@ -5,9 +5,14 @@ function EnsAndAddress(props) {
     const { data, isError, isLoading } = useEnsName({
         address: props.address,
     })
-    const abbrAddress = props.address.substr(2,5) + "..." + props.address.substr(37,5);
+
+    // functions
+    const getAbbrAddress = function(address) {
+        return address.substr(2,5) + "..." + props.address.substr(37,5);
+    }
 
     // returns
+    if (! "address" in props) return <span>Missing address</span>
     if (isLoading) return <span>Fetching ENS name…</span>
     if (isError) return <span>Error fetching ENS name</span>
 
@@ -15,14 +20,14 @@ function EnsAndAddress(props) {
     if (data !== null) return (
         <span>{data}
             <span className="fs-6">
-                &nbsp;({abbrAddress})
+                &nbsp;({getAbbrAddress(props.address)})
             </span>
         </span>
     )
 
     // no ens name
     else return (
-        <span>{abbrAddress}</span>
+        <span>{getAbbrAddress(props.address)}</span>
     )
 }
 
