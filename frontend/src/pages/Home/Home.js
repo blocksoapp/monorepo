@@ -1,18 +1,20 @@
 import React, { useState } from 'react'
-import { Container } from 'react-bootstrap'
+import { Col, Container, Row } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
 import Search from '../../components/form/Search'
 import WalletFeed from './WalletFeed/WalletFeed';
 
 function Home() {  
     return (
-        <div>
-          <Container>
-            <h1>Home Page</h1>
-            <Search/>
-          </Container>
-        </div>
-      );
+        <Container>
+          <Row className="justify-content-center">
+              <Col xs={12}>
+                  <Search/>
+              </Col>
+          </Row>
+          <WalletFeed />
+        </Container>
+    );
 }
 
 export default Home
