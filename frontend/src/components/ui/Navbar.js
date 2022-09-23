@@ -1,5 +1,5 @@
 import { Container, Nav, Navbar, NavDropdown, NavItem } from 'react-bootstrap'
-import { BrowserRouter, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import DisplayConnection from '../authentication/DisplayConnection';
 import SignInButton from '../authentication/SignInButton';
 

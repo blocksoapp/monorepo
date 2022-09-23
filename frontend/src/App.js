@@ -10,6 +10,7 @@ import NavbarComponent from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
 
 function App() {
+    // Replace isConnected with isAuthenticated 
     const { isConnected } = useAccount()
 
     return (
@@ -17,7 +18,7 @@ function App() {
         <Router>
              <NavbarComponent/>
             <Routes>
-
+            
               {isConnected ? <Route path="/" element={<Home/>}></Route> : 
               <Route path="/" element={<Explore/>}></Route> 
               }
