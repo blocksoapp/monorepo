@@ -18,7 +18,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Follow, Post, Profile
+from .models import Follow, Post, Profile, Socials
 from . import jobs, serializers
 
 
@@ -66,7 +66,15 @@ def auth_login(request):
     wallet = authenticate(request, **auth_kwargs)
     if wallet is not None:
         if wallet.is_active:
+            # log user in
             login(request, wallet)
+
+            # create profile for user
+            profile, _ = Profile.objects.get_or_create(
+                user=wallet
+            )
+            Socials.objects.get_or_create(profile=profile)  # create socials
+
             return Response(status=200)
         else:
             return Response(status=401)

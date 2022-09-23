@@ -34,7 +34,7 @@ function WalletFeed(props) {
      */
     const determineProfilePic = (pfp) => {
         // if no image url was passed in
-        if (pfp === null || pfp === undefined) {
+        if (pfp === null || pfp === undefined || pfp === "") {
             // if user has an ens avatar then use it
             if (ensAvatar["data"] !== null) {
                 setPfpUrl(ensAvatar["data"]);
@@ -102,7 +102,7 @@ function WalletFeed(props) {
             <Container>
                 <Row className="justify-content-center">
                     <Col xs={12} lg={6}>
-                        <Card>
+                        <Card style={{ backgroundColor: "#fffff0" }}>
                             {/* Card body that includes the post form details. */}
                             <Card.Body>
                                 <Row>
@@ -127,19 +127,26 @@ function WalletFeed(props) {
                                     </Col>
                                     <Col>
                                         <Form onSubmit={handleSubmit}>
+                                            <Row>
+                                            <Col>
                                             <InputGroup>
                                                 <Form.Control
                                                     as="textarea"
                                                     aria-label="With textarea"
-                                                    placeholder="What kinda cool stuff are we gonna post today!"
+                                                    placeholder="What kinda cool stuff are we gonna post today!?"
                                                     type="text"
+                                                    size="lg"
                                                     value={postText}
                                                     onChange={(event) => setPostText(event.target.value)}
                                                 />
                                             </InputGroup>
-                                                <Button variant="primary" type="submit">
+                                            </Col>
+                                            <Col className="col-auto">
+                                                <Button className="mt-3 float-end" variant="primary" type="submit">
                                                     Submit
                                                 </Button>
+                                            </Col>
+                                            </Row>
                                         </Form>
                                     </Col>
                                 </Row>
@@ -160,6 +167,7 @@ function WalletFeed(props) {
                         imgUrl={post.imgUrl}
                         created={post.created}
                         refTx={post.refTx}
+                        pfp={pfpUrl}
                     />
                 ))}
             </Container>
