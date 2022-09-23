@@ -1,22 +1,32 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
-import { baseAPI } from '../../utils'
+import { useEnsName } from 'wagmi'
 
-function ListItem({address, index}) {
+function ListItem({item, index}) {
 
     const navigate = useNavigate()
+    const etherscanUrl = `https://etherscan.io/address/${item}`
 
-    const etherscanUrl = `https://etherscan.io/address/${address}`
+    //Using ENS Name
+    const { data, isLoading } = useEnsName({
+        address: item,
+      })
 
+    // Abbreviate address
     const getAbbrAddress = function(address) {
         return address.substr(2,5) + "..." + address.substr(37,5);
     }
 
+    const displayName = () => {
+        if (isLoading) return <p>Fetching name…</p>
+        if (!data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {getAbbrAddress(item)} </a>
+        else if(data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {data} </a>
+    }
+
     const handleClick = () => {
         console.log('view profile requested')
-        navigate(`/${address}/profile`)
-        
+        navigate(`/${item}/profile`)
     }
 
   return (
@@ -25,12 +35,9 @@ function ListItem({address, index}) {
             Image here
             Make display image function reusable from wallet feed
             */}
-            <a 
-             href={etherscanUrl} 
-             rel="noreferrer" 
-             target="_blank" >
-                {getAbbrAddress(address)}
-            </a>
+            <div>
+                {displayName()}
+            </div>
             <Button 
              className="btn-sm" 
              onClick={handleClick} >

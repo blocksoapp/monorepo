@@ -8,11 +8,11 @@ function FeaturedList() {
   return (
     <div className='border p-5 text-center'>
         <Row>
-            {featuredList.map((address, index) => {
+            {featuredList.map((item, index) => {
             return <div className="col-sm-6"> 
                         <ListItem
                         list = {featuredList}
-                        address={address}
+                        item={item}
                         key={index}
                         /> 
                         </div>
