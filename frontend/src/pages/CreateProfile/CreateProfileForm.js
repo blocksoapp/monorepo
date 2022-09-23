@@ -1,36 +1,30 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Container, Form, Button, Row, Col } from 'react-bootstrap'
 import { baseAPI, getCookie } from '../../utils'
 import NftForm from './NftForm'
 import { useAccount } from 'wagmi'
 import FileUpload from './FileUpload'
 
-function CreateProfileForm({ profile, setProfile, initialState }) {
+function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
     const { isConnected, address } = useAccount();
 
      // Form State Update
      const handleChange = (event) => {
       const { name, value } = event.target
-
       setProfile(prevValue => {
           return {
               ...prevValue,
               [name]: value
           }
       })
-
-      console.log(profile)
   } 
   
   // Form Submission Function
   const handleSubmit = async () => {
-
       if(!isConnected) return
-
       const url = `${baseAPI}/${address}/profile/`
-      console.log("this my url: ",url)
-      const res = await fetch(url, {
+      const formRes = await fetch(url, {
           method: 'POST',
           body: JSON.stringify(profile),
           headers: {
@@ -38,10 +32,24 @@ function CreateProfileForm({ profile, setProfile, initialState }) {
               'X-CSRFTOKEN': getCookie('csrftoken')
             },
             credentials: 'include'
-      }) 
+      })
+      
+      if(formRes.status === 200 || 201) {
+        console.log('successfully posted data')
+        setProfile(initialState)
+      } else console.log('error posting data')
  
   }
 
+  const checkForProfile = async () => {
+    const res = getUser()
+    if(res.profile === !null) {
+      // Give popup error saying profile exists
+      console.log('profile already exists') 
+      return
+    } else console.log('profile does not exist')
+  }
+  
   return (
     <>
     <Container className='p-3'>

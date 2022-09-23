@@ -4,7 +4,7 @@
 export const baseAPI = `${process.env.REACT_APP_BACKEND_URL}/api`
 
 // Paste your NFT.Storage API key into the quotes:
-export const nftStorageAPI = process.env.NFT_STORAGE_KEY
+export const nftAPI = process.env.REACT_APP_NFT_KEY
 /*
  * Return value of cookie with the given name.
  */

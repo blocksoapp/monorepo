@@ -8,7 +8,7 @@ function NftForm({ profile, setProfile }) {
     tokenId: null,
     contractAddress: ''
 })
-
+  // Instantiate the contract
   const contract = useContractRead({
     addressOrName: nft.contractAddress,
     contractInterface: erc721ABI,
@@ -16,60 +16,48 @@ function NftForm({ profile, setProfile }) {
     args: nft.tokenId
   })
 
-
     // Updates NFT state
     const handleNftChange = (event) => {
       const { name, value } = event.target
-
       setNft(prevValue => {
           return {
               ...prevValue,
               [name]: value
           }
       })
-
-      console.log(nft)
   } 
 
       // Gets NFT metadata
       const getNftMetadata = async () => {
-
-        // Returns tokenUri string
+        // Returns tokenUri method data
         const tokenUriResult = contract.data
-          // Some results start with ipfs:// and others a direct link
+        // Adjust URL
         if(tokenUriResult.startsWith('ipfs://')) {
-          console.log('if ran')
           const tokenUriResultSliced = contract.data.slice(7)
           const ipfsDomain = 'https://ipfs.io/ipfs/'
           const ipfsLink = `${ipfsDomain}${tokenUriResultSliced}`
-           // Fetch ipfs metdata
           const ipfsRes = await fetch(ipfsLink)
           // Store image 
           const ipfsResJson = await ipfsRes.json()
-          console.log(ipfsResJson)
           const jsonResultSliced = ipfsResJson.image.slice(7)
           const ipfs = `${ipfsDomain}${jsonResultSliced}` 
-          console.log(ipfs)
-          // set profile.image state to ipfs.image
+          // Set profile.image state to ipfs
           setProfile(prevValue => {
               return {
                   ...prevValue,
                   image: ipfs
               }
           })
-          console.log(profile)
         } else {
-          console.log('else ran')
+          // If metadata includes normal link
           const ipfsRes = await fetch(tokenUriResult)
           const ipfs = await ipfsRes.json()
-          console.log(ipfs.image)
           setProfile(prevValue => {
               return {
                   ...prevValue,
                   image: ipfs.image
               }
           })
-          console.log(profile)
         }
   }
 
