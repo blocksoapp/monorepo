@@ -77,10 +77,8 @@ function Post(props) {
      */
     const determineProfilePic = (pfp) => {
         // if no image url was passed in
-        console.log("pfp in determineProfilePic: ", pfp);
         if (pfp === null || pfp === undefined) {
             // if user has an ens avatar then use it
-            console.log("ensAvatar: ", ensAvatar["data"]);
             if (ensAvatar["data"] !== null) {
                 setPfpUrl(ensAvatar["data"]);
             }
