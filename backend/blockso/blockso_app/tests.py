@@ -12,7 +12,7 @@ import eth_account
 import responses
 
 # our imports
-from .models import Follow, Post
+from .models import Follow, Post, Transaction, ERC721Transfer
 from . import jobs
 
 
@@ -143,14 +143,6 @@ class BaseTest(APITestCase):
         This function will usually be called after authenticating
         with the _do_login function above.
         """
-        # register a response for a covalent API request that
-        # is made after creating a profile
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(signer.address),
-            body=self.tx_history_resp_data
-        )
-
         # create profile
         url = f"/api/{signer.address}/profile/"
         resp = self.client.post(url, self.create_profile_data)
@@ -277,6 +269,8 @@ class ProfileTests(BaseTest):
         })
         self.assertDictEqual(resp.data, expected)
 
+    # TODO remove or update this patch when a job queue is added
+    @mock.patch("blockso_app.jobs.process_address_txs", lambda x: None)
     def test_retrieve_profile(self):
         """
         Assert that a profile is retrieved successfully.
@@ -343,18 +337,6 @@ class FollowTests(BaseTest):
     Tests follow related behavior.
     """
 
-    def setUp(self):
-        """ Runs before each test. """
-
-        super().setUp()
-
-        # register response for getting tx history
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer_2.address),
-            body=self.tx_history_resp_data
-        )
-
     def test_follow(self):
         """
         Assert that a user can follow another.
@@ -363,12 +345,15 @@ class FollowTests(BaseTest):
         # create user 1 and log them in
         self._do_login(self.test_signer)
         self._create_profile(self.test_signer)
+        self._do_logout()
 
         # create user 2
-        url = f"/api/{self.test_signer_2.address}/profile/"
-        self.client.post(url, self.create_profile_data)
+        self._do_login(self.test_signer_2)
+        self._create_profile(self.test_signer_2)
+        self._do_logout()
 
         # make request for user 1 to follow user 2
+        self._do_login(self.test_signer)
         url = f"/api/{self.test_signer_2.address}/follow/"
         resp = self.client.post(url)
 
@@ -416,16 +401,14 @@ class TransactionParsingTests(BaseTest):
     and using it to create Posts.
     """
 
-    def setUp(self):
-        """ Runs before each test. """
-
-        super().setUp()
-
-        # register response for getting tx history
+    def _mock_tx_history_response(self, json_response):
+        """
+        Mocks a response for user tx history.
+        """
         self.mock_responses.add(
             responses.GET,
             jobs.get_tx_history_url(self.test_signer.address),
-            body=self.tx_history_resp_data
+            body=json_response
         )
 
     def test_process_address_txs(self):
@@ -436,7 +419,7 @@ class TransactionParsingTests(BaseTest):
         reflect their transaction history.
         """
         # set up test
-        # done in setUp and setUpClass
+        self._mock_tx_history_response(self.tx_history_resp_data)
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -447,6 +430,37 @@ class TransactionParsingTests(BaseTest):
         expected = json.loads(self.tx_history_resp_data)
         expected = len(expected["data"]["items"])
         self.assertEqual(post_count, expected)
+
+    def test_erc721_txs(self):
+        """
+        Assert that a user's history with erc721 txs
+        is parsed and stored correctly.
+        """
+        # set up test
+        with open(
+            "./blockso_app/covalent-tx-history-erc721.json",
+            "r"
+        ) as fobj:
+            tx_history_json = fobj.read()
+            self._mock_tx_history_response(tx_history_json)
+            tx_history_obj = json.loads(tx_history_json)
+
+        # call function
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make assertions
+        # assert that the correct number of Transactions has been created
+        tx_count = Transaction.objects.all().count()
+        expected = len(tx_history_obj["data"]["items"])
+        self.assertEqual(tx_count, expected)
+
+        # assert that the correct number of Posts has been created
+        # there should be as many Posts as Transactions
+        self.assertEqual(Post.objects.all().count(), expected)
+
+        # assert that the correct number of ERC721Transfers has been created
+        erc721_transfer_count = ERC721Transfer.objects.all().count()
+        self.assertEqual(erc721_transfer_count, 6)
 
 
 class PostTests(BaseTest):
@@ -528,6 +542,47 @@ class PostTests(BaseTest):
             0
         )
 
+    def test_get_post_ref_tx(self):
+        """
+        Assert that a post with a refTx will return
+        the details of the transaction in the serialized
+        post data response. 
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        self._create_profile(self.test_signer)
+        # create posts using the test covalent tx history API 
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address),
+            body=self.tx_history_resp_data
+        )
+        jobs.process_address_txs(self.test_signer.address)
+
+        # assert that post 1 has a general reference transaction
+        url = "/api/post/1/"
+        resp = self.client.get(url)
+        self.assertEqual(
+            resp.data["refTx"]["tx_hash"],
+            "0x3a6db035bb71e695628860d6f488b9f8deaa72ce506eace855"\
+            "2a7c515346e323"
+        )
+
+        # assert that post 3 has a reference transaction
+        # that includes erc20 transfers
+        # refTx tied to them
+        url = "/api/post/3/"
+        resp = self.client.get(url)
+        self.assertEqual(
+            resp.data["refTx"]["tx_hash"],
+            "0x895df40e50f22cedfff6b835388c7bf741f0e943ab0aedbf76f"\
+            "df268090506c8"
+        )
+        self.assertEqual(
+            resp.data["refTx"]["erc20_transfers"][0]["contract_address"],
+            "0x3b484b82567a09e2588a13d54d032153f0c0aee0"
+        )
+
 
 class FeedTests(BaseTest):
     """
@@ -573,12 +628,6 @@ class FeedTests(BaseTest):
         both their posts and those they follow will show up in their feed.
         """
         # set up test
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer_2.address),
-            body=self.tx_history_resp_data
-        )
-
         # login user 2, create a post
         expected = []
         self._do_login(self.test_signer_2)

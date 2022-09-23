@@ -99,9 +99,6 @@ class FollowCreateDestroy(
     def post(self, request, *args, **kwargs):
         """ Signed in user follows the given address. """
 
-        # fetch and store the tx history of the person being followed
-        jobs.process_address_txs(self.kwargs["address"])
-
         return self.create(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -150,9 +147,6 @@ class ProfileCreateRetrieveUpdate(
     def post(self, request, *args, **kwargs):
         """ Create a Profile for the given address. """
 
-        # fetch and store the tx history of the person being followed
-        jobs.process_address_txs(self.kwargs["address"])
-
         return self.create(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
@@ -162,6 +156,12 @@ class ProfileCreateRetrieveUpdate(
 
     def get(self, request, *args, **kwargs):
         """ Retrieve the Profile of the given address. """
+
+        # TODO this should create a job instead of
+        # doing the actual work in the GET request
+        # fetch and store the tx history of the person being searched
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+        jobs.process_address_txs(address)
 
         return self.retrieve(request, *args, **kwargs)
 

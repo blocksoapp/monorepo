@@ -7,30 +7,6 @@ from django.conf import settings
 # our imports
 
 
-class User(models.Model):
-    """ Represents a user. """
-
-    address = models.CharField(
-        primary_key=True,
-        max_length=255,
-        blank=False,
-        editable=False
-    )
-
-    def clean(self, *args, **kwargs):
-        """ Clean model before storing it. """
-
-        # make address lowercase
-        self.address = self.address.lower() 
-
-    def save(self, *args, **kwargs):
-        """ Business logic on write. """
-
-        # run the clean and validation functions
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-
 class Profile(models.Model):
     """ Represents the profile of a user. """
 
@@ -39,8 +15,8 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile"
     )
-    bio = models.TextField(blank=False)
-    image = models.URLField(blank=False)
+    bio = models.TextField(blank=False, default="")
+    image = models.URLField(blank=False, default="")
 
 
 class Socials(models.Model):
@@ -73,6 +49,20 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name="follow_dest"
     )
+
+    class Meta:
+        constraints = [
+            # user cannot follow someone twice
+            models.UniqueConstraint(
+                fields=['src', 'dest'],
+                name='cannot follow twice constraint'
+            ),
+            # user cannot follow themselves
+            models.CheckConstraint(
+                check=~models.Q(src__exact=models.F("dest")),
+                name="cannot follow oneself constraint"
+            ),
+        ]
 
 
 class Transaction(models.Model):
@@ -122,7 +112,7 @@ class ERC721Transfer(models.Model):
     logo_url = models.URLField(blank=False)
     from_address = models.CharField(max_length=255, blank=False)
     to_address = models.CharField(max_length=255, blank=False)
-    token_id = models.PositiveIntegerField(blank=False)
+    token_id = models.CharField(max_length=255, blank=False)
 
 
 class Post(models.Model):
@@ -149,4 +139,4 @@ class Post(models.Model):
         null=True,
         blank=False
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(blank=False)

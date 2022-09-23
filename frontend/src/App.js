@@ -5,6 +5,7 @@ import CreateProfile from './pages/CreateProfile/CreateProfile';
 import Explore from './pages/Explore';
 import Home from './pages/Home/Home';
 import EditProfile from './pages/EditProfile/EditProfile'
+import Profile from './components/authentication/Profile';
 import NavbarComponent from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
 
@@ -26,6 +27,7 @@ function App() {
               <Route path="/explore" element={<Explore/>}></Route>
               <Route path="/create-profile" element={<CreateProfile/>}> </Route>
               <Route path="/edit-profile" element={<EditProfile/>}></Route>
+              <Route path="/:address/profile" element={<Profile/>}></Route>
             </Routes>
         </Router>
           <Footer/>
