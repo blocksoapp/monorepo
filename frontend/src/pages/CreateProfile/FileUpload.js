@@ -25,7 +25,7 @@ function FileUpload({ profile, setProfile }) {
     // Handle Submission to DB
     const handleFileSubmit = async () => {
         if(!isConnected) return
-        const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1NTM1ZjNlNDVGNjc5NDgyRjljQTllOWM5QTdmMjM0NDViNzY5NjIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzYyMjMxOTk5OCwibmFtZSI6ImJsb2Nrc28ifQ.XiamSrDC0I7CpyOKZhJFYLJzYKCC2GdScg1gi4nn-qI' })
+        const client = new NFTStorage({ token: nftAPI })
         const content = new Blob([bufferImage])
         const cid = await client.storeBlob(content)
         console.log('fetching nft storage api')
@@ -35,7 +35,7 @@ function FileUpload({ profile, setProfile }) {
             headers: {
                 'accept': 'application/json',
                 'Content-Type': 'image/png',
-                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1NTM1ZjNlNDVGNjc5NDgyRjljQTllOWM5QTdmMjM0NDViNzY5NjIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzYyMjMxOTk5OCwibmFtZSI6ImJsb2Nrc28ifQ.XiamSrDC0I7CpyOKZhJFYLJzYKCC2GdScg1gi4nn-qI`
+                'Authorization': `Bearer ${nftAPI}`
               }
         })
         const data = await res.json()
@@ -60,10 +60,8 @@ function FileUpload({ profile, setProfile }) {
             <Form.Control onChange={handleBufferChange} type="file" id="file" size="sm" name="imagePath" value={imagePath}/>
             <Form.Text className="text-muted mb-3">
             Upload a file for your profile picture. <br/>
-            {process.env.REACT_APP_NFT_KEY}
             </Form.Text> 
             <Button className="mt-2 btn-sm" onClick={handleFileSubmit}>Upload File</Button>
-      
         </Form.Group>
   )
 }
