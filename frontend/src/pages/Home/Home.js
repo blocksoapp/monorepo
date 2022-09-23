@@ -17,14 +17,11 @@ function Home() {
 
     return (
         <Container>
-          <Row className="justify-content-center">
-              <Col xs={12}>
-                  <Search/>
-              </Col>
-          </Row>
           {user !== null &&
           <WalletFeed
               author={user["address"]}
+              pfp={user["image"]}
+              className="mt-5"
           />
           }
         </Container>

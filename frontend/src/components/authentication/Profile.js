@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import EnsAndAddress from '../ensName.js';
@@ -12,6 +12,7 @@ function Profile() {
     // state
     const [profileData, setProfileData] = useState({});
     const { address } = useParams();
+    const routerLocation = useLocation();
     const [pfpUrl, setPfpUrl] = useState(null);
     const ensAvatar = useEnsAvatar({addressOrName: address});
  
@@ -54,7 +55,7 @@ function Profile() {
     // effects
     useEffect(() => {
         fetchProfile();
-    }, [])
+    }, [routerLocation.key])
 
     useEffect(() => {
         if (pfpUrl === ensAvatar["data"]) {
@@ -67,7 +68,7 @@ function Profile() {
 
 
   return (
-    <Container fluid className="bg-light">
+    <Container fluid>
 
         {/* User Info Section */}
         <Container className="border-bottom border-light">
