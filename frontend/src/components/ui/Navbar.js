@@ -27,7 +27,7 @@ function NavbarComponent() {
             {user !== null && <Nav.Link as={Link} to="/home">Home</Nav.Link>}
             <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
             {user !== null && <Nav.Link as={Link} to="/edit-profile">Edit Profile</Nav.Link>}
-            {account["address"] !== null && <Nav.Link as={Link} to={`${account["address"]}/profile`}>My Profile</Nav.Link>}
+            {user !== null && <Nav.Link as={Link} to={`${user["address"]}/profile`}>My Profile</Nav.Link>}
             <Col auto>
             </Col>
           <Form className="d-flex w-50">
