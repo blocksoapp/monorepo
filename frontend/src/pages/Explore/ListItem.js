@@ -7,7 +7,6 @@ function ListItem({userAddress, index}) {
 
     // state
     const ensAvatar = useEnsAvatar({addressOrName: userAddress });
-    const [pfpUrl, setPfpUrl] = useState(null);
     const { data, isLoading } = useEnsName({ address: userAddress })
 
     // react-router dependency

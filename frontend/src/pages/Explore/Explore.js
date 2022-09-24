@@ -11,7 +11,7 @@ function Explore() {
   return (
     <div>
       <Container fluid>
-        <h1 className='text-center p-3'>Explore Page</h1>
+        <h1 className='text-center p-3 fw-bolder'>Explore Page</h1>
         <Search/>
             <InfoSection/>
             <FeaturedList/>
