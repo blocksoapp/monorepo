@@ -3,6 +3,7 @@ import { Container, Row } from 'react-bootstrap'
 import Search from '../../components/form/Search';
 import { useAccount, useEnsAddress } from 'wagmi'
 import FeaturedList from './FeaturedList';
+import InfoSection from './InfoSection';
 
 function Explore() {
   const {address} = useAccount  
@@ -12,6 +13,7 @@ function Explore() {
       <Container fluid>
         <h1 className='text-center p-3'>Explore Page</h1>
         <Search/>
+            <InfoSection/>
             <FeaturedList/>
       </Container>
     </div>
