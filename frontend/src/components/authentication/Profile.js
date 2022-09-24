@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import EnsAndAddress from '../ensName.js';
 import Post from '../post.js'; 
 import { baseAPI, getCookie } from '../../utils.js'
 import Blockies from 'react-blockies';
+import { useUser } from '../../hooks';
 
 
 function Profile() {
-    // state
-    const [profileData, setProfileData] = useState({});
+    // constants
     const { address } = useParams();
     const routerLocation = useLocation();
-    const [pfpUrl, setPfpUrl] = useState(null);
+    const navigate = useNavigate();
     const ensAvatar = useEnsAvatar({addressOrName: address});
+    const user = useUser();
+
+    // state
+    const [profileData, setProfileData] = useState({});
+    const [pfpUrl, setPfpUrl] = useState(null);
  
     // functions
     const determineProfilePic = async () => {
@@ -28,7 +33,10 @@ function Profile() {
 
     const fetchProfile = async () => {
         const url = `${baseAPI}/${address}/profile/`;
-        const res = await fetch(url);
+        const res = await fetch(url, {
+            method: 'GET',
+            credentials: 'include'
+        });
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);
@@ -41,6 +49,20 @@ function Profile() {
         else { console.log("unhandled case: ", res) }
     }
 
+    const handleUnfollow = async () => {
+        const url = `${baseAPI}/${address}/follow/`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+        if (res.ok) {
+            navigate("#");
+        }
+    }
+
     const handleFollow = async () => {
         const url = `${baseAPI}/${address}/follow/`;
         const res = await fetch(url, {
@@ -50,6 +72,9 @@ function Profile() {
             },
             credentials: 'include'
         });
+        if (res.ok) {
+            navigate("#");
+        }
     }
 
     // effects
@@ -130,11 +155,24 @@ function Profile() {
                     </h5>
                 </Col>
                 <Col className="col-auto">
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleFollow}>Follow
-                    </Button> 
+                    {user !== null && profileData["followedByMe"] === true
+                        ? <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleUnfollow}
+                            disabled={user !== null && user["address"] === address ? true : false}
+                          >
+                            Unfollow
+                          </Button> 
+                        : <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleFollow}
+                            disabled={user !== null && user["address"] === address ? true : false}
+                          >
+                            Follow
+                          </Button>
+                    }
                 </Col>
             </Row>
 

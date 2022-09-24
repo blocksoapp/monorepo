@@ -19,10 +19,10 @@ function App() {
              <NavbarComponent />
             <Routes>
             
-              {isConnected ? <Route path="/" element={<Home/>}></Route> : 
-              <Route path="/" element={<Explore/>}></Route> 
+              {isConnected !== null
+                  ? <Route path="/" element={<Home/>}></Route>
+                  : <Route path="/" element={<Explore/>}></Route> 
               }
-
               <Route path="/home" element={<Home/>}></Route>
               <Route path="/explore" element={<Explore/>}></Route>
               <Route path="/edit-profile" element={<CreateProfile/>}></Route>
