@@ -8,10 +8,11 @@ import EditProfile from './pages/EditProfile/EditProfile'
 import Profile from './components/authentication/Profile';
 import NavbarComponent from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
+import { useUser } from './hooks';
+
 
 function App() {
-    // Replace isConnected with isAuthenticated 
-    const { isConnected } = useAccount()
+    const user = useUser();
 
     return (
         <>
@@ -19,7 +20,7 @@ function App() {
              <NavbarComponent />
             <Routes>
             
-              {isConnected !== null
+              {user !== null
                   ? <Route path="/" element={<Home/>}></Route>
                   : <Route path="/" element={<Explore/>}></Route> 
               }
