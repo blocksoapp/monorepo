@@ -14,9 +14,11 @@ function Home() {
 
     // functions
 
-
     return (
         <Container>
+          {user === null &&
+          <h1 class="text-muted text-center">Please sign in.</h1>
+          }
           {user !== null &&
           <WalletFeed
               author={user["address"]}
