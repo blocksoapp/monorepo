@@ -50,7 +50,6 @@ function FeaturedList() {
 
   return (
     <div className='p-5'>
-        <h1 className='fw-bold'>Featured</h1>
         <Row>
             {isLoading ? <h2>Fetching Featured Profiles...</h2> :
                  profileData.map( (item, index) => {
