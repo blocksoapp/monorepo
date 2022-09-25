@@ -146,8 +146,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # cross-site request forgery config
+CSRF_USE_SESSIONS = config("CSRF_USE_SESSIONS", cast=bool) 
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+CSRF_COOKIE_DOMAIN = config("CSRF_COOKIE_DOMAIN", cast=str)
 
 
 # session cookie config
