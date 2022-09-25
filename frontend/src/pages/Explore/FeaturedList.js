@@ -56,6 +56,7 @@ function FeaturedList() {
                             <ListItem
                             userAddress={item.address}
                             imageUrl={item.image}
+                            bio={item.bio}
                             key={index}
                             />
                         </div>

@@ -4,7 +4,7 @@ import { Button, Image } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 import Blockies from 'react-blockies';
 
-function ListItem({userAddress, imageUrl, index}) {
+function ListItem({userAddress, imageUrl, bio, index}) {
 
     // state
     const [pfpUrl, setPfpUrl] = useState(null)
@@ -58,7 +58,7 @@ function ListItem({userAddress, imageUrl, index}) {
     }, [])
 
   return (
-    <div className="d-flex flex-column justify-content-center p-3 mb-5 align-items-center border">
+    <div className="d-flex flex-column justify-content-center p-3 mb-5 align-items-center border" onClick={handleClick}>
             {/*
             Image here
             Make display image function reusable from wallet feed
@@ -66,7 +66,7 @@ function ListItem({userAddress, imageUrl, index}) {
             {pfpUrl === null
             ? <Blockies
                 seed={userAddress}
-                size={15}
+                size={20}
                 scale={5}
                 className="rounded-circle"
                 color="#ff5412"
@@ -83,11 +83,10 @@ function ListItem({userAddress, imageUrl, index}) {
             <div>
                 {displayName()}
             </div>
-            <Button 
-             className="btn-sm" 
-             onClick={handleClick} >
-                View Profile
-            </Button>
+            <div>
+                <p>{bio}</p>
+                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptas rerum accusantium excepturi deserunt facere dolore nulla alias itaque vero minima? Assumenda eaque inventore praesentium hic sequi ducimus rerum. Delectus, hic.</p>
+            </div>
     </div>
   )
 }
