@@ -19,12 +19,19 @@ export function useUser() {
                 method: 'GET',
                 credentials: 'include'
             });
+            if (!res.ok) {
+                return;
+            }
             const userData = await res.json();
             setUser(userData);
         }
 
+        if (user !== null) {
+            return;
+        }
+
         getUser();
-    }, []);
+    }, [user]);
 
     return user;
 }

@@ -40,7 +40,7 @@ function Post(props) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const [pfpUrl, setPfpUrl] = useState(props.pfp);
+    const [pfpUrl, setPfpUrl] = useState(null);
 
     // functions
 
@@ -99,12 +99,26 @@ function Post(props) {
         determineProfilePic(props.pfp);
     }, [])
 
+    useEffect(() => {
+        if (pfpUrl !== null && pfpUrl !== undefined && pfpUrl !== "") {
+            return;
+        }
+
+        if (pfpUrl === ensAvatar["data"]) {
+            return;
+        }
+        if (ensAvatar["data"] !== "") {
+            setPfpUrl(ensAvatar["data"]);
+        }
+    }, [pfpUrl])
+
 
     const render = function () {
         const dateObj = new Date(props.created);
 
         return (
             <Container className="mt-4">
+                {erc20Transfers.length <= 10 &&
                 <Row className="justify-content-center">
                     <Col xs={12} lg={6}>
                         <Card>
@@ -310,6 +324,7 @@ function Post(props) {
                         </Card>
                     </Col>
                 </Row>
+                }
             </Container>
         )
     }

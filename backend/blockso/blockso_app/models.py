@@ -15,8 +15,8 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile"
     )
-    bio = models.TextField(blank=False, default="")
-    image = models.URLField(blank=False, default="")
+    bio = models.TextField(blank=True, default="")
+    image = models.URLField(blank=True, default="")
 
 
 class Socials(models.Model):

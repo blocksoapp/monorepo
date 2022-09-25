@@ -16,21 +16,19 @@ function App() {
     return (
         <>
         <Router>
-             <NavbarComponent/>
+             <NavbarComponent />
             <Routes>
             
-              {isConnected ? <Route path="/" element={<Home/>}></Route> : 
-              <Route path="/" element={<Explore/>}></Route> 
+              {isConnected !== null
+                  ? <Route path="/" element={<Home/>}></Route>
+                  : <Route path="/" element={<Explore/>}></Route> 
               }
-
               <Route path="/home" element={<Home/>}></Route>
               <Route path="/explore" element={<Explore/>}></Route>
-              <Route path="/create-profile" element={<CreateProfile/>}> </Route>
-              <Route path="/edit-profile" element={<EditProfile/>}></Route>
+              <Route path="/edit-profile" element={<CreateProfile/>}></Route>
               <Route path="/:address/profile" element={<Profile/>}></Route>
             </Routes>
         </Router>
-          <Footer/>
         </>
       );
 }
