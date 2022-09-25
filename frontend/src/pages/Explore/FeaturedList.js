@@ -59,6 +59,8 @@ function FeaturedList() {
                                 userAddress={item.address}
                                 imageUrl={item.image}
                                 bio={item.bio}
+                                numFollowers={item.numFollowers}
+                                numFollowing={item.numFollowing}
                                 key={index}
                                 />
                             </div>

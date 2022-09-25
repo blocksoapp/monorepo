@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Image } from 'react-bootstrap'
+import { Badge, Col, Image, Row } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 import Blockies from 'react-blockies';
 
-function ListItem({userAddress, imageUrl, bio, index}) {
+function ListItem({userAddress, imageUrl, bio, index, numFollowers, numFollowing}) {
 
     // state
     const [pfpUrl, setPfpUrl] = useState(null)
@@ -56,7 +56,10 @@ function ListItem({userAddress, imageUrl, bio, index}) {
     }, [])
 
   return (
-    <div className="card-body d-flex flex-column justify-content-center p-3 mb-5 align-items-center rounded border" onClick={handleClick}>
+    <div className="card-body d-flex flex-column justify-content-center p-3 mb-5 align-items-center rounded border"
+        onClick={handleClick}
+        style={{ cursor: "pointer"}} 
+    >
             {/*
             Image here
             Make display image function reusable from wallet feed
@@ -64,8 +67,8 @@ function ListItem({userAddress, imageUrl, bio, index}) {
             {pfpUrl === null
             ? <Blockies
                 seed={userAddress}
-                size={20}
-                scale={5}
+                size={31}
+                scale={8}
                 className="rounded-circle"
                 color="#ff5412"
                 bgColor="#ffb001"
@@ -73,17 +76,35 @@ function ListItem({userAddress, imageUrl, bio, index}) {
                 />
             : <Image
                 src={pfpUrl}
-                height="100px"
-                width="100px"
+                height="256px"
+                width="256px"
                 roundedCircle
                 />
             }
-            <div>
+            <div className="mt-3">
                 {displayName()}
             </div>
             <div>
-                <p>This is an example of what a bio should look like for each user. {bio}</p>
+                <p>{bio}</p>
             </div>
+            <Row className="justify-content-center mt-3 mb-3">
+                <Col className="col-auto">
+                    <h5>
+                        <Badge bg="secondary">
+                            {numFollowers}
+                            {numFollowers === 1 ?
+                                " Follower" : " Followers"}
+                        </Badge>
+                    </h5>
+                </Col>
+                <Col className="col-auto">
+                    <h5>
+                        <Badge bg="secondary">
+                            {numFollowing} Following
+                        </Badge>
+                    </h5>
+                </Col>
+            </Row>
     </div>
   )
 }
