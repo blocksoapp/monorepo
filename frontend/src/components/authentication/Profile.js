@@ -40,7 +40,6 @@ function Profile() {
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);
-            determineProfilePic(); 
         }
         else if (res.status === 404) {
             // TODO show 404 feedback on page
@@ -83,13 +82,18 @@ function Profile() {
     }, [routerLocation.key])
 
     useEffect(() => {
-        if (pfpUrl === ensAvatar["data"]) {
-            return;
+        determineProfilePic()
+
+        return () => {
+            if (pfpUrl === ensAvatar["data"]) {
+                return;
+            }
+            if (ensAvatar["data"] !== "") {
+                setPfpUrl(ensAvatar["data"]);
+            }
         }
-        if (ensAvatar["data"] !== "") {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }, [pfpUrl])
+
+        }, [profileData])
 
 
   return (
