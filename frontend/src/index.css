@@ -18,6 +18,9 @@ code {
   color: #00A8E8
 }
 
+
+/* Explore Page */
+
 .info-container {
   background-color: #003459;
   color: #fff
@@ -40,5 +43,17 @@ code {
   letter-spacing: normal;
   line-height: 24px;
   text-transform: none;
+}
+
+.card-body:hover{
+  background-color: #f8f9fa;
+}
+
+.btn-primary.custom-btn {
+  background-color: #00A8E8;
+}
+
+.btn-primary.custom-btn:hover {
+  background-color: #007EA7;
 }
   
