@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from 'react-bootstrap'
+import { Button, Image } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
+import Blockies from 'react-blockies';
 
 function ListItem({userAddress, imageUrl, index}) {
 
     // state
-    const ensAvatar = useEnsAvatar({addressOrName: userAddress });
+    const [pfpUrl, setPfpUrl] = useState(null)
+    const ensAvatar = useEnsAvatar({addressOrName: userAddress })
     const { data, isLoading } = useEnsName({ address: userAddress })
 
     // react-router dependency
@@ -33,6 +35,16 @@ function ListItem({userAddress, imageUrl, index}) {
     * displayed instead.
     */
    
+     const determineProfilePic = async () => {
+        if (imageUrl !== "") {
+            setPfpUrl(imageUrl);
+        }
+        else {
+            setPfpUrl(ensAvatar["data"]);
+        }
+    }
+   
+   
 
     // Navigate to user profile
     const handleClick = () => {
@@ -40,12 +52,34 @@ function ListItem({userAddress, imageUrl, index}) {
         navigate(`/${userAddress}/profile`)
     }
 
+     // set profile pic
+     useEffect(() => {
+        determineProfilePic();
+    }, [])
+
   return (
     <div className="d-flex flex-column justify-content-center p-3 mb-5 align-items-center border">
             {/*
             Image here
             Make display image function reusable from wallet feed
             */}
+            {pfpUrl === null
+            ? <Blockies
+                seed={userAddress}
+                size={15}
+                scale={5}
+                className="rounded-circle"
+                color="#ff5412"
+                bgColor="#ffb001"
+                spotColor="#4db3e4"
+                />
+            : <Image
+                src={pfpUrl}
+                height="100px"
+                width="100px"
+                roundedCircle
+                />
+            }
             <div>
                 {displayName()}
             </div>

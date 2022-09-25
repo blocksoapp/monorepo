@@ -49,7 +49,6 @@ function FeaturedList() {
   return (
     <div className='p-5'>
         <h1 className='fw-bold'>Featured</h1>
-        <Button onClick={getFeaturedProfiles}>Get Profiles</Button>
         <Row>
             {
              profileData.map( (item, index) => {
