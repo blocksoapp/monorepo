@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
-import { useAccount, useNetwork, useSignMessage } from 'wagmi'
+import {
+    useAccount,
+    useConnect,
+    useNetwork,
+    useSignMessage
+} from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
 import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
 
 
-function SignInButton() {
+function SignInButton({setUser}) {
     const [nonceData, setNonceData] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
@@ -15,6 +21,9 @@ function SignInButton() {
     const navigate = useNavigate()
 
     // Dependencies from wagmi
+    const { connect } = useConnect({
+        connector: new InjectedConnector()
+    });
     const { address, isConnected } = useAccount()
     const { chain: activeChain } = useNetwork()
     const { signMessageAsync } = useSignMessage()
@@ -54,17 +63,8 @@ function SignInButton() {
         console.log('cannot get user, log in again')
       } else if (fetchUser.status === 200) {
         const json = await fetchUser.json()
-        console.log('json:', json)
-        const profile = json.profile
-        if(profile !== null) {
-          // redirect to homepage and render tx's. Should check for best authentication practice.
-          console.log('here is your wallet feed')
-          navigate('/')
-        } else {
-          // redirect to create profile page
-          console.log('need to create profile')
-          navigate('/create-profile')
-        }
+        setUser(json);
+        navigate('/home')
       }
     }
     
@@ -147,6 +147,8 @@ function SignInButton() {
 
         if(logoutRes.status === 200)  {
           setIsAuthenticated(false)
+          setUser(null);
+          navigate("/explore");
           fetchNonce()
         }
         else if(logoutRes.status === 400 || 403) console.log('logout error')
@@ -157,38 +159,35 @@ function SignInButton() {
 
       // Function to handle authentication on refresh 
       const handleAuthentication = async () => {
-         // Check for sessionid -- browser not returning sessionid
-        const checkForSessionId = () => {
-          console.log("get session id:", getCookie('sessionid'))
-         if(getCookie('sessionid') !== null) {
-          // Disable sign in button
-          setIsAuthenticated(true)
-          console.log('sessionid exists')
-         } else {
-          setIsAuthenticated(false)
-          console.log('no session id, log in please')
-          fetchNonce()
-         }
-       }
-        checkForSessionId()
         // You GET /api/user/
-        const getUserStatus = await getUser()
-        const status = await getUserStatus.status
-        if(status === 403) {
-          console.log('Not authorized to do')
-          // Enable sign in button -- remove disabled class 
-        } else return
-      } 
+        const resp = await getUser()
+        const status = resp.status
+
+        if(status === 200) {
+            var user = await resp.json();
+            setUser(user);
+            setIsAuthenticated(true); 
+        }
+        else { 
+            fetchNonce();
+            setUser(null);
+            setIsAuthenticated(false);
+        }
+      }
 
       // useEffect to load nonce on component render 
     useEffect(() => {
       handleAuthentication()
-    }, []) 
+    }, []);
 
   return (
     <div className='pb-1'>
-        {isAuthenticated ? <Button onClick={signOut}>Sign out</Button> :
-        <Button id="signInButton" disabled={isLoading || !isConnected || isAuthenticated} onClick={signIn}> Sign In</Button>  }
+        {isAuthenticated
+            ? <Button variant="light" onClick={signOut}>Sign out</Button>
+            : isConnected
+                ? <Button id="signInButton" disabled={isLoading} onClick={signIn}> Sign In</Button>
+                : <Button onClick={connect}>Connect</Button>
+        }
     </div>
   );
 }

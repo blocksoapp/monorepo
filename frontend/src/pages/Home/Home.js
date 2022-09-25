@@ -14,17 +14,16 @@ function Home() {
 
     // functions
 
-
     return (
         <Container>
-          <Row className="justify-content-center">
-              <Col xs={12}>
-                  <Search/>
-              </Col>
-          </Row>
+          {user === null &&
+          <h1 class="text-muted text-center">Please sign in.</h1>
+          }
           {user !== null &&
           <WalletFeed
               author={user["address"]}
+              pfp={user["image"]}
+              className="mt-5"
           />
           }
         </Container>

@@ -8,29 +8,28 @@ import EditProfile from './pages/EditProfile/EditProfile'
 import Profile from './components/authentication/Profile';
 import NavbarComponent from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
+import { useUser } from './hooks';
+
 
 function App() {
-    // Replace isConnected with isAuthenticated 
-    const { isConnected } = useAccount()
+    const user = useUser();
 
     return (
         <>
         <Router>
-             <NavbarComponent/>
+             <NavbarComponent />
             <Routes>
             
-              {isConnected ? <Route path="/" element={<Home/>}></Route> : 
-              <Route path="/" element={<Explore/>}></Route> 
+              {user !== null
+                  ? <Route path="/" element={<Home/>}></Route>
+                  : <Route path="/" element={<Explore/>}></Route> 
               }
-
               <Route path="/home" element={<Home/>}></Route>
               <Route path="/explore" element={<Explore/>}></Route>
-              <Route path="/create-profile" element={<CreateProfile/>}> </Route>
-              <Route path="/edit-profile" element={<EditProfile/>}></Route>
+              <Route path="/edit-profile" element={<CreateProfile/>}></Route>
               <Route path="/:address/profile" element={<Profile/>}></Route>
             </Routes>
         </Router>
-          <Footer/>
         </>
       );
 }

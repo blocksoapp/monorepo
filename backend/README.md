@@ -19,3 +19,4 @@ Make sure you have the requirements above installed, then run the `build.sh` scr
 2. Revisit when users' tx history should be fetched and transformed to posts.  
 3. Add business logic checks for Posts that are quoted, shared, or refer to a tx.
 4. Add a job queueing system for fetching the user's tx history.
+5. Fix broken tests due to creating a Profile on user sign in.
