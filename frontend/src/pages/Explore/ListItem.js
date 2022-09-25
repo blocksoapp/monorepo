@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Image } from 'react-bootstrap'
+import { Image } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 import Blockies from 'react-blockies';
 
@@ -13,8 +13,6 @@ function ListItem({userAddress, imageUrl, bio, index}) {
 
     // react-router dependency
     const navigate = useNavigate()
-    // navigate to etherscan
-    const etherscanUrl = `https://etherscan.io/address/${userAddress}`
     
     // Abbreviate address
     const getAbbrAddress = function(address) {
@@ -24,8 +22,8 @@ function ListItem({userAddress, imageUrl, bio, index}) {
     // Show ENS Name
     const displayName = () => {
         if (isLoading) return <p>Fetching name…</p>
-        if (!data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {getAbbrAddress(userAddress)} </a>
-        else if(data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {data} </a>
+        if (!data) return <h4> {getAbbrAddress(userAddress)} </h4>
+        else if(data) return <h4> {data} </h4>
     }
 
     /* Sets the user's pfp to their ens avatar
@@ -58,7 +56,7 @@ function ListItem({userAddress, imageUrl, bio, index}) {
     }, [])
 
   return (
-    <div className="d-flex flex-column justify-content-center p-3 mb-5 align-items-center border" onClick={handleClick}>
+    <div className="card-body d-flex flex-column justify-content-center p-3 mb-5 align-items-center rounded border" onClick={handleClick}>
             {/*
             Image here
             Make display image function reusable from wallet feed
@@ -84,8 +82,7 @@ function ListItem({userAddress, imageUrl, bio, index}) {
                 {displayName()}
             </div>
             <div>
-                <p>{bio}</p>
-                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptas rerum accusantium excepturi deserunt facere dolore nulla alias itaque vero minima? Assumenda eaque inventore praesentium hic sequi ducimus rerum. Delectus, hic.</p>
+                <p>This is an example of what a bio should look like for each user. {bio}</p>
             </div>
     </div>
   )
