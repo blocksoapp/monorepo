@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 
-function ListItem({userAddress, index}) {
+function ListItem({userAddress, imageUrl, index}) {
 
     // state
     const ensAvatar = useEnsAvatar({addressOrName: userAddress });
@@ -25,6 +25,14 @@ function ListItem({userAddress, index}) {
         if (!data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {getAbbrAddress(userAddress)} </a>
         else if(data) return <a href={etherscanUrl} rel="noreferrer" target="_blank" > {data} </a>
     }
+
+    /* Sets the user's pfp to their ens avatar
+    * if the user has not uploaded a profile pic.
+    * Returns null if the user does not have an
+    * ens avatar. That way a blockie will be
+    * displayed instead.
+    */
+   
 
     // Navigate to user profile
     const handleClick = () => {

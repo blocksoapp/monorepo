@@ -11,19 +11,14 @@ function FeaturedList() {
 
   // UseEffect Calling getFeaturedProfiles then map out each item
     useEffect(() => {
-      const updatedPfpArray = async () => {
-        await getFeaturedProfiles()
-        mapFeaturedList()
-      }
-
-      updatedPfpArray()
+        getFeaturedProfiles()
     }, [])
     
 
     // Function to get profile data for each in array
     const getFeaturedProfiles = async () => {
 
-        var tempPfpArray = []
+        var tempProfileArray = []
 
         const getProfileData = async (addressIndex) => {
             const url = `${baseAPI}/${addressIndex}/profile`
@@ -33,16 +28,16 @@ function FeaturedList() {
         }
         // Storing extracted data into a temp array
         const storeProfileData = async _ => {
-            console.log('fetching featured profiles')
+            console.log('storing featured profiles')
             for(let index = 0; index < featuredList.length; index++) {
                 var currentAddress = featuredList[index]
                 var pfpAddressToAdd = await getProfileData(currentAddress)
-                tempPfpArray.push(pfpAddressToAdd)
+                tempProfileArray.push(pfpAddressToAdd)
             }
 
-            console.log(tempPfpArray)
+            console.log(tempProfileArray)
             // Set Array State
-            setProfileData(tempPfpArray)
+            setProfileData(tempProfileArray)
         }
 
         storeProfileData()
@@ -51,42 +46,22 @@ function FeaturedList() {
     // Function to extract all image url to PFPUrl state
     
 
-    // Function to return mapped items
-    const mapFeaturedList = async () => {
-        console.log('called mapFeaturedList')
-        console.log('profiledata state: ', profileData)
-        featuredList['address'] && featuredList['image'].map( (index) => {
-            return (<div className="col-sm-6">
-                        <ListItem
-                        userAddress={featuredList.address}
-                        imageUrl={featuredList.image}
-                        key={index}
-                        />
-                    </div>
-        )})
-    }
-
-    const mapFeaturedLists = () => {
-        return <div><ListItem/></div>
-    }
-
-    /* {featuredList.map((item, index) => {
-            return <div className="col-sm-6"> 
-                        <ListItem
-                        list = {featuredList}
-                        userAddress={item}
-                        key={index}
-                        /> 
-                        </div>
-                    })}
-                    */
-
   return (
     <div className='p-5'>
         <h1 className='fw-bold'>Featured</h1>
         <Button onClick={getFeaturedProfiles}>Get Profiles</Button>
         <Row>
-            {mapFeaturedList}
+            {
+             profileData.map( (item, index) => {
+                return (<div className="col-sm-6">
+                            <ListItem
+                            userAddress={item.address}
+                            imageUrl={item.image}
+                            key={index}
+                            />
+                        </div>
+            )})
+            }
         </Row>
   </div>
   )
