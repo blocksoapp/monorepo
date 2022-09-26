@@ -9,4 +9,3 @@ export var featuredListData = [
     '0x4b26bdf68ac9abfb19f6146313428e7f8b6041f4',
     '0xC4c314810B4927E6445bF44C88cde3Ce61Bc1e76'
  ]
-

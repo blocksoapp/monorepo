@@ -2,14 +2,24 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { WagmiConfig, createClient } from 'wagmi'
-import { getDefaultProvider } from 'ethers'
+import { 
+    WagmiConfig,
+    configureChains,
+    createClient,
+    defaultChains
+} from 'wagmi'
+import { infuraProvider } from 'wagmi/providers/infura'
 
 
 /* Establishing a client for wagmi */
+const { provider } = configureChains(
+  defaultChains,
+  [infuraProvider({ apiKey: process.env.REACT_APP_INFURA_KEY })],
+)
+
 const client = createClient({
   autoConnect: true,
-  provider: getDefaultProvider(),
+  provider: provider,
 })
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
