@@ -36,6 +36,7 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
+    const [pfpUrl, setPfpUrl] = useState(props)
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
@@ -80,7 +81,7 @@ function Post(props) {
         if (pfp === null || pfp === undefined) {
             // if user has an ens avatar then use it
             if (ensAvatar["data"] !== null) {
-                props.handlePfpChange(ensAvatar["data"]);
+                setPfpUrl(ensAvatar["data"]);
             }
         }
     }
@@ -110,7 +111,7 @@ function Post(props) {
                 return;
             }
             if (ensAvatar["data"] !== "") {
-                props.handlePfpChange(ensAvatar["data"]);
+                setPfpUrl(ensAvatar["data"]);
             }
         }
         
