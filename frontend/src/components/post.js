@@ -40,7 +40,7 @@ function Post(props) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const [pfpUrl, setPfpUrl] = useState(null);
+    //const [pfpUrl, setPfpUrl] = useState(null);
 
     // functions
 
@@ -80,7 +80,7 @@ function Post(props) {
         if (pfp === null || pfp === undefined) {
             // if user has an ens avatar then use it
             if (ensAvatar["data"] !== null) {
-                setPfpUrl(ensAvatar["data"]);
+                props.handlePfpChange(ensAvatar["data"]);
             }
         }
     }
@@ -96,21 +96,25 @@ function Post(props) {
     // determine tx type on component mount
     useEffect(() => {
         determineTxType();
-        determineProfilePic(props.pfp);
     }, [])
 
     useEffect(() => {
-        if (pfpUrl !== null && pfpUrl !== undefined && pfpUrl !== "") {
-            return;
-        }
+        determineProfilePic(props.pfp);
 
-        if (pfpUrl === ensAvatar["data"]) {
-            return;
+        return () => {
+            if (props.pfpUrl !== null && props.pfpUrl !== undefined) {
+                return;
+            }
+    
+            if (props.pfpUrl === ensAvatar["data"]) {
+                return;
+            }
+            if (ensAvatar["data"] !== "") {
+                props.handlePfpChange(ensAvatar["data"]);
+            }
         }
-        if (ensAvatar["data"] !== "") {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }, [pfpUrl])
+        
+    }, [])
 
 
     const render = function () {
@@ -126,7 +130,7 @@ function Post(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        {pfpUrl === null
+                                        {props.pfpUrl === null
                                         ? <Blockies
                                             seed={props.author}
                                             size={15}
@@ -137,7 +141,7 @@ function Post(props) {
                                             spotColor="#4db3e4"
                                           />
                                         : <Image
-                                            src={pfpUrl}
+                                            src={props.pfpUrl}
                                             height="100px"
                                             width="100px"
                                             roundedCircle

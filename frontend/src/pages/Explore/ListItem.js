@@ -4,7 +4,7 @@ import { Badge, Col, Image, Row } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 import Blockies from 'react-blockies';
 
-function ListItem({userAddress, imageUrl, bio, index, numFollowers, numFollowing}) {
+function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
 
     // state
     const [pfpUrl, setPfpUrl] = useState(null)

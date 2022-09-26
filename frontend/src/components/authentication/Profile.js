@@ -20,6 +20,11 @@ function Profile() {
     // state
     const [profileData, setProfileData] = useState({});
     const [pfpUrl, setPfpUrl] = useState(null);
+
+    // handler for pfpUrl state change
+    const handlePfpChange = (newUrl) => {
+        setPfpUrl(newUrl)
+    }
  
     // functions
     const determineProfilePic = async () => {
@@ -191,7 +196,8 @@ function Profile() {
                     text={post.text}
                     imgUrl={post.imgUrl}
                     created={post.created}
-                    pfp={pfpUrl}
+                    pfpUrl={pfpUrl}
+                    handlePfpChange={handlePfpChange}
                     refTx={post.refTx}
                 />
             ))}

@@ -63,14 +63,13 @@ function FeaturedList() {
         <Row>
             {isLoading ? <h2>Fetching Featured Profiles...</h2> :
                  profileData.map( (item, index) => {
-                    return (<div className="col-sm-6">
+                    return (<div key={index} className="col-sm-6">
                                 <ListItem
                                 userAddress={item.address}
                                 imageUrl={item.image}
                                 bio={item.bio}
                                 numFollowers={item.numFollowers}
                                 numFollowing={item.numFollowing}
-                                key={index}
                                 />
                             </div>
                 )})
