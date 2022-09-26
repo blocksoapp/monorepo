@@ -15,8 +15,8 @@ function ListItem({userAddress, imageUrl, bio, index, numFollowers, numFollowing
     const navigate = useNavigate()
     
     // Abbreviate address
-    const getAbbrAddress = function(address) {
-        return address.substr(2,5) + "..." + address.substr(37,5);
+    const getAbbrAddress = (addy) => {
+        return addy.substr(2,5) + "..." + addy.substr(37,5);
     }
 
     // Show ENS Name

@@ -13,6 +13,7 @@ function FeaturedList() {
   // UseEffect Calling getFeaturedProfiles then map out each item
     useEffect(() => {
         getFeaturedProfiles()
+        console.log(profileData)
     }, [])
     
 
@@ -25,15 +26,24 @@ function FeaturedList() {
             const url = `${baseAPI}/${addressIndex}/profile`
             const res = await fetch(url)
             const data = await res.json()
-            return data
+            const profileDataTemp = {
+                                address: data.address, 
+                                image: data.image, 
+                                bio: data.bio, 
+                                numFollowers: data.numFollowers, 
+                                numFollowing: data.numFollowing
+                                    }
+            //const profileDataTemp = {addressUrl, imageUrl}
+            console.log("fetched profile data: ", profileDataTemp)
+            return profileDataTemp
         }
         // Storing extracted data into a temp array
         const storeProfileData = async _ => {
-            console.log('storing featured profiles')
+            console.log('storing featured profiles address/image')
             for(let index = 0; index < featuredList.length; index++) {
                 var currentAddress = featuredList[index]
-                var pfpAddressToAdd = await getProfileData(currentAddress)
-                tempProfileArray.push(pfpAddressToAdd)
+                var pfpObjectToAdd = await getProfileData(currentAddress)
+                tempProfileArray.push(pfpObjectToAdd)
             }
 
             console.log(tempProfileArray)
