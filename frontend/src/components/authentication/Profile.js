@@ -18,6 +18,7 @@ function Profile() {
     const user = useUser();
 
     // state
+    const [posts, setPosts] = useState([]);
     const [profileData, setProfileData] = useState({});
     const [pfpUrl, setPfpUrl] = useState(null);
  
@@ -28,6 +29,22 @@ function Profile() {
         }
         else {
             setPfpUrl(ensAvatar["data"]);
+        }
+    }
+
+    const fetchPosts = async () => {
+        const url = `${baseAPI}/posts/${address}/`;
+        const res = await fetch(url, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (res.status === 200) {
+            var data = await res.json();
+            console.log("results: ", data);
+            setPosts(data["results"]);
+        }
+        else { //TODO show error feedback
+            throw new Error("error fetching posts")
         }
     }
 
@@ -80,6 +97,7 @@ function Profile() {
     // effects
     useEffect(() => {
         fetchProfile();
+        fetchPosts();
     }, [routerLocation.key])
 
     useEffect(() => {
@@ -180,7 +198,7 @@ function Profile() {
 
         {/* Posts Section */}
         <Container>
-            {profileData["posts"] && profileData["posts"].map(post => (
+            {posts.map(post => (
                 <Post
                     key={post.id}
                     author={post.author}
