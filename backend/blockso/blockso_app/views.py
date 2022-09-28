@@ -19,7 +19,11 @@ from web3 import Web3
 
 # our imports
 from .models import Follow, Post, Profile, Socials
-from . import jobs, serializers
+from .pagination import PostsPagination
+from . import jobs, pagination, serializers
+
+
+UserModel = get_user_model()
 
 
 @api_view(['GET'])
@@ -165,12 +169,6 @@ class ProfileCreateRetrieveUpdate(
     def get(self, request, *args, **kwargs):
         """ Retrieve the Profile of the given address. """
 
-        # TODO this should create a job instead of
-        # doing the actual work in the GET request
-        # fetch and store the tx history of the person being searched
-        address = Web3.toChecksumAddress(self.kwargs["address"])
-        jobs.process_address_txs(address)
-
         return self.retrieve(request, *args, **kwargs)
 
 
@@ -206,9 +204,29 @@ class PostCreateList(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
-    queryset = Post.objects.all()
+    pagination_class = PostsPagination
     lookup_url_kwarg = "address"
     lookup_field = "author"
+
+    def get_queryset(self):
+        """
+        Return queryset.
+        """
+        author = UserModel.objects.get(pk=self.kwargs["address"])
+        queryset = Post.objects.filter(author=author)
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a list of the user's posts.
+        """
+        # TODO this should create a job instead of
+        # doing the actual work in the GET request
+        # fetch and store the tx history of the person being searched
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+        jobs.process_address_txs(address)
+
+        return self.list(request, *args, **kwargs)
 
 
 class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -260,13 +278,12 @@ class FeedList(generics.ListAPIView):
         """
         # get user
         user = self.request.user
-        user_model = get_user_model()
-        user_queryset = user_model.objects.filter(
+        user_queryset = UserModel.objects.filter(
             pk=user.ethereum_address
         )
         # get users they follow
         follow_src = Follow.objects.filter(src=user)
-        users_followed = user_model.objects.filter(follow_dest__in=follow_src)
+        users_followed = UserModel.objects.filter(follow_dest__in=follow_src)
 
         # combine the two querysets
         users = user_queryset | users_followed

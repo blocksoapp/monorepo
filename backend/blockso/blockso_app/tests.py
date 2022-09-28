@@ -30,8 +30,8 @@ class BaseTest(APITestCase):
         cls.test_signer = eth_account.Account.create()
         cls.test_signer_2 = eth_account.Account.create()
 
-        # common data for creating profile
-        cls.create_profile_data = {
+        # common data for updating profile
+        cls.update_profile_data = {
             "image": "https://ipfs.io/ipfs/QmRRPWG96cmgTn2qSzjwr2qvfNEuhunv6FNeMFGa9bx6mQ",
             "bio": "Hello world, I am a user.",
             "socials": {
@@ -136,16 +136,16 @@ class BaseTest(APITestCase):
         url = "/api/auth/logout/"
         return self.client.post(url)
 
-    def _create_profile(self, signer):
+    def _update_profile(self, signer):
         """
         Utility function to create a Profile using
         the given test data.
         This function will usually be called after authenticating
         with the _do_login function above.
         """
-        # create profile
+        # update profile
         url = f"/api/{signer.address}/profile/"
-        resp = self.client.post(url, self.create_profile_data)
+        resp = self.client.put(url, self.update_profile_data)
         return resp
 
     def _create_post(self, signer):
@@ -219,25 +219,18 @@ class ProfileTests(BaseTest):
 
     def test_create_profile(self):
         """
-        Assert that a profile is created successfully.
+        Assert that a profile is created when a user signs in for the first time.
         Assert that the created profile info is returned as JSON.
         """
-        # prepare test
+        # prepare test and create profile
         self._do_login(self.test_signer)
-
-        # make POST request
-        resp = self._create_profile(self.test_signer)
-
+        
         # make assertions
-        self.assertEqual(resp.status_code, 201)
-        expected = self.create_profile_data
-        expected.update({
-            "address": self.test_signer.address,
-            "numFollowers": 0,
-            "numFollowing": 0,
-            "posts": []
-        })
-        self.assertDictEqual(resp.data, expected)
+        url = f"/api/{self.test_signer.address}/profile/"
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["address"], self.test_signer.address)
+        self.assertEqual(resp.data["image"], "")
+        self.assertEqual(resp.data["bio"], "")
 
     def test_update_profile(self):
         """
@@ -246,10 +239,9 @@ class ProfileTests(BaseTest):
         """
         # prepare test
         self._do_login(self.test_signer)
-        self._create_profile(self.test_signer)
 
         # change some profile info
-        update_data = self.create_profile_data
+        update_data = self.update_profile_data
         update_data["image"] = "https://ipfs.io/ipfs/nonexistent"
         update_data["bio"] = "short bio"
         update_data["socials"]["website"] = "https://newsite.com"
@@ -265,7 +257,7 @@ class ProfileTests(BaseTest):
             "address": self.test_signer.address,
             "numFollowers": 0,
             "numFollowing": 0,
-            "posts": []
+            "followedByMe": False
         })
         self.assertDictEqual(resp.data, expected)
 
@@ -277,7 +269,7 @@ class ProfileTests(BaseTest):
         """
         # prepare test
         self._do_login(self.test_signer)
-        self._create_profile(self.test_signer)
+        self._update_profile(self.test_signer)
 
         # make GET request
         url = f"/api/{self.test_signer.address}/profile/"
@@ -285,12 +277,12 @@ class ProfileTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
-        expected = self.create_profile_data
+        expected = self.update_profile_data
         expected.update({
             "address": self.test_signer.address,
             "numFollowers": 0,
             "numFollowing": 0,
-            "posts": []
+            "followedByMe": False
         })
         self.assertDictEqual(resp.data, expected)
 
@@ -311,12 +303,6 @@ class ProfileTests(BaseTest):
             resp.data["address"],
             self.test_signer.address
         )
-        self.assertIsNone(resp.data["profile"])
-
-        # create user profile
-        self._create_profile(self.test_signer)
-        resp = self.client.get("/api/user/")
-        self.assertEqual(resp.status_code, 200)
         self.assertIsNotNone(resp.data["profile"])
 
     def test_retrieve_user_unauthed(self):
@@ -344,12 +330,10 @@ class FollowTests(BaseTest):
         # prepare test
         # create user 1 and log them in
         self._do_login(self.test_signer)
-        self._create_profile(self.test_signer)
         self._do_logout()
 
         # create user 2
         self._do_login(self.test_signer_2)
-        self._create_profile(self.test_signer_2)
         self._do_logout()
 
         # make request for user 1 to follow user 2
@@ -372,11 +356,10 @@ class FollowTests(BaseTest):
         # prepare test
         # create user 1 and log them in
         self._do_login(self.test_signer)
-        self._create_profile(self.test_signer)
 
         # create user 2
         url = f"/api/{self.test_signer_2.address}/profile/"
-        self.client.post(url, self.create_profile_data)
+        self.client.post(url, self.update_profile_data)
 
         # make request for user 1 to follow user 2
         url = f"/api/{self.test_signer_2.address}/follow/"
@@ -497,6 +480,41 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 200)
 
+    def test_get_posts(self):
+        """
+        Assert that a list of a user's posts are
+        retrieved successfully by any user.
+        Assert that the posts are paginated by 20.
+        Assert that the posts are sorted in chronological
+        order from most recent to least recent.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        # create posts using the test covalent tx history API 
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address),
+            body=self.tx_history_resp_data
+        )
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make request
+        url = f"/api/posts/{self.test_signer.address}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        results = resp.data["results"]
+        self.assertEqual(len(results), 20)  # 20 results
+
+        # assert chronological ordering
+        for i in range(1, len(results)):
+            prev = i - 1
+            self.assertGreaterEqual(
+                datetime.fromisoformat(results[prev]["created"][:-1]),
+                datetime.fromisoformat(results[i]["created"][:-1])
+            )
+
     def test_update_post(self):
         """
         Assert that a post is updated successfully.
@@ -550,7 +568,6 @@ class PostTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        self._create_profile(self.test_signer)
         # create posts using the test covalent tx history API 
         self.mock_responses.add(
             responses.GET,
