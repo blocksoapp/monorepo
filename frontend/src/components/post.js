@@ -116,9 +116,11 @@ function Post(props) {
     const render = function () {
         const dateObj = new Date(props.created);
 
+        // do not render spammy txs
+        if (erc20Transfers.length > 10 || erc721Transfers.length > 10) return
+
         return (
             <Container className="mt-4">
-                {erc20Transfers.length <= 10 &&
                 <Row className="justify-content-center">
                     <Col xs={12} lg={6}>
                         <Card>
@@ -169,11 +171,11 @@ function Post(props) {
 
                             {/* Card body that includes the transaction details. */}
                             {/* ERC20 Transfer */}
-                            {txType === txTypes.ERC20Transfer && 
+                            {txType === txTypes.ERC20Transfer &&
                             <Card.Body>
                                 {/* show all transfers of a transaction */}
                                 {/* TODO improve hacky way of skipping spam which is currently checking if there are more than 10 transfers */}
-                                {erc20Transfers.length <= 10 && erc20Transfers.map(transfer => (
+                                {erc20Transfers.map(transfer => (
                                     <Row className="align-items-end">
                                         {/* token image */}
                                         <Col className="col-auto">
@@ -209,42 +211,14 @@ function Post(props) {
                                         </Col>
                                     </Row>
                                 ))}
-                                {/* show different text for long/spammy tx */}
-                                {erc20Transfers.length > 10 &&
-                                <Row>
-                                    <Col className="col-auto">
-                                        <Card.Text>
-                                            <Link to={`/${erc20Transfers[0].from_address}/profile`}  style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                <EnsAndAddress address={erc20Transfers[0].from_address} />
-                                            </Link>
-                                            &nbsp;sent&nbsp;
-                                            <a
-                                                className="text-danger"
-                                                href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ fontStyle: 'italic', color: 'black' }}
-                                            >
-                                                {formatTokenAmount(erc20Transfers[0].amount, erc20Transfers[0].decimals)} {erc20Transfers[0].contract_ticker}
-                                            </a>
-                                            &nbsp;to&nbsp;
-                                            <Link to={`/${erc20Transfers[0].to_address}/profile`} style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                <EnsAndAddress address={erc20Transfers[0].to_address} />
-                                            </Link>
-                                            <br />
-                                            Note: this transaction seems spammy.
-                                        </Card.Text>
-                                    </Col>
-                                </Row>
-                                }
-
                             </Card.Body>
                             }
 
                             {/* ERC721 Transfer */}
-                            {txType === txTypes.ERC721Transfer &&
+                            {txType === txTypes.ERC721Transfer && 
                             <Card.Body>
                                 {/* show all transfers of a transaction */}
+                                {/* TODO improve hacky way of skipping spam which is currently checking if there are more than 10 transfers */}
                                 {erc721Transfers.map(transfer => (
                                     <Row>
                                         {/* nft transfer details */}
@@ -324,7 +298,6 @@ function Post(props) {
                         </Card>
                     </Col>
                 </Row>
-                }
             </Container>
         )
     }
