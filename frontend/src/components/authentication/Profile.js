@@ -7,6 +7,7 @@ import Post from '../post.js';
 import { baseAPI, getCookie } from '../../utils.js'
 import Blockies from 'react-blockies';
 import { useUser } from '../../hooks';
+import { apiGetPosts } from '../../api' 
 
 
 function Profile() {
@@ -33,14 +34,9 @@ function Profile() {
     }
 
     const fetchPosts = async () => {
-        const url = `${baseAPI}/posts/${address}/`;
-        const res = await fetch(url, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const res = await apiGetPosts(address);
         if (res.status === 200) {
             var data = await res.json();
-            console.log("results: ", data);
             setPosts(data["results"]);
         }
         else { //TODO show error feedback
