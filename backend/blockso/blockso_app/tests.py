@@ -1,9 +1,11 @@
 # std lib imports
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import mock
 import json
+import pytz
 
 # third party imports
+from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
 from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
@@ -14,6 +16,9 @@ import responses
 # our imports
 from .models import Follow, Post, Transaction, ERC721Transfer
 from . import jobs
+
+
+UserModel = get_user_model()
 
 
 class BaseTest(APITestCase):
@@ -58,9 +63,16 @@ class BaseTest(APITestCase):
         # sample tx history json
         with open(
             "./blockso_app/covalent-tx-history-sample.json",
-            "r"
+            "r",
+            encoding="utf-8"
         ) as fobj:
             cls.tx_history_resp_data = fobj.read() 
+            # replace all occurrences of the address in the tx history sample
+            # with the address of our test signer
+            cls.tx_history_resp_data = cls.tx_history_resp_data.replace(
+                "0xa79e63e78eec28741e711f89a672a4c40876ebf3",
+                cls.test_signer.address
+            )
 
     def setUp(self):
         """ Runs before each test. """
@@ -384,13 +396,13 @@ class TransactionParsingTests(BaseTest):
     and using it to create Posts.
     """
 
-    def _mock_tx_history_response(self, json_response):
+    def _mock_tx_history_response(self, address, json_response):
         """
         Mocks a response for user tx history.
         """
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address),
+            jobs.get_tx_history_url(address),
             body=json_response
         )
 
@@ -402,7 +414,7 @@ class TransactionParsingTests(BaseTest):
         reflect their transaction history.
         """
         # set up test
-        self._mock_tx_history_response(self.tx_history_resp_data)
+        self._mock_tx_history_response(self.test_signer.address, self.tx_history_resp_data)
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -410,9 +422,26 @@ class TransactionParsingTests(BaseTest):
         # make assertions
         # assert that the correct number of Posts has been created
         post_count = Post.objects.all().count()
-        expected = json.loads(self.tx_history_resp_data)
-        expected = len(expected["data"]["items"])
-        self.assertEqual(post_count, expected)
+        self.assertEqual(post_count, 6)
+
+    def test_posts_originate_from_address(self):
+        """
+        Assert that posts are only created for
+        transactions or transfers that originate
+        from the given address.
+        This is meant to reduce spam and provide more
+        quality posts.
+        """
+        # set up test
+        self._mock_tx_history_response(self.test_signer.address, self.tx_history_resp_data)
+
+        # call function
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make assertions
+        # assert that the correct number of Posts has been created
+        post_count = Post.objects.all().count()
+        self.assertEqual(post_count, 6)
 
     def test_erc721_txs(self):
         """
@@ -425,7 +454,10 @@ class TransactionParsingTests(BaseTest):
             "r"
         ) as fobj:
             tx_history_json = fobj.read()
-            self._mock_tx_history_response(tx_history_json)
+            self._mock_tx_history_response(
+                self.test_signer.address,
+                tx_history_json
+            )
             tx_history_obj = json.loads(tx_history_json)
 
         # call function
@@ -438,8 +470,9 @@ class TransactionParsingTests(BaseTest):
         self.assertEqual(tx_count, expected)
 
         # assert that the correct number of Posts has been created
-        # there should be as many Posts as Transactions
-        self.assertEqual(Post.objects.all().count(), expected)
+        # there should be as many Posts as Transactions/Transfers where
+        # the post author is the from address
+        self.assertEqual(Post.objects.all().count(), 0)
 
         # assert that the correct number of ERC721Transfers has been created
         erc721_transfer_count = ERC721Transfer.objects.all().count()
@@ -480,6 +513,7 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 200)
 
+    @mock.patch("blockso_app.jobs.process_address_txs", mock.MagicMock)
     def test_get_posts(self):
         """
         Assert that a list of a user's posts are
@@ -490,13 +524,18 @@ class PostTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        # create posts using the test covalent tx history API 
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address),
-            body=self.tx_history_resp_data
-        )
-        jobs.process_address_txs(self.test_signer.address)
+
+        # create 25 posts
+        user = UserModel.objects.get(pk=self.test_signer.address)
+        created_time = datetime.now(tz=pytz.UTC)
+        for i in range(25):
+            created_time = created_time + timedelta(hours=1)
+            Post.objects.create(
+                author=user,
+                created=created_time,
+                isQuote=False,
+                isShare=False
+            )
 
         # make request
         url = f"/api/posts/{self.test_signer.address}/"
@@ -585,19 +624,19 @@ class PostTests(BaseTest):
             "2a7c515346e323"
         )
 
-        # assert that post 3 has a reference transaction
+        # assert that post 5 has a reference transaction
         # that includes erc20 transfers
         # refTx tied to them
-        url = "/api/post/3/"
+        url = "/api/post/5/"
         resp = self.client.get(url)
         self.assertEqual(
             resp.data["refTx"]["tx_hash"],
-            "0x895df40e50f22cedfff6b835388c7bf741f0e943ab0aedbf76f"\
-            "df268090506c8"
+            "0x9fd2eb7db94cf71ddc665b48dad42e1d00d90ace525fd6a047"\
+            "9f958cce8a729f"
         )
         self.assertEqual(
             resp.data["refTx"]["erc20_transfers"][0]["contract_address"],
-            "0x3b484b82567a09e2588a13d54d032153f0c0aee0"
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
         )
 
 

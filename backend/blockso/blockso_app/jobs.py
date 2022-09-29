@@ -114,8 +114,11 @@ def parse_and_create_tx(tx_data):
 def create_post(tx_record, post_author):
     """
     Creates a Post using a db record of Transaction, ERC20Transaction,
-    or ERC721Transaction.
+    or ERC721Transaction, where the post_author is the from address
+    of the transaction or transfer.
     Returns the created object.
+    Returns None if the post_author is not the originator of the
+    transaction or transfer(s).
     """
     # Post details that remain the same
     object_kwargs = {
@@ -125,13 +128,38 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
+    address = post_author.ethereum_address
 
-    return Post.objects.create(
-        author=post_author,
-        refTx=tx_record,
-        created=tx_record.block_signed_at,
-        **object_kwargs
-    )
+    # create Post if author is the sender of the tx
+    if tx_record.from_address == address:
+        return Post.objects.create(
+            author=post_author,
+            refTx=tx_record,
+            created=tx_record.block_signed_at,
+            **object_kwargs
+        )
+
+    # create Post if author is the sender of an erc20 transfer in the tx
+    for transfer in tx_record.erc20_transfers.all():
+        if transfer.from_address == address:
+            return Post.objects.create(
+                author=post_author,
+                refTx=tx_record,
+                created=tx_record.block_signed_at,
+                **object_kwargs
+            )
+
+    # create Post if author is the sender of an erc721 transfer in the tx
+    for transfer in tx_record.erc721_transfers.all():
+        if transfer.from_address == address:
+            return Post.objects.create(
+                author=post_author,
+                refTx=tx_record,
+                created=tx_record.block_signed_at,
+                **object_kwargs
+            )
+
+    return None
 
 def process_address_txs(address):
     """
