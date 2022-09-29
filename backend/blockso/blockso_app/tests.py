@@ -410,7 +410,7 @@ class TransactionParsingTests(BaseTest):
         """
         Assert that an address' tx history is retrieved
         and parsed correctly.
-        Assert that the address now has Posts that
+        Assert that the address now has Transactions that
         reflect their transaction history.
         """
         # set up test
@@ -421,8 +421,8 @@ class TransactionParsingTests(BaseTest):
 
         # make assertions
         # assert that the correct number of Posts has been created
-        post_count = Post.objects.all().count()
-        self.assertEqual(post_count, 6)
+        post_count = Transaction.objects.all().count()
+        self.assertEqual(post_count, 7)
 
     def test_posts_originate_from_address(self):
         """
