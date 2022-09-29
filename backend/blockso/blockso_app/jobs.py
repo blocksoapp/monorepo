@@ -128,7 +128,7 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
-    address = post_author.ethereum_address
+    address = post_author.ethereum_address.lower()
 
     # create Post if author is the sender of the tx
     if tx_record.from_address == address:
