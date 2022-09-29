@@ -71,7 +71,7 @@ class BaseTest(APITestCase):
             # with the address of our test signer
             cls.tx_history_resp_data = cls.tx_history_resp_data.replace(
                 "0xa79e63e78eec28741e711f89a672a4c40876ebf3",
-                cls.test_signer.address
+                cls.test_signer.address.lower()
             )
 
     def setUp(self):
