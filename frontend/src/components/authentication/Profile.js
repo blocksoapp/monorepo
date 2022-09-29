@@ -7,6 +7,7 @@ import Post from '../post.js';
 import { baseAPI, getCookie } from '../../utils.js'
 import Blockies from 'react-blockies';
 import { useUser } from '../../hooks';
+import { apiGetPosts } from '../../api' 
 
 
 function Profile() {
@@ -18,6 +19,7 @@ function Profile() {
     const user = useUser();
 
     // state
+    const [posts, setPosts] = useState([]);
     const [profileData, setProfileData] = useState({});
     const [pfpUrl, setPfpUrl] = useState(null);
  
@@ -28,6 +30,17 @@ function Profile() {
         }
         else {
             setPfpUrl(ensAvatar["data"]);
+        }
+    }
+
+    const fetchPosts = async () => {
+        const res = await apiGetPosts(address);
+        if (res.status === 200) {
+            var data = await res.json();
+            setPosts(data["results"]);
+        }
+        else { //TODO show error feedback
+            throw new Error("error fetching posts")
         }
     }
 
@@ -79,6 +92,7 @@ function Profile() {
     // effects
     useEffect(() => {
         fetchProfile();
+        fetchPosts();
     }, [routerLocation.key])
 
     useEffect(() => {
@@ -184,7 +198,7 @@ function Profile() {
 
         {/* Posts Section */}
         <Container>
-            {profileData["posts"] && profileData["posts"].map(post => (
+            {posts.map(post => (
                 <Post
                     key={post.id}
                     author={post.author}

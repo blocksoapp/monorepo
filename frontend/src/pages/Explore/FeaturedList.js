@@ -3,6 +3,7 @@ import { featuredListData } from '../../data/data'
 import ListItem from './ListItem'
 import { Row, Button } from 'react-bootstrap'
 import { baseAPI } from '../../utils'
+import { apiGetPosts } from '../../api'
 
 function FeaturedList() {
     const [profileData, setProfileData] = useState([])
@@ -23,8 +24,17 @@ function FeaturedList() {
         var tempProfileArray = []
 
         const getProfileData = async (addressIndex) => {
-            const url = `${baseAPI}/${addressIndex}/profile`
-            const res = await fetch(url)
+            const url = `${baseAPI}/${addressIndex}/profile/`
+            var res = await fetch(url);
+
+            // in case a profile is not found
+            // fetch their posts, which will create them
+            // a profile in the backend for the time being
+            // TODO adjust this after https://github.com/blocksoapp/monorepo/issues/25
+            if (res.status === 404) {
+                await apiGetPosts(addressIndex);
+                res = await fetch(url);
+            }
             const data = await res.json()
             const profileDataTemp = {
                                 address: data.address, 

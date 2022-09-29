@@ -118,6 +118,10 @@ class ERC721Transfer(models.Model):
 class Post(models.Model):
     """ Represents a Post created by a user. """
 
+    class Meta:
+        ordering = ["-created"]
+
+
     author = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
