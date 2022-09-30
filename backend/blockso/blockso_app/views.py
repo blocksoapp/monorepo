@@ -7,6 +7,7 @@ import secrets
 # third party imports
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated, \
@@ -263,6 +264,27 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ExploreList(generics.ListAPIView):
+
+    """
+    View that supports retrieving a list of profiles for the explore page.
+    """
+
+    serializer_class = serializers.ProfileSerializer
+
+    def get_queryset(self):
+        """
+        Return Profiles of users that are featured on the Explore page.
+        The current implementation returns the top 8 profiles sorted
+        from most followers to least followers.
+        """
+        queryset = Profile.objects.annotate(num_followers=Count('user__follow_dest'))
+        queryset = queryset.order_by("-num_followers")
+        queryset = queryset[:8]
+
+        return queryset
 
 
 class FeedList(generics.ListAPIView):

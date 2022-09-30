@@ -3,7 +3,7 @@ import { featuredListData } from '../../data/data'
 import ListItem from './ListItem'
 import { Row, Button } from 'react-bootstrap'
 import { baseAPI } from '../../utils'
-import { apiGetPosts } from '../../api'
+import { apiGetExplore } from '../../api'
 
 function FeaturedList() {
     const [profileData, setProfileData] = useState([])
@@ -11,7 +11,7 @@ function FeaturedList() {
     const [isLoading, setIsLoading] = useState(Boolean)
     const featuredList = featuredListData;
 
-  // UseEffect Calling getFeaturedProfiles then map out each item
+    // UseEffect Calling getFeaturedProfiles then map out each item
     useEffect(() => {
         getFeaturedProfiles()
     }, [])
@@ -20,43 +20,12 @@ function FeaturedList() {
     // Function to get profile data for each in array
     const getFeaturedProfiles = async () => {
         setIsLoading(true)
-        var tempProfileArray = []
-
-        const getProfileData = async (addressIndex) => {
-            const url = `${baseAPI}/${addressIndex}/profile/`
-            var res = await fetch(url);
-
-            // in case a profile is not found
-            // fetch their posts, which will create them
-            // a profile in the backend for the time being
-            // TODO adjust this after https://github.com/blocksoapp/monorepo/issues/25
-            if (res.status === 404) {
-                await apiGetPosts(addressIndex);
-                res = await fetch(url);
-            }
-            const data = await res.json()
-            return data
-        }
-        // Storing extracted data into a temp array
-        const storeProfileData = async _ => {
-            console.log('storing featured profiles')
-            for(let index = 0; index < featuredList.length; index++) {
-                var currentAddress = featuredList[index]
-                var pfpAddressToAdd = await getProfileData(currentAddress)
-                tempProfileArray.push(pfpAddressToAdd)
-            }
-
-            console.log(tempProfileArray)
-            // Set Array State
-            setProfileData(tempProfileArray)
-            setIsLoading(false)
-        }
-
-        storeProfileData()
+        var res = await apiGetExplore();
+        const data = await res.json()
+        setProfileData(data);
+        setIsLoading(false)
     }
 
-    // Function to extract all image url to PFPUrl state
-    
 
   return (
     <div className='p-5'>

@@ -734,3 +734,46 @@ class FeedTests(BaseTest):
         self.assertEqual(len(resp.data), 2)
         self.assertDictEqual(resp.data[0], expected[0])
         self.assertDictEqual(resp.data[1], expected[1])
+
+
+class ExploreTests(BaseTest):
+    """
+    Test behavior around explore page.
+    """
+
+    def test_profiles_by_follower_count(self):
+        """
+        Assert that the top 8 profiles by follower count are returned.
+        """
+        # set up test
+        # create 10 profiles
+        signers = []
+        for i in range(10):
+            signer = eth_account.Account.create()
+            self._do_login(signer)  # a user is created when signer logs in
+            signers.append(signer)
+
+        # make each user follow the remaining users
+        # so user 1 follows users 2-10
+        # user 2 follows users 3-10, etc
+        for i in range(10):
+            self._do_login(signers[i])
+            for j in range(i+1, 10):
+                url = f"/api/{signers[j].address}/follow/"
+                self.client.post(url)
+
+        # make request to fetch explore page profiles
+        self._do_logout()
+        url = "/api/explore/"
+        resp = self.client.get(url)
+
+        # make assertions
+        # assert that the top 8 profiles are returned
+        self.assertEqual(len(resp.data), 8)
+
+        # assert that the explore profiles are sorted
+        # in order from most followers to least
+        # user 10 should have the most followers
+        # user 3 should have the least followers
+        for i in range(8):
+            self.assertEqual(resp.data[i]["address"], signers[9-i].address)
