@@ -220,11 +220,13 @@ class PostCreateList(generics.ListCreateAPIView):
         """
         Returns a list of the user's posts.
         """
+        # clean the address
+        self.kwargs["address"] = Web3.toChecksumAddress(self.kwargs["address"])
+
         # TODO this should create a job instead of
         # doing the actual work in the GET request
         # fetch and store the tx history of the person being searched
-        address = Web3.toChecksumAddress(self.kwargs["address"])
-        jobs.process_address_txs(address)
+        jobs.process_address_txs(self.kwargs["address"])
 
         return self.list(request, *args, **kwargs)
 
