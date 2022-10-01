@@ -13,6 +13,7 @@ import { useEnsAvatar } from "wagmi";
 import Blockies from 'react-blockies';
 import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
+import PostsPlaceholder from '../../../components/PostsPlaceholder';
 
 
 function WalletFeed(props) {
@@ -21,6 +22,7 @@ function WalletFeed(props) {
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
     const [pfpUrl, setPfpUrl] = useState(null);
     const [postText, setPostText] = useState("");
+    const [loadingFeed, setLoadingFeed] = useState(true);
     const [posts, setPosts] = useState(null);
 
     // functions
@@ -79,6 +81,7 @@ function WalletFeed(props) {
 
     const fetchFeed = async () => {
         const url = `${baseAPI}/feed/`;
+        setLoadingFeed(true);
         const res = await fetch(url, {
             method: 'GET',
             credentials: 'include'
@@ -86,8 +89,13 @@ function WalletFeed(props) {
         if (res.status === 200) {
             var data = await res.json();
             setPosts(data);
+            setLoadingFeed(false);
         }
-        else { console.log("unhandled case: ", res) }
+        else {
+            // TODO show feedback here
+            console.log("unhandled case: ", res)
+            setLoadingFeed(false);
+        }
     }
 
     // set profile pic and fetch feed on mount
@@ -99,6 +107,8 @@ function WalletFeed(props) {
 
     return (
         <Container>
+
+            {/* New Post Form */}
             <Container>
                 <Row className="justify-content-center">
                     <Col xs={12} lg={6}>
@@ -157,8 +167,10 @@ function WalletFeed(props) {
                 </Row>
             </Container>
 
-            {/* Posts Section */}
-            <Container>
+            {/* Feed or Placeholder */}
+            {loadingFeed === true
+            ? <PostsPlaceholder />
+            : <Container>
                 {posts && posts.map(post => (
                     <Post
                         key={post.id}
@@ -171,6 +183,8 @@ function WalletFeed(props) {
                     />
                 ))}
             </Container>
+            }
+
         </Container>
     )
 }
