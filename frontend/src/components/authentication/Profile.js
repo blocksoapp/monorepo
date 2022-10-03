@@ -9,6 +9,8 @@ import Blockies from 'react-blockies';
 import { useUser } from '../../hooks';
 import { apiGetPosts } from '../../api';
 import PostsPlaceholder from '../PostsPlaceholder';
+import PostsError from '../PostsError';
+import PostsNotFound from '../PostsNotFound';
 import ProfilePlaceholder from './ProfilePlaceholder';
 
 
@@ -25,8 +27,9 @@ function Profile() {
     const [address, setAddress] = useState(null);
     const [loadingProfileData, setLoadingProfileData] = useState(true);
     const [profileData, setProfileData] = useState({});
-    const [loadingPosts, setLoadingPosts] = useState(true);
+    const [postsLoading, setPostsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
+    const [postsError, setPostsError] = useState(false);
     const [pfpUrl, setPfpUrl] = useState(null);
  
     // functions
@@ -58,17 +61,18 @@ function Profile() {
     }
 
     const fetchPosts = async () => {
-        setLoadingPosts(true);
+        setPostsLoading(true);
         const res = await apiGetPosts(address);
 
         if (res.status === 200) {
             var data = await res.json();
             setPosts(data["results"]);
-            setLoadingPosts(false);
+            setPostsLoading(false);
         }
-        else { //TODO show error feedback
-            setLoadingPosts(false);
-            throw new Error("error fetching posts")
+        else {
+            setPostsError(true);
+            setPostsLoading(false);
+            console.error(res);
         }
     }
 
@@ -285,18 +289,22 @@ function Profile() {
         }
 
         {/* Posts Section -- show placeholder or posts */}
-        {loadingPosts === true
-             ? <PostsPlaceholder />
-             : posts.map(post => (
-                <Post
-                    key={post.id}
-                    author={post.author}
-                    text={post.text}
-                    imgUrl={post.imgUrl}
-                    created={post.created}
-                    pfp={pfpUrl}
-                    refTx={post.refTx}
-                />
+        {postsLoading === true
+            ? <PostsPlaceholder />
+            : postsError === true
+                ? <PostsError retryAction={fetchPosts} />
+                : posts.length === 0
+                    ? <PostsNotFound retryAction={fetchPosts} />
+                    : posts.map(post => (
+                        <Post
+                            key={post.id}
+                            author={post.author}
+                            text={post.text}
+                            imgUrl={post.imgUrl}
+                            created={post.created}
+                            pfp={pfpUrl}
+                            refTx={post.refTx}
+                        />
         ))}
 
     </Container>
