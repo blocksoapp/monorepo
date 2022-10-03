@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
-import { BigNumber } from "ethers";
+import { utils } from "ethers";
 import EnsAndAddress from "./ensName.js";
 import Blockies from 'react-blockies';
 
@@ -87,10 +87,7 @@ function Post(props) {
 
 
     const formatTokenAmount = function(amount, decimals) {
-        var amount = BigNumber.from(amount);
-        var decimals = BigNumber.from(10).pow(decimals);
-        var result = amount.div(decimals);
-        return result.toString();
+        return utils.formatUnits(amount, decimals);
     }
 
     // determine tx type on component mount
