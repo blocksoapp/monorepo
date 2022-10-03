@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
+import { useAccount, useEnsName, useEnsAddress, useEnsAvatar } from 'wagmi'
 import EnsAndAddress from '../ensName.js';
 import Post from '../post.js'; 
 import { baseAPI, getCookie } from '../../utils.js'
@@ -14,13 +14,15 @@ import ProfilePlaceholder from './ProfilePlaceholder';
 
 function Profile() {
     // constants
-    const { address } = useParams();
+    const { urlInput } = useParams();
     const routerLocation = useLocation();
     const navigate = useNavigate();
-    const ensAvatar = useEnsAvatar({addressOrName: address});
+    const ensAvatar = useEnsAvatar({addressOrName: urlInput});
+    const ensAddress = useEnsAddress({name: urlInput});
     const user = useUser();
 
     // state
+    const [address, setAddress] = useState(null);
     const [loadingProfileData, setLoadingProfileData] = useState(true);
     const [profileData, setProfileData] = useState({});
     const [loadingPosts, setLoadingPosts] = useState(true);
@@ -28,6 +30,24 @@ function Profile() {
     const [pfpUrl, setPfpUrl] = useState(null);
  
     // functions
+    const resolveAddress = (input) => {
+        // input is an ens name, resolve it to an address
+        if (input.endsWith(".eth")) {
+            var resolved = ensAddress.data;
+            if (resolved === null || resolved === undefined) {
+                setAddress(input);
+            }
+            else {
+                setAddress(resolved);
+            }
+        }
+
+        // input is not an ens name, set address to the given input
+        else {
+            setAddress(input);
+        }
+    }
+
     const determineProfilePic = async () => {
         if ("image" in profileData && profileData["image"] !== "") {
             setPfpUrl(profileData["image"]);
@@ -106,17 +126,47 @@ function Profile() {
     }
 
     // effects
+    /*
+     * Clear existing profile and resolve the given address
+     * from the url when the page is navigated to.
+     */
     useEffect(() => {
         // reset state
+        setAddress(null);
         setProfileData({});
         setPosts([]);
         setPfpUrl(null);
 
-        // load new data
+        // resolve the ens or address
+        resolveAddress(urlInput);
+    }, [urlInput, routerLocation.key])
+
+    /* 
+     * Fetch profile and posts when address is set.
+     */
+    useEffect(() => {
+        if (address === null || address === undefined) {
+            return;
+        }
+
         fetchProfile();
         fetchPosts();
-    }, [routerLocation.key])
+    }, [address])
+        
+    /* 
+     * Resolve address when ensAddress changes.
+     */
+    useEffect(() => {
+        if (
+            ensAddress.data === null ||
+            ensAddress.data === undefined
+        ) {
+            return;
+        }
 
+        resolveAddress(urlInput);
+    }, [ensAddress])
+        
     useEffect(() => {
         if (pfpUrl === ensAvatar["data"]) {
             return;
@@ -136,7 +186,6 @@ function Profile() {
             return;
         }
         if (Object.keys(profileData).length === 0) {
-            console.log("fetchign profile again cuz ther was not data there");
             fetchProfile();
         }
     }, [posts]);
