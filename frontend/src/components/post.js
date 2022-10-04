@@ -284,7 +284,10 @@ function Post(props) {
 
                             {/* Card footer that includes the action buttons. */}
                             <Card.Footer>
-                                <Row className="justify-content-around">
+                                <Row className="justify-content-around align-items-center">
+                                    <Col className="col-auto border-end border-3">
+                                        <span className="text-muted">Coming Soon</span>
+                                    </Col>
                                     <Col className="col-auto">
                                         <Button size="sm" variant="light"><FontAwesomeIcon icon={faHeart} /></Button>
                                     </Col>
