@@ -1,21 +1,21 @@
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 
 
-function PostsNotFound(props) {
+function FeedError(props) {
 
     return (
         <Container>
             <Row className="justify-content-center p-5">
                 <Col xs={10} lg={6}>
-                    <Alert variant="warning">
-                        Looks like this user hasn't posted anything...
+                    <Alert variant="danger">
+                        Sorry, something went wrong. Please report the issue if it persists.
                         <Button
                             size="sm"
                             variant="outline-primary"
                             className="float-end"
                             onClick={props.retryAction}
                         >
-                            Try Again!
+                            Retry
                         </Button>
                     </Alert>
                 </Col>
@@ -25,4 +25,4 @@ function PostsNotFound(props) {
 }
 
 
-export default PostsNotFound;
+export default FeedError;

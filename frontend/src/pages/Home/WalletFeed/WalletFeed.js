@@ -14,6 +14,7 @@ import Blockies from 'react-blockies';
 import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
 import PostsPlaceholder from '../../../components/PostsPlaceholder';
+import FeedError from './FeedError';
 
 
 function WalletFeed(props) {
@@ -23,6 +24,7 @@ function WalletFeed(props) {
     const [pfpUrl, setPfpUrl] = useState(null);
     const [postText, setPostText] = useState("");
     const [loadingFeed, setLoadingFeed] = useState(true);
+    const [feedError, setFeedError] = useState(false);
     const [posts, setPosts] = useState(null);
 
     // functions
@@ -89,12 +91,14 @@ function WalletFeed(props) {
         if (res.status === 200) {
             var data = await res.json();
             setPosts(data);
+            setFeedError(false);
             setLoadingFeed(false);
         }
         else {
             // TODO show feedback here
-            console.log("unhandled case: ", res)
+            setFeedError(true);
             setLoadingFeed(false);
+            console.error(res);
         }
     }
 
@@ -170,19 +174,21 @@ function WalletFeed(props) {
             {/* Feed or Placeholder */}
             {loadingFeed === true
             ? <PostsPlaceholder />
-            : <Container>
-                {posts && posts.map(post => (
-                    <Post
-                        key={post.id}
-                        author={post.author}
-                        text={post.text}
-                        imgUrl={post.imgUrl}
-                        created={post.created}
-                        refTx={post.refTx}
-                        pfp={pfpUrl}
-                    />
-                ))}
-            </Container>
+            : feedError === true
+                ? <FeedError retryAction={fetchFeed} />
+                : <Container>
+                    {posts && posts.map(post => (
+                        <Post
+                            key={post.id}
+                            author={post.author}
+                            text={post.text}
+                            imgUrl={post.imgUrl}
+                            created={post.created}
+                            refTx={post.refTx}
+                            pfp={pfpUrl}
+                        />
+                    ))}
+                </Container>
             }
 
         </Container>
