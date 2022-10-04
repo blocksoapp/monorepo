@@ -345,6 +345,7 @@ function Profile() {
                                         created={post.created}
                                         pfp={pfpUrl}
                                         refTx={post.refTx}
+                                        profileAddress={address}
                                     />
                     ))}
 

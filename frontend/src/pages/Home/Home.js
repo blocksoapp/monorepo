@@ -21,9 +21,10 @@ function Home() {
           }
           {user !== null &&
           <WalletFeed
+              className="mt-5"
               author={user["address"]}
               pfp={user["image"]}
-              className="mt-5"
+              user={user}
           />
           }
         </Container>
