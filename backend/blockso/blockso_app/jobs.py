@@ -45,6 +45,7 @@ def get_user_tx_history(address):
     """
     url = get_tx_history_url(address)
     resp = client.get(url) 
+    resp.raise_for_status()
     data = resp.json()
     txs = data["data"]["items"]
 
