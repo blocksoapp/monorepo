@@ -88,7 +88,6 @@ def auth_login(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def auth_logout(request):
     """ Terminates the user's session. """
 

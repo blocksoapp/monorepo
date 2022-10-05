@@ -134,7 +134,11 @@ function Profile() {
             credentials: 'include'
         });
         if (res.ok) {
-            navigate("#");
+            setProfileData({
+                ...profileData,
+                numFollowers: profileData["numFollowers"] - 1,
+                followedByMe: false
+            });
         }
     }
 
@@ -148,7 +152,11 @@ function Profile() {
             credentials: 'include'
         });
         if (res.ok) {
-            navigate("#");
+            setProfileData({
+                ...profileData,
+                numFollowers: profileData["numFollowers"] + 1,
+                followedByMe: true
+            });
         }
     }
 
@@ -337,6 +345,7 @@ function Profile() {
                                         created={post.created}
                                         pfp={pfpUrl}
                                         refTx={post.refTx}
+                                        profileAddress={address}
                                     />
                     ))}
 

@@ -239,6 +239,18 @@ class AuthTests(BaseTest):
         session_key = self.client.cookies.get("sessionid").value
         self.assertEqual(session_key, "")
 
+    def test_logout_unauthed(self):
+        """
+        Assert that a user can call logout even if they are not authenticated.
+        """
+        # prepare test
+        # logout
+        resp = self.client.post("/api/auth/logout/")
+
+        # make assertions
+        # assert that the user no longer has a session
+        self.assertEqual(resp.status_code, 200)
+
 
 class ProfileTests(BaseTest):
     """ Tests profile related behavior. """

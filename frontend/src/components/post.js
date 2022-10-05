@@ -14,6 +14,7 @@ import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-
 import { utils } from "ethers";
 import EnsAndAddress from "./ensName.js";
 import Blockies from 'react-blockies';
+import TxAddress from "./TxAddress";
 
 
 function Post(props) {
@@ -187,9 +188,10 @@ function Post(props) {
                                         {/* transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text className="text-wrap">
-                                                <Link to={`/${transfer.from_address}/profile`}  style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                    <EnsAndAddress address={transfer.from_address} />
-                                                </Link>
+                                                <TxAddress
+                                                    address={transfer.from_address}
+                                                    profileAddress={props.profileAddress}
+                                                />
                                                 &nbsp;sent&nbsp;
                                                 <a
                                                     className="text-success"
@@ -201,9 +203,10 @@ function Post(props) {
                                                     {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <Link to={`/${transfer.to_address}/profile`} style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                    <EnsAndAddress address={transfer.to_address} />
-                                                </Link>
+                                                <TxAddress
+                                                    address={transfer.to_address}
+                                                    profileAddress={props.profileAddress}
+                                                />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -221,9 +224,10 @@ function Post(props) {
                                         {/* nft transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text>
-                                                <Link to={`/${transfer.from_address}/profile`}  style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                    <EnsAndAddress address={transfer.from_address} />
-                                                </Link>
+                                                <TxAddress
+                                                    address={transfer.from_address}
+                                                    profileAddress={props.profileAddress}
+                                                />
                                                 &nbsp;sent&nbsp;
                                                 <a
                                                     className="text-success"
@@ -235,9 +239,10 @@ function Post(props) {
                                                     {transfer.contract_ticker} #{transfer.token_id}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <Link to={`/${transfer.to_address}/profile`} style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                    <EnsAndAddress address={transfer.to_address} />
-                                                </Link>
+                                                <TxAddress
+                                                    address={transfer.to_address}
+                                                    profileAddress={props.profileAddress}
+                                                />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -251,9 +256,10 @@ function Post(props) {
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
-                                            <Link to={`/${props.refTx["from_address"]}/profile`}  style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                <EnsAndAddress address={props.refTx.from_address} />
-                                            </Link>
+                                            <TxAddress
+                                                address={props.refTx["from_address"]}
+                                                profileAddress={props.profileAddress}
+                                            />
                                             &nbsp;sent a&nbsp;
                                             <a
                                                 className="text-success"
@@ -266,9 +272,10 @@ function Post(props) {
                                             </a>
                                             {props.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(props.refTx.value, 18)} ETH</span>}
                                             &nbsp;to&nbsp; 
-                                            <Link to={`/${props.refTx.to_address}/profile`} style={{ fontStyle: 'italic', textDecoration: 'none', color: 'black' }}>
-                                                <EnsAndAddress address={props.refTx.to_address} />
-                                            </Link>
+                                            <TxAddress
+                                                address={props.refTx["to_address"]}
+                                                profileAddress={props.profileAddress}
+                                            />
                                         </Card.Text>
                                     </Col>
                                 </Row>
@@ -277,7 +284,10 @@ function Post(props) {
 
                             {/* Card footer that includes the action buttons. */}
                             <Card.Footer>
-                                <Row className="justify-content-around">
+                                <Row className="justify-content-around align-items-center">
+                                    <Col className="col-auto border-end border-3">
+                                        <span className="text-muted">Coming Soon</span>
+                                    </Col>
                                     <Col className="col-auto">
                                         <Button size="sm" variant="light"><FontAwesomeIcon icon={faHeart} /></Button>
                                     </Col>

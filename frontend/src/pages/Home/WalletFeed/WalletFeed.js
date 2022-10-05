@@ -186,6 +186,7 @@ function WalletFeed(props) {
                             created={post.created}
                             refTx={post.refTx}
                             pfp={pfpUrl}
+                            profileAddress={props.user.address}
                         />
                     ))}
                 </Container>
