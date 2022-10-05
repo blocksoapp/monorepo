@@ -12,7 +12,6 @@ import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
-import EnsAndAddress from "./ensName.js";
 import Blockies from 'react-blockies';
 import TxAddress from "./TxAddress";
 
@@ -145,7 +144,12 @@ function Post(props) {
                                         }
                                     </Col>
                                     <Col className="col-auto">
-                                        <h5><EnsAndAddress address={props.author} /></h5>
+                                        <h5>
+                                            <TxAddress
+                                                address={props.author}
+                                                profileAddress={props.profileAddress}
+                                            />
+                                        </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}
                                         </p>

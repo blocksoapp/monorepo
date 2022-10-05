@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
-import { useAccount, useEnsName, useEnsAddress, useEnsAvatar } from 'wagmi'
+import { useAccount, useEnsAddress, useEnsAvatar } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
-import EnsAndAddress from '../ensName.js';
 import Post from '../post.js'; 
 import { baseAPI, getCookie } from '../../utils.js'
 import Blockies from 'react-blockies';
@@ -14,6 +13,7 @@ import PostsError from '../PostsError';
 import PostsNotFound from '../PostsNotFound';
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
+import ProfileEnsAndAddress from '../ProfileEnsAndAddress';
 
 
 function Profile() {
@@ -274,7 +274,11 @@ function Profile() {
                                 {/* Address and ENS */}
                                 <Row className="justify-content-center mt-2">
                                     <Col className="col-auto text-center">
-                                        <h5><EnsAndAddress address={address} /></h5>
+                                        <h5>
+                                            <ProfileEnsAndAddress
+                                                address={address}
+                                            />
+                                        </h5>
                                     </Col>
                                 </Row>
 
