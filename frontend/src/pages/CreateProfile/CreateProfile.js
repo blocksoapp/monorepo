@@ -45,7 +45,7 @@ function CreateProfile() {
       }
    
         return (
-            <div>
+            <div className=''>
                 <CreateProfileForm
                 profile={profile}
                 setProfile={setProfile}

@@ -61,6 +61,8 @@ function NftForm({ profile, setProfile }) {
         }
   }
 
+  
+
   return (
     <Form.Group className="mb-3 border p-3">
     <Form.Label>Profile Picture (NFT): </Form.Label> <br/>
@@ -72,7 +74,7 @@ function NftForm({ profile, setProfile }) {
         Alternatively, you can enter your NFT details for your profile picture.
         </Form.Text>
         <br/>
-        <Button className="btn-sm" onClick={getNftMetadata}>Verify NFT</Button>
+        <Button className="btn-sm" onClick={getNftMetadata}>Verify</Button>
     </Form.Group>
   )
 }

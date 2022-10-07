@@ -74,7 +74,7 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
 
   return (
-    <>
+    <div className="pt-5 pb-5">
     <Container className='border p-3'>
         <Form>
         
@@ -151,7 +151,7 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
             </Form.Text> : '' }
         </Form>
     </Container>
-</>
+</div>
 )
 }
 
