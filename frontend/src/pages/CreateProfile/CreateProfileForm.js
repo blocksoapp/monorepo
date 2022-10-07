@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Container, Form, Button, Row, Col } from 'react-bootstrap'
 import { baseAPI, getCookie } from '../../utils'
 import NftForm from './NftForm'
 import { useAccount } from 'wagmi'
 import FileUpload from './FileUpload'
+import CurrentPfp from './CurrentPfp'
 
 function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
     const { isConnected, address } = useAccount();
+    const [pfp, setPfp] = useState(null)
+    const [userAddress, setUserAddress] = useState(profile.address)
 
      // Form State Update
      const handleChange = (event) => {
@@ -59,12 +62,26 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
       checkForProfile();
   }, [])
 
+  useEffect(() => {
+    setPfp(profile.image)
+    setUserAddress(profile.address)
+  
+    return () => {
+      console.log('profile image: ', pfp)
+    }
+  }, [profile])
+  
+
 
   return (
     <>
-    <Container className='p-3'>
+    <Container className='border p-3'>
         <Form>
         
+        <CurrentPfp
+        pfp={pfp}
+        userAddress={userAddress}/>
+    
         <FileUpload
         profile={profile}
         setProfile={setProfile}/>

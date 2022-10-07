@@ -45,13 +45,13 @@ function CreateProfile() {
       }
    
         return (
-            <>
+            <div>
                 <CreateProfileForm
                 profile={profile}
                 setProfile={setProfile}
                 initialState={initialState}
                 getUser={getUser}/>
-            </>
+            </div>
         )
 }
 
