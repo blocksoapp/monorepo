@@ -15,11 +15,13 @@ import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
 
 
-function WalletFeed(props) {
+function WalletFeed({ profileData, setProfileData, user }) {
+
+    const { address, image } = {...profileData.profile}
 
     // state
-    const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const [pfpUrl, setPfpUrl] = useState(null);
+    const ensAvatar = useEnsAvatar({addressOrName: address});
+    const [pfpUrl, setPfpUrl] = useState(image);
     const [postText, setPostText] = useState("");
     const [posts, setPosts] = useState(null);
 
@@ -47,7 +49,7 @@ function WalletFeed(props) {
         event.preventDefault();
 
         // post data to api
-        const url = `${baseAPI}/posts/${props.author}/`;
+        const url = `${baseAPI}/posts/${address}/`;
         const data = {
             text: postText,
             imgUrl: "",
@@ -93,7 +95,10 @@ function WalletFeed(props) {
     // set profile pic and fetch feed on mount
     useEffect(() => {
         fetchFeed();
-        determineProfilePic(props.pfp);
+        determineProfilePic(pfpUrl);
+        return () => {
+            console.log(pfpUrl)
+        }
     }, [])
 
 
@@ -107,9 +112,9 @@ function WalletFeed(props) {
                             <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
-                                        {pfpUrl === null
+                                        {pfpUrl === null || ''
                                         ? <Blockies
-                                            seed={props.author}
+                                            seed={address}
                                             size={15}
                                             scale={5}
                                             className="rounded-circle"

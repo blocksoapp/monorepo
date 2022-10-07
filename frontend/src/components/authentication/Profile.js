@@ -205,8 +205,7 @@ function Profile() {
                     text={post.text}
                     imgUrl={post.imgUrl}
                     created={post.created}
-                    pfpUrl={pfpUrl}
-                    setPfpUrl={setPfpUrl}
+                    pfp={pfpUrl}
                     refTx={post.refTx}
                 />
             ))}

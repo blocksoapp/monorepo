@@ -36,7 +36,7 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
-    const [pfpUrl, setPfpUrl] = useState(props)
+    const [pfpUrl, setPfpUrl] = useState(props.pfp)
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
@@ -103,11 +103,11 @@ function Post(props) {
         determineProfilePic(props.pfp);
 
         return () => {
-            if (props.pfpUrl !== null && props.pfpUrl !== undefined) {
+            if (pfpUrl !== null && pfpUrl !== undefined) {
                 return;
             }
     
-            if (props.pfpUrl === ensAvatar["data"]) {
+            if (pfpUrl === ensAvatar["data"]) {
                 return;
             }
             if (ensAvatar["data"] !== "") {
@@ -133,7 +133,7 @@ function Post(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        {props.pfpUrl === null
+                                        {pfpUrl === null
                                         ? <Blockies
                                             seed={props.author}
                                             size={15}
@@ -144,7 +144,7 @@ function Post(props) {
                                             spotColor="#4db3e4"
                                           />
                                         : <Image
-                                            src={props.pfpUrl}
+                                            src={pfpUrl}
                                             height="100px"
                                             width="100px"
                                             roundedCircle
