@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { NFTStorage, Blob } from 'nft.storage'
 import { nftAPI } from '../../utils'
@@ -23,6 +23,7 @@ function FileUpload({ profile, setProfile }) {
         const buffer = event.target.files[0]
         setBufferImage(buffer)
     }
+
 
     // Handle Submission to DB
     const handleFileSubmit = async () => {
@@ -69,18 +70,24 @@ function FileUpload({ profile, setProfile }) {
     }, [loadingText]);
 
   return (
-    <Form.Group className="mb-3 border p-3">
-        <Form.Label>Profile Picture</Form.Label>
-            <Form.Control onChange={handleBufferChange} type="file" id="file" size="sm" name="imagePath" value={imagePath}/>
-            <Form.Text className="text-muted mb-3">
-            Upload a file for your profile picture. <br/>
-            </Form.Text> 
-            <Button className="mt-2 me-3 btn-sm" onClick={handleFileSubmit}>Upload</Button>
-            <Form.Text className={!isLoading ? 'text-success' : 'text-muted'}>
-            {loadingText}
-            </Form.Text>
+    <>
+        <Form.Group className="mb-3 border p-3">
+    
+            <Form.Group className="mb-1">
+              <Form.Label>Upload Profile Picture</Form.Label>
+              <Form.Control onChange={handleBufferChange} type="file"/>
+            </Form.Group>
+
+            <div className='d-flex align-items-center'>
+              <Button className="mt-2 me-3 btn-sm" onClick={handleFileSubmit}>Upload</Button>
+              <Form.Text className={`${!isLoading ? 'text-success' : 'text-muted'}`}>
+              {loadingText}
+              </Form.Text>
+            </div>
         </Form.Group>
+    </>
   )
 }
 
 export default FileUpload
+

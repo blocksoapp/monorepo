@@ -19,7 +19,7 @@ code {
 }
 
 
-/* Explore Page */
+/* EXPLORE PAGE */
 
 .info-container {
   background-color: #003459;
@@ -56,4 +56,8 @@ code {
 .btn-primary.custom-btn:hover {
   background-color: #007EA7;
 }
+
+/* EDIT PROFILE / CREATE PROFILE PAGE */
+/* Hides the file input text */
+
   

@@ -65,16 +65,15 @@ function NftForm({ profile, setProfile }) {
 
   return (
     <Form.Group className="mb-3 border p-3">
-    <Form.Label>Profile Picture (NFT): </Form.Label> <br/>
-    <Form.Label>NFT TokenId</Form.Label>  
-        <Form.Control onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name}/>
-        <Form.Label>NFT Contract Address</Form.Label>
-        <Form.Control onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name}/>
-        <Form.Text className="text-muted">
-        Alternatively, you can enter your NFT details for your profile picture.
-        </Form.Text>
-        <br/>
-        <Button className="btn-sm" onClick={getNftMetadata}>Verify</Button>
+      <Form.Label>Upload Profile Picture With An NFT </Form.Label> <br/>
+      <Form.Label>NFT TokenId</Form.Label>  
+      <Form.Control onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name}/>
+      <Form.Label>NFT Contract Address</Form.Label>
+      <Form.Control onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name}/>
+      <Form.Text className="text-muted">
+          Alternatively, you can enter your NFT details for your profile picture.  <br/>
+      </Form.Text>
+      <Button className="btn-sm" onClick={getNftMetadata}>Verify</Button>
     </Form.Group>
   )
 }
