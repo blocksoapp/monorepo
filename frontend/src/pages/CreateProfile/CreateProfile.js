@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import CreateProfileForm from './CreateProfileForm'
 import { baseAPI } from '../../utils'
+import { Container } from 'react-bootstrap'
 
 
 function CreateProfile() {
@@ -46,11 +47,14 @@ function CreateProfile() {
    
         return (
             <div className=''>
-                <CreateProfileForm
-                profile={profile}
-                setProfile={setProfile}
-                initialState={initialState}
-                getUser={getUser}/>
+                <Container>
+                    <h2 className='fw-bold'>Edit Your Blockso Profile</h2>
+                    <CreateProfileForm
+                    profile={profile}
+                    setProfile={setProfile}
+                    initialState={initialState}
+                    getUser={getUser}/>
+                </Container>
             </div>
         )
 }

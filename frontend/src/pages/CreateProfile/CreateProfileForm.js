@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi'
 import FileUpload from './FileUpload'
 import CurrentPfp from './CurrentPfp'
 import Loading from '../../components/ui/Loading'
+import FormSocialLinks from './FormSocialLinks'
 
 function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
@@ -89,77 +90,53 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
             <Container className='border p-3'>
                 <Form>
                 
-                <CurrentPfp
-                pfp={pfp}
-                userAddress={userAddress}/>
-            
-                <FileUpload
-                profile={profile}
-                setProfile={setProfile}/>
+                <div className='d-flex'>
+                    <div className='d-flex flex-column'>
+                        <Form.Label className="fw-bold">Profile Picture</Form.Label>
+                        <Form.Text className="text-muted">
+                        Upload a picture for your profile so everyone can tell who you are!
+                        </Form.Text>
+                    </div>
+                    <div className='d-flex flex-column flex-grow'>
 
-                <NftForm
-                profile={profile}
-                setProfile={setProfile}/>
+                        <CurrentPfp
+                        pfp={pfp}
+                        userAddress={userAddress}/>
+
+                        <FileUpload
+                        profile={profile}
+                        setProfile={setProfile}/>
+
+                        <NftForm
+                        profile={profile}
+                        setProfile={setProfile}/>
+                    </div>
+                </div>
+            
+
 
                 <Form.Group className="mb-3 border p-3">
-                    <Form.Label>Bio</Form.Label>
-                    <Form.Control onChange={handleChange} name="bio" value={profile.bio} type="text" placeholder="" />
+                    <Form.Label className='fw-bold'>Your Bio</Form.Label>
+                    <Form.Control onChange={handleChange} name="bio" as="textarea" rows={3} value={profile.bio} type="text" placeholder="" />
                     <Form.Text className="text-muted">
                     Tell us a little about yourself.
                     </Form.Text>
                 </Form.Group>
 
-                <div className="border p-3">
-                    <h3>Add Socials (optional):</h3>
-                    <Form.Group className="mb-3" controlId="website">
-                    <Form.Label>Website</Form.Label>
-                    <Form.Control onChange={handleChange} name="website" value={profile.socials.website} type="text" size="sm" placeholder="" />
-                    </Form.Group>
+                <FormSocialLinks
+                handleChange={handleChange}
+                profile={profile}
+                />
 
-                    <Row>
-
-                        <Col>
-                            <Form.Group className="mb-3" controlId="">
-                            <Form.Label>Twitter</Form.Label>
-                            <Form.Control onChange={handleChange} name="twitter" value={profile.socials.twitter} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="">
-                            <Form.Label>Telegram</Form.Label>
-                            <Form.Control onChange={handleChange} name="telegram" value={profile.socials.telegram} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="">
-                            <Form.Label>Discord</Form.Label>
-                            <Form.Control onChange={handleChange} name="discord" value={profile.socials.discord} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-                        </Col>
-
-                        <Col>
-                            <Form.Group className="mb-3" controlId="">
-                            <Form.Label>Opensea</Form.Label>
-                            <Form.Control onChange={handleChange} name="opensea" value={profile.socials.opensea} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="">
-                                <Form.Label>LooksRare</Form.Label>
-                                <Form.Control onChange={handleChange} name="looksrare" value={profile.socials.looksrare} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="">
-                                <Form.Label>Snapshot</Form.Label>
-                                <Form.Control onChange={handleChange} name="snapshot" value={profile.socials.snapshot} type="text" size="sm" placeholder="" />
-                            </Form.Group>
-                        </Col>
-
-                    </Row>
-                </div>
-                <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
-                    Submit
-                </Button> 
+                <div className='p-3'>
+                    <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
+                        Submit
+                    </Button> 
                     {!isConnected ? <Form.Text className="text-muted p-3">
                     Please connect to Metamask before submitting.
                     </Form.Text> : '' }
+                </div>
+               
                 </Form>
             </Container> : 
             <Container><Loading/></Container>
