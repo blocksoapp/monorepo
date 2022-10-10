@@ -7,6 +7,8 @@ import FileUpload from './FileUpload'
 import CurrentPfp from './CurrentPfp'
 import Loading from '../../components/ui/Loading'
 import FormSocialLinks from './FormSocialLinks'
+import FormBio from './FormBio'
+import FormHeader from './FormHeader'
 
 function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
@@ -24,7 +26,9 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
               [name]: value
           }
       })
+      console.log(profile)
   } 
+
   
   // Form Submission Function
   const handleSubmit = async () => {
@@ -87,59 +91,78 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
   return (
     <div className="pt-5 pb-5">
         {!isLoading ? 
-            <Container className='border p-3'>
+            <Container className='profile-form'>
                 <Form>
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="Profile Picture"
+                            subheader="Upload a picture for your profile so everyone can tell who you are!"
+                            />
+                        </Col>
+
+                        <Col md={9}>
+                                <Col>
+                                    <CurrentPfp
+                                    pfp={pfp}
+                                    userAddress={userAddress}/>
+                                </Col>
+                                <Col>
+                                    <FileUpload
+                                    profile={profile}
+                                    setProfile={setProfile}/>
+                                </Col>
+                                <Col>
+                                    <NftForm
+                                    profile={profile}
+                                    setProfile={setProfile}/>
+                                </Col> 
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="About"
+                            subheader="Tell us about yourself. We would love to know!"
+                            />
+                        </Col>
+                        <Col md={9}>
+                        <FormBio
+                        handleChange={handleChange}
+                        profile={profile} />
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="Social Profiles"
+                            subheader="Where can people find you online? Including social profiles are completely optional."
+                            />
+                        </Col>
+                        <Col md={9}>
+                            <FormSocialLinks
+                            setProfile={setProfile}
+                            profile={profile}
+                            />
+                        </Col>
+                    </Row>
+
+                    <div className='p-3'>
+                        <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
+                            Submit
+                        </Button> 
+                        {!isConnected ? <Form.Text className="text-muted p-3">
+                        Please connect to Metamask before submitting.
+                        </Form.Text> : '' }
+                    </div>
                 
-                <div className='d-flex'>
-                    <div className='d-flex flex-column'>
-                        <Form.Label className="fw-bold">Profile Picture</Form.Label>
-                        <Form.Text className="text-muted">
-                        Upload a picture for your profile so everyone can tell who you are!
-                        </Form.Text>
-                    </div>
-                    <div className='d-flex flex-column flex-grow'>
-
-                        <CurrentPfp
-                        pfp={pfp}
-                        userAddress={userAddress}/>
-
-                        <FileUpload
-                        profile={profile}
-                        setProfile={setProfile}/>
-
-                        <NftForm
-                        profile={profile}
-                        setProfile={setProfile}/>
-                    </div>
-                </div>
-            
-
-
-                <Form.Group className="mb-3 border p-3">
-                    <Form.Label className='fw-bold'>Your Bio</Form.Label>
-                    <Form.Control onChange={handleChange} name="bio" as="textarea" rows={3} value={profile.bio} type="text" placeholder="" />
-                    <Form.Text className="text-muted">
-                    Tell us a little about yourself.
-                    </Form.Text>
-                </Form.Group>
-
-                <FormSocialLinks
-                handleChange={handleChange}
-                profile={profile}
-                />
-
-                <div className='p-3'>
-                    <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
-                        Submit
-                    </Button> 
-                    {!isConnected ? <Form.Text className="text-muted p-3">
-                    Please connect to Metamask before submitting.
-                    </Form.Text> : '' }
-                </div>
-               
-                </Form>
+                    </Form>
             </Container> : 
-            <Container><Loading/></Container>
+            <Container>
+                <Loading/>
+            </Container>
         }
     </div>
 )
