@@ -13,6 +13,8 @@ import { useEnsAvatar } from "wagmi";
 import Blockies from 'react-blockies';
 import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
+import PostsPlaceholder from '../../../components/PostsPlaceholder';
+import FeedError from './FeedError';
 
 
 function WalletFeed({ profileData, setProfileData, user }) {
@@ -23,6 +25,8 @@ function WalletFeed({ profileData, setProfileData, user }) {
     const ensAvatar = useEnsAvatar({addressOrName: address});
     const [pfpUrl, setPfpUrl] = useState(image);
     const [postText, setPostText] = useState("");
+    const [loadingFeed, setLoadingFeed] = useState(true);
+    const [feedError, setFeedError] = useState(false);
     const [posts, setPosts] = useState(null);
 
     // functions
@@ -81,6 +85,7 @@ function WalletFeed({ profileData, setProfileData, user }) {
 
     const fetchFeed = async () => {
         const url = `${baseAPI}/feed/`;
+        setLoadingFeed(true);
         const res = await fetch(url, {
             method: 'GET',
             credentials: 'include'
@@ -88,8 +93,15 @@ function WalletFeed({ profileData, setProfileData, user }) {
         if (res.status === 200) {
             var data = await res.json();
             setPosts(data);
+            setFeedError(false);
+            setLoadingFeed(false);
         }
-        else { console.log("unhandled case: ", res) }
+        else {
+            // TODO show feedback here
+            setFeedError(true);
+            setLoadingFeed(false);
+            console.error(res);
+        }
     }
 
     // set profile pic and fetch feed on mount
@@ -104,6 +116,8 @@ function WalletFeed({ profileData, setProfileData, user }) {
 
     return (
         <Container>
+
+            {/* New Post Form */}
             <Container>
                 <Row className="justify-content-center">
                     <Col xs={12} lg={6}>
@@ -162,20 +176,27 @@ function WalletFeed({ profileData, setProfileData, user }) {
                 </Row>
             </Container>
 
-            {/* Posts Section */}
-            <Container>
-                {posts && posts.map(post => (
-                    <Post
-                        key={post.id}
-                        author={post.author}
-                        text={post.text}
-                        imgUrl={post.imgUrl}
-                        created={post.created}
-                        refTx={post.refTx}
-                        pfp={pfpUrl}
-                    />
-                ))}
-            </Container>
+            {/* Feed or Placeholder */}
+            {loadingFeed === true
+            ? <PostsPlaceholder />
+            : feedError === true
+                ? <FeedError retryAction={fetchFeed} />
+                : <Container>
+                    {posts && posts.map(post => (
+                        <Post
+                            key={post.id}
+                            author={post.author}
+                            text={post.text}
+                            imgUrl={post.imgUrl}
+                            created={post.created}
+                            refTx={post.refTx}
+                            pfp={pfpUrl}
+                            profileAddress={props.user.address}
+                        />
+                    ))}
+                </Container>
+            }
+
         </Container>
     )
 }

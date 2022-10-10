@@ -27,7 +27,7 @@ function App() {
               <Route path="/home" element={<Home/>}></Route>
               <Route path="/explore" element={<Explore/>}></Route>
               <Route path="/edit-profile" element={<CreateProfile/>}></Route>
-              <Route path="/:address/profile" element={<Profile/>}></Route>
+              <Route path="/:urlInput/profile" element={<Profile/>}></Route>
             </Routes>
         </Router>
         </>

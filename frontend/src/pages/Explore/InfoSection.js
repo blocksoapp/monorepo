@@ -13,9 +13,6 @@ function InfoSection() {
                         <br/>
                         Follow your favorite personalities, share your latest, and collect that sweet internet karma :)
                     </p>
-                    <div className="mt-2">
-                        <Button className="btn-lg custom-btn" href="https://github.com/blocksoapp/monorepo" target="_blank">Learn More</Button>
-                    </div>
                 </div>
             </div>
         </Container>

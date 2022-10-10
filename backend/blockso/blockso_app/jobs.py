@@ -45,19 +45,27 @@ def get_user_tx_history(address):
     """
     url = get_tx_history_url(address)
     resp = client.get(url) 
+    resp.raise_for_status()
     data = resp.json()
     txs = data["data"]["items"]
 
     return txs
 
 
-def parse_and_create_tx(tx_data):
+def parse_and_create_tx(tx_data, address):
     """
     Parses transaction data and stores it in the database.
-    Returns the created object.
-    Returns None if the transaction already exists in the database.
+    Returns the created Transaction object.
+    Returns None if the transaction:
+     - does not originate from the given address, or
+     - does not have any transfers that originate from
+       the given address, or
+     - the transaction already exists in the db.
     """
-    # create Transaction object using the transaction data
+    tx = None
+    address = address.lower()
+
+    # data for creating new tx
     object_kwargs = {
         "chain_id": chain_id,
         "tx_hash": tx_data["tx_hash"],
@@ -68,11 +76,16 @@ def parse_and_create_tx(tx_data):
         "to_address": tx_data["to_address"],
         "value": tx_data["value"]
     }
-    tx, created = Transaction.objects.get_or_create(**object_kwargs)
 
-    # return None if the transaction already exists in the db
-    if created is False:
+    # return None if transaction already exists
+    if Transaction.objects.filter(
+        tx_hash=object_kwargs["tx_hash"]
+    ).count() > 0:
         return None
+
+    # create transaction if it originated from the given address
+    if object_kwargs["from_address"] == address:
+        tx = Transaction.objects.create(**object_kwargs)
 
     # create db records for the events we support
     log_events = tx_data["log_events"]
@@ -81,8 +94,15 @@ def parse_and_create_tx(tx_data):
         if event["decoded"] is None:
             continue
 
-        # create an erc20 transfer record
-        if event["decoded"]["signature"] == erc20_transfer_sig:
+        # create an erc20 transfer record if
+        # the from address in the log matches that of the sender
+        event_sig = event["decoded"]["signature"]
+        if event_sig == erc20_transfer_sig and \
+            event["decoded"]["params"][0]["value"] == address:
+
+            if tx is None:
+                tx, _ = Transaction.objects.get_or_create(**object_kwargs)
+
             ERC20Transfer.objects.create(
                 tx=tx,
                 contract_address=event["sender_address"],
@@ -95,8 +115,14 @@ def parse_and_create_tx(tx_data):
                 decimals=event["sender_contract_decimals"]
             )
 
-        # create an erc721 transfer record
-        if event["decoded"]["signature"] == erc721_transfer_sig:
+        # create an erc721 transfer record if
+        # the from address in the log matches that of the sender
+        if event_sig == erc721_transfer_sig and \
+            event["decoded"]["params"][0]["value"] == address:
+
+            if tx is None:
+                tx, _ = Transaction.objects.get_or_create(**object_kwargs)
+
             ERC721Transfer.objects.create(
                 tx=tx,
                 contract_address=event["sender_address"],
@@ -128,7 +154,7 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
-    address = post_author.ethereum_address
+    address = post_author.ethereum_address.lower()
 
     # create Post if author is the sender of the tx
     if tx_record.from_address == address:
@@ -177,11 +203,11 @@ def process_address_txs(address):
     # create db records based on history
     for transaction in history:
         # create a Transaction using the tx data
-        tx_record = parse_and_create_tx(transaction)
+        tx_record = parse_and_create_tx(transaction, address)
 
         # exit if the tx has been processed before
         if tx_record is None:
-            break
+            continue
 
         # create a Post using the tx data
         create_post(tx_record, user)

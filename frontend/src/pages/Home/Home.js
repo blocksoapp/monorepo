@@ -37,6 +37,7 @@ function Home() {
               className="mt-5"
               profileData={profileData}
               setProfileData={setProfileData}
+              author={user["address"]}
               user={user}
           /> : 
           <h1 class="text-muted text-center">Loading...</h1>

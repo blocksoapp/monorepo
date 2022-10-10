@@ -14,7 +14,7 @@ import eth_account
 import responses
 
 # our imports
-from .models import Follow, Post, Transaction, ERC721Transfer
+from .models import Follow, Post, Transaction, ERC20Transfer, ERC721Transfer
 from . import jobs
 
 
@@ -60,18 +60,32 @@ class BaseTest(APITestCase):
             "refTx": None
         }
 
-        # sample tx history json
+        # sample tx history json for erc20 transactions
         with open(
             "./blockso_app/covalent-tx-history-sample.json",
             "r",
             encoding="utf-8"
         ) as fobj:
-            cls.tx_history_resp_data = fobj.read() 
+            cls.erc20_tx_resp_data = fobj.read() 
             # replace all occurrences of the address in the tx history sample
             # with the address of our test signer
-            cls.tx_history_resp_data = cls.tx_history_resp_data.replace(
+            cls.erc20_tx_resp_data = cls.erc20_tx_resp_data.replace(
                 "0xa79e63e78eec28741e711f89a672a4c40876ebf3",
-                cls.test_signer.address
+                cls.test_signer.address.lower()
+            )
+
+        # sample tx history json for erc721 transactions
+        with open(
+            "./blockso_app/covalent-tx-history-erc721.json",
+            "r",
+            encoding="utf-8"
+        ) as fobj:
+            cls.erc721_tx_resp_data = fobj.read() 
+            # replace all occurrences of the address in the tx sample
+            # with the address of our test signer
+            cls.erc721_tx_resp_data = cls.erc721_tx_resp_data.replace(
+                "0xc9eb983357b88921a89844d7047589a37b563108",
+                cls.test_signer.address.lower()
             )
 
     def setUp(self):
@@ -224,6 +238,18 @@ class AuthTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
         session_key = self.client.cookies.get("sessionid").value
         self.assertEqual(session_key, "")
+
+    def test_logout_unauthed(self):
+        """
+        Assert that a user can call logout even if they are not authenticated.
+        """
+        # prepare test
+        # logout
+        resp = self.client.post("/api/auth/logout/")
+
+        # make assertions
+        # assert that the user no longer has a session
+        self.assertEqual(resp.status_code, 200)
 
 
 class ProfileTests(BaseTest):
@@ -410,19 +436,37 @@ class TransactionParsingTests(BaseTest):
         """
         Assert that an address' tx history is retrieved
         and parsed correctly.
-        Assert that the address now has Posts that
+        Assert that the address now has Transactions that
         reflect their transaction history.
         """
         # set up test
-        self._mock_tx_history_response(self.test_signer.address, self.tx_history_resp_data)
+        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
 
         # make assertions
-        # assert that the correct number of Posts has been created
-        post_count = Post.objects.all().count()
-        self.assertEqual(post_count, 6)
+        # assert that the correct number of Transactions has been created
+        tx_count = Transaction.objects.all().count()
+        self.assertEqual(tx_count, 6)
+
+    def test_process_erc20_transfers(self):
+        """
+        Assert that an address' tx history is retrieved
+        and parsed correctly.
+        Assert that the address now has ERC20Transfers that
+        reflect their transaction history.
+        """
+        # set up test
+        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
+
+        # call function
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make assertions
+        # assert that the correct number of ERC20Transfers has been created
+        transfer_count = ERC20Transfer.objects.all().count()
+        self.assertEqual(transfer_count, 2)
 
     def test_posts_originate_from_address(self):
         """
@@ -433,7 +477,7 @@ class TransactionParsingTests(BaseTest):
         quality posts.
         """
         # set up test
-        self._mock_tx_history_response(self.test_signer.address, self.tx_history_resp_data)
+        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -449,16 +493,10 @@ class TransactionParsingTests(BaseTest):
         is parsed and stored correctly.
         """
         # set up test
-        with open(
-            "./blockso_app/covalent-tx-history-erc721.json",
-            "r"
-        ) as fobj:
-            tx_history_json = fobj.read()
-            self._mock_tx_history_response(
-                self.test_signer.address,
-                tx_history_json
-            )
-            tx_history_obj = json.loads(tx_history_json)
+        self._mock_tx_history_response(
+            self.test_signer.address,
+            self.erc721_tx_resp_data
+        )
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -466,17 +504,16 @@ class TransactionParsingTests(BaseTest):
         # make assertions
         # assert that the correct number of Transactions has been created
         tx_count = Transaction.objects.all().count()
-        expected = len(tx_history_obj["data"]["items"])
-        self.assertEqual(tx_count, expected)
+        self.assertEqual(tx_count, 1)
 
         # assert that the correct number of Posts has been created
         # there should be as many Posts as Transactions/Transfers where
         # the post author is the from address
-        self.assertEqual(Post.objects.all().count(), 0)
+        self.assertEqual(Post.objects.all().count(), 1)
 
         # assert that the correct number of ERC721Transfers has been created
         erc721_transfer_count = ERC721Transfer.objects.all().count()
-        self.assertEqual(erc721_transfer_count, 6)
+        self.assertEqual(erc721_transfer_count, 1)
 
 
 class PostTests(BaseTest):
@@ -611,7 +648,7 @@ class PostTests(BaseTest):
         self.mock_responses.add(
             responses.GET,
             jobs.get_tx_history_url(self.test_signer.address),
-            body=self.tx_history_resp_data
+            body=self.erc20_tx_resp_data
         )
         jobs.process_address_txs(self.test_signer.address)
 
@@ -709,3 +746,46 @@ class FeedTests(BaseTest):
         self.assertEqual(len(resp.data), 2)
         self.assertDictEqual(resp.data[0], expected[0])
         self.assertDictEqual(resp.data[1], expected[1])
+
+
+class ExploreTests(BaseTest):
+    """
+    Test behavior around explore page.
+    """
+
+    def test_profiles_by_follower_count(self):
+        """
+        Assert that the top 8 profiles by follower count are returned.
+        """
+        # set up test
+        # create 10 profiles
+        signers = []
+        for i in range(10):
+            signer = eth_account.Account.create()
+            self._do_login(signer)  # a user is created when signer logs in
+            signers.append(signer)
+
+        # make each user follow the remaining users
+        # so user 1 follows users 2-10
+        # user 2 follows users 3-10, etc
+        for i in range(10):
+            self._do_login(signers[i])
+            for j in range(i+1, 10):
+                url = f"/api/{signers[j].address}/follow/"
+                self.client.post(url)
+
+        # make request to fetch explore page profiles
+        self._do_logout()
+        url = "/api/explore/"
+        resp = self.client.get(url)
+
+        # make assertions
+        # assert that the top 8 profiles are returned
+        self.assertEqual(len(resp.data), 8)
+
+        # assert that the explore profiles are sorted
+        # in order from most followers to least
+        # user 10 should have the most followers
+        # user 3 should have the least followers
+        for i in range(8):
+            self.assertEqual(resp.data[i]["address"], signers[9-i].address)
