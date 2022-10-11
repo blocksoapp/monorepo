@@ -46,9 +46,9 @@ function CreateProfile() {
       }
    
         return (
-            <div className=''>
+            <div className='p-sm-4'>
                 <Container>
-                    <h2 className='fw-bold'>Edit Your Blockso Profile</h2>
+                    <h2 className='fw-bold mb-5'>Edit Your Blockso Profile</h2>
                     <CreateProfileForm
                     profile={profile}
                     setProfile={setProfile}

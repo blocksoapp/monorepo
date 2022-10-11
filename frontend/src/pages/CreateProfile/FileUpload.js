@@ -74,7 +74,7 @@ function FileUpload({ profile, setProfile }) {
         <Form.Group className="mb-3 border p-3">
     
             <Form.Group className="mb-1">
-              <Form.Label>Upload Profile Picture</Form.Label>
+              <Form.Label className="fw-bold">Upload Profile Picture</Form.Label>
               <Form.Control onChange={handleBufferChange} type="file"/>
             </Form.Group>
 

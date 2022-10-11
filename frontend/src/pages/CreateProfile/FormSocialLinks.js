@@ -16,7 +16,7 @@ function FormSocialLinks({ profile, setProfile }) {
         } 
 
   return (
-    <div className="border p-3">
+    <div className="">
             <Form.Group className="mb-3">
             <Form.Label className="fw-bold">Website</Form.Label>
             <Form.Control onChange={handleSocialChange} name="website" value={profile.socials.website} type="text" size="sm" placeholder="" />

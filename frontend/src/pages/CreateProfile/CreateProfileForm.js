@@ -16,6 +16,7 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
     const [pfp, setPfp] = useState(null)
     const [userAddress, setUserAddress] = useState(profile.address)
     const [isLoading, setIsLoading] = useState(false)
+    
 
      // Form State Update
      const handleChange = (event) => {
@@ -89,9 +90,9 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
 
   return (
-    <div className="pt-5 pb-5">
+    <div className="p-3 border mb-5 mt-3">
         {!isLoading ? 
-            <Container className='profile-form'>
+            <Container className=''>
                 <Form>
                     <Row>
                         <Col>
@@ -146,17 +147,19 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
                             setProfile={setProfile}
                             profile={profile}
                             />
+
+
+                            <div className='mt-3 mb-3'>
+                                <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
+                                    Submit
+                                </Button> 
+                                {!isConnected ? <Form.Text className="text-muted p-3">
+                                Please connect to Metamask before submitting.
+                                </Form.Text> : '' }
+                            </div>
                         </Col>
                     </Row>
 
-                    <div className='p-3'>
-                        <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
-                            Submit
-                        </Button> 
-                        {!isConnected ? <Form.Text className="text-muted p-3">
-                        Please connect to Metamask before submitting.
-                        </Form.Text> : '' }
-                    </div>
                 
                     </Form>
             </Container> : 
