@@ -41,7 +41,6 @@ function Post(props) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    //const [pfpUrl, setPfpUrl] = useState(null);
 
     // functions
 
@@ -123,14 +122,14 @@ function Post(props) {
 
         return (
             <Container className="mt-4">
-                <Row className="justify-content-center">
+                <Row className="justify-content-center mb-4">
                     <Col xs={12} lg={6}>
                         <Card>
                             {/* Card header that includes pfp, address, created time. */}
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        {pfpUrl === null
+                                        {pfpUrl === null || pfpUrl === ""
                                         ? <Blockies
                                             seed={props.author}
                                             size={15}

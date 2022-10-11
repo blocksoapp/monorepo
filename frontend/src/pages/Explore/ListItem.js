@@ -84,7 +84,7 @@ function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
             <div className="mt-3">
                 {displayName()}
             </div>
-            <div>
+            <div className="pt-4 ps-5 pe-5">
                 <p>{bio}</p>
             </div>
             <Row className="justify-content-center mt-3 mb-3">
