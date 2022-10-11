@@ -14,6 +14,7 @@ function FeaturedList() {
     // UseEffect Calling getFeaturedProfiles then map out each item
     useEffect(() => {
         getFeaturedProfiles()
+        console.log(profileData)
     }, [])
     
 

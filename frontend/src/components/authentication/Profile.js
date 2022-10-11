@@ -111,7 +111,6 @@ function Profile() {
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);
-            determineProfilePic(); 
             setProfileDataLoading(false);
         }
         else if (res.status === 404) {
@@ -210,13 +209,18 @@ function Profile() {
     }, [address])
         
     useEffect(() => {
-        if (pfpUrl === ensAvatar["data"]) {
-            return;
+        determineProfilePic()
+
+        return () => {
+            if (pfpUrl === ensAvatar["data"]) {
+                return;
+            }
+            if (ensAvatar["data"] !== "") {
+                setPfpUrl(ensAvatar["data"]);
+            }
         }
-        if (ensAvatar["data"] !== "") {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }, [pfpUrl])
+
+        }, [profileData])
 
     useEffect(() => {
         // TODO clean this up once a job system is added in

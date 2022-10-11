@@ -9,9 +9,22 @@ import { useUser } from "../../hooks"
 function Home() {  
     // constants
     const user = useUser();
+    const [profileData, setProfileData] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     // state
+    useEffect(() => {
+      setProfileData(user)
+      console.log('setProfileData to user')
+    }, [user])
 
+    useEffect(() => {
+      console.log('profile data recognized')
+      setLoading(false)
+        console.log('profile data: ', profileData)
+    }, [profileData])
+    
+    
     // functions
 
     return (
@@ -19,13 +32,15 @@ function Home() {
           {user === null &&
           <h1 class="text-muted text-center">Please sign in.</h1>
           }
-          {user !== null &&
+          {user !== null && profileData !== null && loading === false ?
           <WalletFeed
               className="mt-5"
+              profileData={profileData}
+              setProfileData={setProfileData}
               author={user["address"]}
-              pfp={user["image"]}
               user={user}
-          />
+          /> : 
+          <h1 class="text-muted text-center">Loading...</h1>
           }
         </Container>
     );
