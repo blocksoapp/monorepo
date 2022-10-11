@@ -191,7 +191,7 @@ function WalletFeed({ profileData, setProfileData, user }) {
                             created={post.created}
                             refTx={post.refTx}
                             pfp={pfpUrl}
-                            profileAddress={props.user.address}
+                            profileAddress={user['address']}
                         />
                     ))}
                 </Container>
