@@ -102,7 +102,7 @@ function NftForm({ profile, setProfile }) {
           Alternatively, you can enter your NFT details for your profile picture.  <br/>
       </Form.Text>
       <div className='d-flex align-items-center'>
-              <Button className="btn-sm me-4 mt-1" onClick={getNftMetadata}>Verify</Button>
+              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Verify</Button>
               <Form.Text className={`${!isError ? 'text-muted' : 'text-danger'}`}>
               {loadingMsg}
               </Form.Text>

@@ -150,7 +150,7 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
 
 
                             <div className='mt-3 mb-3'>
-                                <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
+                                <Button disabled={!isConnected} variant="dark" onClick={handleSubmit}>
                                     Submit
                                 </Button> 
                                 {!isConnected ? <Form.Text className="text-muted p-3">

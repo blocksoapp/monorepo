@@ -79,7 +79,7 @@ function FileUpload({ profile, setProfile }) {
             </Form.Group>
 
             <div className='d-flex align-items-center'>
-              <Button className="mt-2 me-3 btn-sm" onClick={handleFileSubmit}>Upload</Button>
+              <Button className="mt-2 me-3 btn-sm" variant="dark" onClick={handleFileSubmit}>Upload</Button>
               <Form.Text className={`${!isLoading ? 'text-success' : 'text-muted'}`}>
               {loadingText}
               </Form.Text>
