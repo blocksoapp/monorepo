@@ -32,7 +32,7 @@ function FileUpload({ profile, setProfile }) {
         setLoadingText("Retrieving an ipfs link...")
         const client = new NFTStorage({ token: nftAPI })
         const content = new Blob([bufferImage])
-        const cid = await client.storeBlob(content)
+        var cid = await client.storeBlob(content)
         console.log('fetching nft storage api')
         const res = await fetch('https://api.nft.storage/upload', {
             method: 'POST',
@@ -46,8 +46,7 @@ function FileUpload({ profile, setProfile }) {
         const data = await res.json()
         if(data.ok) {
             console.log('uploaded to ipfs successfully')
-            const uri = 'https://www.ipfs.com/ipfs/'
-            const ipfs = `${uri}${cid}`
+            const ipfs = `https://${cid}.ipfs.nftstorage.link`
             setProfile(prevValue => {
                 return {
                     ...prevValue,

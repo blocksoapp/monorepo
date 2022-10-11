@@ -36,11 +36,12 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
+    const [pfpUrl, setPfpUrl] = useState(props.pfp)
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const [pfpUrl, setPfpUrl] = useState(null);
+    //const [pfpUrl, setPfpUrl] = useState(null);
 
     // functions
 
@@ -93,21 +94,25 @@ function Post(props) {
     // determine tx type on component mount
     useEffect(() => {
         determineTxType();
-        determineProfilePic(props.pfp);
     }, [])
 
     useEffect(() => {
-        if (pfpUrl !== null && pfpUrl !== undefined && pfpUrl !== "") {
-            return;
-        }
+        determineProfilePic(props.pfp);
 
-        if (pfpUrl === ensAvatar["data"]) {
-            return;
+        return () => {
+            if (pfpUrl !== null && pfpUrl !== undefined) {
+                return;
+            }
+    
+            if (pfpUrl === ensAvatar["data"]) {
+                return;
+            }
+            if (ensAvatar["data"] !== "") {
+                setPfpUrl(ensAvatar["data"]);
+            }
         }
-        if (ensAvatar["data"] !== "") {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }, [pfpUrl])
+        
+    }, [])
 
 
     const render = function () {
