@@ -126,7 +126,7 @@ function WalletFeed({ profileData, setProfileData, user }) {
                             <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
-                                        {pfpUrl === null || ''
+                                        {pfpUrl === null || pfpUrl === ''
                                         ? <Blockies
                                             seed={address}
                                             size={15}
