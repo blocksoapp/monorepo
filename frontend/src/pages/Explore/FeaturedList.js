@@ -35,14 +35,14 @@ function FeaturedList() {
             ? <ExplorePlaceholder />
             : profileData.map( (item, index) => {
                 return (
-                    <div className="col-sm-6">
+                    <div key={index} className="col-sm-6">
                         <ListItem
+                            key={index}
                             userAddress={item.address}
                             imageUrl={item.image}
                             bio={item.bio}
                             numFollowers={item.numFollowers}
                             numFollowing={item.numFollowing}
-                            key={index}
                             />
                     </div>
                 )})

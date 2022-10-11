@@ -8,7 +8,18 @@ function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
 
     // state
     const [pfpUrl, setPfpUrl] = useState(null)
-    const ensAvatar = useEnsAvatar({addressOrName: userAddress })
+    const ensAvatar = useEnsAvatar({
+        addressOrName: userAddress,
+        onSuccess(data) {
+            // set the user's pfp to their ens avatar
+            // if they haven't uploaded a profile pic
+            if (data !== null) {
+                if (pfpUrl === null || pfpUrl === "") {
+                    setPfpUrl(data);
+                }
+            }
+        }
+    })
     const { data, isLoading } = useEnsName({ address: userAddress })
 
     // react-router dependency
@@ -26,34 +37,31 @@ function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
         else if(data) return <h4> {data} </h4>
     }
 
-    /* Sets the user's pfp to their ens avatar
-    * if the user has not uploaded a profile pic.
-    * Returns null if the user does not have an
-    * ens avatar. That way a blockie will be
-    * displayed instead.
-    */
    
-     const determineProfilePic = async () => {
-        if (imageUrl !== "") {
-            setPfpUrl(imageUrl);
-        }
-        else {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }
-   
-   
-
     // Navigate to user profile
     const handleClick = () => {
         console.log('view profile requested')
         navigate(`/${userAddress}/profile`)
     }
 
-     // set profile pic
+    /*
+     * Sets the user's pfp to their ens avatar
+     * if the user has not uploaded a profile pic.
+     * If a user does not have an ens avatar or
+     * a profile pic, then pfpUrl remains null and
+     * a Blockie is shown instead.
+     */
      useEffect(() => {
-        determineProfilePic();
-    }, [])
+        if (imageUrl !== "") {
+            setPfpUrl(imageUrl);
+        }
+        else {
+            if (ensAvatar.isLoading === false && ensAvatar.data !== null) {
+                setPfpUrl(ensAvatar.data);
+            }
+        }
+    }, [imageUrl])
+
 
   return (
     <div className="card-body d-flex flex-column justify-content-center p-3 mb-5 align-items-center rounded border"
