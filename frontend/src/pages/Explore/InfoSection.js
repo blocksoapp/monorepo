@@ -9,9 +9,11 @@ function InfoSection() {
                 <div className='w-75 p-1 p-sm-3'>
                     <h1>A Social Platform for <span className="primary-color">WEB3</span></h1>
                     <p className="fs-4 lh-sm">
-                        Blockso is a new way to keep up with your crypto frens!
+                        Blockso is a new way to keep up with the crypto world!
                         <br/>
-                        Follow your favorite personalities, share your latest, and collect that sweet internet karma :)
+                        Follow your frens, celebrities, and total randos!
+                        <br/>
+                        Keep them in the loop by sharing your latest!
                     </p>
                 </div>
             </div>
