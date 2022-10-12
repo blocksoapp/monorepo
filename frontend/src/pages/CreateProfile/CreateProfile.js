@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import CreateProfileForm from './CreateProfileForm'
 import { baseAPI } from '../../utils'
+import { Container } from 'react-bootstrap'
 
 
 function CreateProfile() {
@@ -18,20 +19,6 @@ function CreateProfile() {
         }
     })
 
-    const initialState = {
-        image: '',
-        bio: '',
-        socials: {
-            website: '',
-            telegram: '',
-            discord: '',
-            twitter: '',
-            opensea: '',
-            looksrare: '',
-            snapshot: ''
-        }
-    }
-
     // Fetch user profile status
     const getUser = async () => {
         const url = `${baseAPI}/user/`
@@ -45,13 +32,15 @@ function CreateProfile() {
       }
    
         return (
-            <>
-                <CreateProfileForm
-                profile={profile}
-                setProfile={setProfile}
-                initialState={initialState}
-                getUser={getUser}/>
-            </>
+            <div className='p-sm-4'>
+                <Container>
+                    <h2 className='fw-bold mb-5'>Edit Your Blockso Profile</h2>
+                    <CreateProfileForm
+                    profile={profile}
+                    setProfile={setProfile}
+                    getUser={getUser}/>
+                </Container>
+            </div>
         )
 }
 

@@ -1,13 +1,22 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Container, Form, Button, Row, Col } from 'react-bootstrap'
 import { baseAPI, getCookie } from '../../utils'
 import NftForm from './NftForm'
 import { useAccount } from 'wagmi'
 import FileUpload from './FileUpload'
+import CurrentPfp from './CurrentPfp'
+import Loading from '../../components/ui/Loading'
+import FormSocialLinks from './FormSocialLinks'
+import FormBio from './FormBio'
+import FormHeader from './FormHeader'
 
-function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
+function CreateProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
+    const [pfp, setPfp] = useState(null)
+    const [userAddress, setUserAddress] = useState(profile.address)
+    const [isLoading, setIsLoading] = useState(false)
+    
 
      // Form State Update
      const handleChange = (event) => {
@@ -18,11 +27,14 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
               [name]: value
           }
       })
+      console.log(profile)
   } 
+
   
   // Form Submission Function
   const handleSubmit = async () => {
       if(!isConnected) return
+      setIsLoading(true)
       const url = `${baseAPI}/${address}/profile/`
       const formRes = await fetch(url, {
           method: 'PUT',
@@ -36,8 +48,15 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
       
       if(formRes.status === 200 || 201) {
         console.log('successfully posted data')
-      } else console.log('error posting data')
- 
+        setTimeout(() => {
+            setIsLoading(false)
+        }, 2000)
+      } else {
+        console.log('error posting data')
+        setTimeout(() => {
+                setIsLoading(false)
+        }, 2000)
+      }
   }
 
   const checkForProfile = async () => {
@@ -59,82 +78,94 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
       checkForProfile();
   }, [])
 
+  useEffect(() => {
+    setPfp(profile.image)
+    setUserAddress(profile.address)
+  
+    return () => {
+      console.log('profile image url: ', pfp)
+    }
+  }, [checkForProfile])
+  
+
 
   return (
-    <>
-    <Container className='p-3'>
-        <Form>
-        
-        <FileUpload
-        profile={profile}
-        setProfile={setProfile}/>
+    <div className="p-3 border mb-5 mt-3">
+        {!isLoading ? 
+            <Container>
+                <Form>
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="Profile Picture"
+                            subheader="Upload a picture for your profile so everyone can tell who you are!"
+                            />
+                        </Col>
 
-        <NftForm
-        profile={profile}
-        setProfile={setProfile}/>
+                        <Col md={9}>
+                                <Col>
+                                    <CurrentPfp
+                                    pfp={pfp}
+                                    userAddress={address}/>
+                                </Col>
+                                <Col>
+                                    <FileUpload
+                                    profile={profile}
+                                    setProfile={setProfile}/>
+                                </Col>
+                                <Col>
+                                    <NftForm
+                                    profile={profile}
+                                    setProfile={setProfile}/>
+                                </Col> 
+                        </Col>
+                    </Row>
 
-        <Form.Group className="mb-3 border p-3">
-            <Form.Label>Bio</Form.Label>
-            <Form.Control onChange={handleChange} name="bio" value={profile.bio} type="text" placeholder="" />
-            <Form.Text className="text-muted">
-            Tell us a little about yourself.
-            </Form.Text>
-        </Form.Group>
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="About"
+                            subheader="Tell us about yourself. We would love to know!"
+                            />
+                        </Col>
+                        <Col md={9}>
+                        <FormBio
+                        handleChange={handleChange}
+                        profile={profile} />
+                        </Col>
+                    </Row>
 
-        <div className="border p-3">
-            <h3>Add Socials (optional):</h3>
-            <Form.Group className="mb-3" controlId="website">
-            <Form.Label>Website</Form.Label>
-            <Form.Control onChange={handleChange} name="website" value={profile.socials.website} type="text" size="sm" placeholder="" />
-            </Form.Group>
+                    <Row>
+                        <Col>
+                            <FormHeader
+                            header="Social Profiles"
+                            subheader="Where can people find you online? Including social profiles are completely optional."
+                            />
+                        </Col>
+                        <Col md={9}>
+                            <FormSocialLinks
+                            setProfile={setProfile}
+                            profile={profile}
+                            />
 
-            <Row>
 
-                <Col>
-                    <Form.Group className="mb-3" controlId="">
-                    <Form.Label>Twitter</Form.Label>
-                    <Form.Control onChange={handleChange} name="twitter" value={profile.socials.twitter} type="text" size="sm" placeholder="" />
-                    </Form.Group>
+                            <div className='mt-3 mb-3'>
+                                <Button disabled={!isConnected} variant="dark" onClick={handleSubmit}>
+                                    Submit
+                                </Button> 
+                                {!isConnected ? <Form.Text className="text-muted p-3">
+                                Please connect to Metamask before submitting.
+                                </Form.Text> : '' }
+                            </div>
+                        </Col>
+                    </Row>
 
-                    <Form.Group className="mb-3" controlId="">
-                    <Form.Label>Telegram</Form.Label>
-                    <Form.Control onChange={handleChange} name="telegram" value={profile.socials.telegram} type="text" size="sm" placeholder="" />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="">
-                    <Form.Label>Discord</Form.Label>
-                    <Form.Control onChange={handleChange} name="discord" value={profile.socials.discord} type="text" size="sm" placeholder="" />
-                    </Form.Group>
-                </Col>
-
-                <Col>
-                    <Form.Group className="mb-3" controlId="">
-                    <Form.Label>Opensea</Form.Label>
-                    <Form.Control onChange={handleChange} name="opensea" value={profile.socials.opensea} type="text" size="sm" placeholder="" />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="">
-                        <Form.Label>LooksRare</Form.Label>
-                        <Form.Control onChange={handleChange} name="looksrare" value={profile.socials.looksrare} type="text" size="sm" placeholder="" />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="">
-                        <Form.Label>Snapshot</Form.Label>
-                        <Form.Control onChange={handleChange} name="snapshot" value={profile.socials.snapshot} type="text" size="sm" placeholder="" />
-                    </Form.Group>
-                </Col>
-
-             </Row>
-        </div>
-        <Button disabled={!isConnected} variant="primary" onClick={handleSubmit}>
-            Submit
-        </Button> 
-            {!isConnected ? <Form.Text className="text-muted p-3">
-            Please connect to Metamask before submitting.
-            </Form.Text> : '' }
-        </Form>
-    </Container>
-</>
+                
+                    </Form>
+            </Container> : 
+                <Loading/>
+        }
+    </div>
 )
 }
 

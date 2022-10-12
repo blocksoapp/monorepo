@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { NFTStorage, Blob } from 'nft.storage'
 import { nftAPI } from '../../utils'
@@ -8,6 +8,8 @@ function FileUpload({ profile, setProfile }) {
         // state for filepath
         const [imagePath, setImagePath] = useState('')
         const [bufferImage, setBufferImage] = useState([])
+        const [isLoading, setIsLoading] = useState(Boolean)
+        const [loadingText, setLoadingText] = useState('')
 
         const { isConnected } = useAccount()
 
@@ -22,9 +24,12 @@ function FileUpload({ profile, setProfile }) {
         setBufferImage(buffer)
     }
 
+
     // Handle Submission to DB
     const handleFileSubmit = async () => {
         if(!isConnected) return
+        setIsLoading(true)
+        setLoadingText("Retrieving an ipfs link...")
         const client = new NFTStorage({ token: nftAPI })
         const content = new Blob([bufferImage])
         var cid = await client.storeBlob(content)
@@ -48,21 +53,40 @@ function FileUpload({ profile, setProfile }) {
                     image: ipfs
                 }
             })
+            setIsLoading(false)
+            setLoadingText('Successfully uploaded image to ipfs!')
         } else if (!data.ok) {
             console.log('There was an error uploading your image to ipfs')
         }
     } 
 
+    // Reset loadingText state after 5 seconds
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setLoadingText('')
+      }, 5000);
+      return () => clearTimeout(timer);
+    }, [loadingText]);
+
   return (
-    <Form.Group className="mb-3 border p-3">
-        <Form.Label>Profile Picture</Form.Label>
-            <Form.Control onChange={handleBufferChange} type="file" id="file" size="sm" name="imagePath" value={imagePath}/>
-            <Form.Text className="text-muted mb-3">
-            Upload a file for your profile picture. <br/>
-            </Form.Text> 
-            <Button className="mt-2 btn-sm" onClick={handleFileSubmit}>Upload File</Button>
+    <>
+        <Form.Group className="mb-3 border p-3">
+    
+            <Form.Group className="mb-1">
+              <Form.Label className="fw-bold">Upload Profile Picture</Form.Label>
+              <Form.Control onChange={handleBufferChange} type="file"/>
+            </Form.Group>
+
+            <div className='d-flex align-items-center'>
+              <Button className="mt-2 me-3 btn-sm" variant="dark" onClick={handleFileSubmit}>Upload</Button>
+              <Form.Text className={`${!isLoading ? 'text-success' : 'text-muted'}`}>
+              {loadingText}
+              </Form.Text>
+            </div>
         </Form.Group>
+    </>
   )
 }
 
 export default FileUpload
+

@@ -18,8 +18,12 @@ code {
   color: #00A8E8
 }
 
+.fullheight-container {
+  min-height: 100vh;
+}
 
-/* Explore Page */
+
+/* EXPLORE PAGE */
 
 .info-container {
   background-color: #003459;
@@ -56,5 +60,3 @@ code {
 .btn-primary.custom-btn:hover {
   background-color: #007EA7;
 }
-  
-
