@@ -106,7 +106,7 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
                                 <Col>
                                     <CurrentPfp
                                     pfp={pfp}
-                                    userAddress={userAddress}/>
+                                    userAddress={address}/>
                                 </Col>
                                 <Col>
                                     <FileUpload

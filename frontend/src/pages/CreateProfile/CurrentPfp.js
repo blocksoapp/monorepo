@@ -13,7 +13,7 @@ function CurrentPfp({ pfp, userAddress }) {
         {/* Profile picture */}
         <Row className="justify-content-center text-center p-2">
                                     <Col className="col-auto">
-                                        {pfp === null
+                                        {pfp === null || pfp === ""
                                         ? <Blockies
                                             seed={userAddress}
                                             size={16}
