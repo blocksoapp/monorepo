@@ -3,9 +3,9 @@ import { Row, Col, Image, Form } from 'react-bootstrap'
 import Blockies from 'react-blockies';
 import ProfileEnsAndAddress from '../../components/ProfileEnsAndAddress';
 
-function CurrentPfp(props) {
+function CurrentPfp({ pfp, userAddress }) {
     
-    const [pfpUrl, setPfpUrl] = useState(props.pfp)
+ 
 
   
   return (
@@ -13,9 +13,9 @@ function CurrentPfp(props) {
         {/* Profile picture */}
         <Row className="justify-content-center text-center p-2">
                                     <Col className="col-auto">
-                                        {pfpUrl === null
+                                        {pfp === null
                                         ? <Blockies
-                                            seed={props.userAddress}
+                                            seed={userAddress}
                                             size={16}
                                             scale={8}
                                             className="rounded-circle"
@@ -24,7 +24,7 @@ function CurrentPfp(props) {
                                             spotColor="#4db3e4"
                                         />
                                         : <Image
-                                            src={pfpUrl}
+                                            src={pfp}
                                             roundedCircle
                                             height="128px"
                                             width="128px"
@@ -38,7 +38,7 @@ function CurrentPfp(props) {
                                     <Col className="col-auto text-center">
                                         <Form.Label>
                                             <ProfileEnsAndAddress
-                                                address={props.userAddress}
+                                                address={userAddress}
                                             />
                                         </Form.Label>
                                     </Col>

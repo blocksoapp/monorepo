@@ -10,7 +10,7 @@ import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
 import FormHeader from './FormHeader'
 
-function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
+function CreateProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
@@ -83,16 +83,16 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
     setUserAddress(profile.address)
   
     return () => {
-      console.log('profile image: ', pfp)
+      console.log('profile image url: ', pfp)
     }
-  }, [profile])
+  }, [checkForProfile])
   
 
 
   return (
     <div className="p-3 border mb-5 mt-3">
         {!isLoading ? 
-            <Container className=''>
+            <Container>
                 <Form>
                     <Row>
                         <Col>
@@ -163,9 +163,7 @@ function CreateProfileForm({ profile, setProfile, initialState, getUser }) {
                 
                     </Form>
             </Container> : 
-            <Container>
                 <Loading/>
-            </Container>
         }
     </div>
 )

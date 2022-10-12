@@ -19,20 +19,6 @@ function CreateProfile() {
         }
     })
 
-    const initialState = {
-        image: '',
-        bio: '',
-        socials: {
-            website: '',
-            telegram: '',
-            discord: '',
-            twitter: '',
-            opensea: '',
-            looksrare: '',
-            snapshot: ''
-        }
-    }
-
     // Fetch user profile status
     const getUser = async () => {
         const url = `${baseAPI}/user/`
@@ -52,7 +38,6 @@ function CreateProfile() {
                     <CreateProfileForm
                     profile={profile}
                     setProfile={setProfile}
-                    initialState={initialState}
                     getUser={getUser}/>
                 </Container>
             </div>
