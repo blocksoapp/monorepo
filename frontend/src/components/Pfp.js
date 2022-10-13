@@ -25,7 +25,7 @@ function Pfp(props) {
                     style={{
                         height: props.height,
                         width: props.width,
-                        backgroundColor: "#27263d",
+                        backgroundColor: `#${props.address.substr(36,6)}73`,
                         color: "white",
                         fontSize: props.fontSize
 

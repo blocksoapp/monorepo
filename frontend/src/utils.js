@@ -31,5 +31,5 @@ export function getCookie(name) {
  * Returns an abbreviated version of the given address.
  */
 export function abbrAddress(address) {
-    return address.substr(2,4) + "..." + address.substr(37,4);
+    return address.substr(2,4) + "..." + address.substr(38,4);
 }
