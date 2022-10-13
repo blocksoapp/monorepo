@@ -12,7 +12,7 @@ import { useEnsAvatar } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
-import Blockies from 'react-blockies';
+import Pfp from './Pfp';
 import TxAddress from "./TxAddress";
 
 
@@ -129,23 +129,14 @@ function Post(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        {pfpUrl === null || pfpUrl === ""
-                                        ? <Blockies
-                                            seed={props.author}
-                                            size={15}
-                                            scale={5}
-                                            className="rounded-circle"
-                                            color="#ff5412"
-                                            bgColor="#ffb001"
-                                            spotColor="#4db3e4"
-                                          />
-                                        : <Image
-                                            src={pfpUrl}
+                                        <Pfp
                                             height="100px"
                                             width="100px"
-                                            roundedCircle
-                                          />
-                                        }
+                                            imgUrl={pfpUrl}
+                                            address={props.author}
+                                            ensName={props.ensName}
+                                            fontSize="1rem"
+                                        />
                                     </Col>
                                     <Col className="col-auto">
                                         <h5>

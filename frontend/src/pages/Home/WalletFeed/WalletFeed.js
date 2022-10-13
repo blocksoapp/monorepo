@@ -10,11 +10,11 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import Blockies from 'react-blockies';
 import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
 import PostsPlaceholder from '../../../components/PostsPlaceholder';
 import FeedError from './FeedError';
+import Pfp from '../../../components/Pfp';
 
 
 function WalletFeed({ profileData, setProfileData, user }) {
@@ -126,23 +126,13 @@ function WalletFeed({ profileData, setProfileData, user }) {
                             <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
-                                        {pfpUrl === null || pfpUrl === ''
-                                        ? <Blockies
-                                            seed={address}
-                                            size={15}
-                                            scale={5}
-                                            className="rounded-circle"
-                                            color="#ff5412"
-                                            bgColor="#ffb001"
-                                            spotColor="#4db3e4"
-                                          />
-                                        : <Image
-                                            src={pfpUrl}
+                                        <Pfp
                                             height="100px"
                                             width="100px"
-                                            roundedCircle
-                                          />
-                                        }
+                                            imgUrl={pfpUrl}
+                                            address={address}
+                                            fontSize="1rem"
+                                        />
                                     </Col>
                                     <Col>
                                         <Form onSubmit={handleSubmit}>
