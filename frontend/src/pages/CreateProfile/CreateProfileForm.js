@@ -14,20 +14,33 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
-    const [userAddress, setUserAddress] = useState(profile.address)
+    const [userAddress, setUserAddress] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [formProfile, setFormProfile] = useState({
+        image: '',
+        bio: '',
+        socials: {
+            website: '',
+            telegram: '',
+            discord: '',
+            twitter: '',
+            opensea: '',
+            looksrare: '',
+            snapshot: ''
+        }
+    })
     
 
      // Form State Update
      const handleChange = (event) => {
       const { name, value } = event.target
-      setProfile(prevValue => {
+      setFormProfile(prevValue => {
           return {
               ...prevValue,
               [name]: value
           }
       })
-      console.log(profile)
+      console.log(formProfile)
   } 
 
   
@@ -38,7 +51,7 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
       const url = `${baseAPI}/${address}/profile/`
       const formRes = await fetch(url, {
           method: 'PUT',
-          body: JSON.stringify(profile),
+          body: JSON.stringify(formProfile),
           headers: {
               'Content-Type': 'application/json',
               'X-CSRFTOKEN': getCookie('csrftoken')
@@ -48,14 +61,11 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
       
       if(formRes.status === 200 || 201) {
         console.log('successfully posted data')
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 2000)
+        setIsLoading(false)
+        checkForProfile()
       } else {
         console.log('error posting data')
-        setTimeout(() => {
-                setIsLoading(false)
-        }, 2000)
+        setIsLoading(false)
       }
   }
 
@@ -79,13 +89,10 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
   }, [])
 
   useEffect(() => {
+    setFormProfile(profile)
     setPfp(profile.image)
     setUserAddress(profile.address)
-  
-    return () => {
-      console.log('profile image url: ', pfp)
-    }
-  }, [checkForProfile])
+  }, [profile])
   
 
 
@@ -110,13 +117,11 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
                                 </Col>
                                 <Col>
                                     <FileUpload
-                                    profile={profile}
-                                    setProfile={setProfile}/>
+                                    setProfile={setFormProfile}/>
                                 </Col>
                                 <Col>
                                     <NftForm
-                                    profile={profile}
-                                    setProfile={setProfile}/>
+                                    setProfile={setFormProfile}/>
                                 </Col> 
                         </Col>
                     </Row>
@@ -131,7 +136,7 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
                         <Col md={9}>
                         <FormBio
                         handleChange={handleChange}
-                        profile={profile} />
+                        profile={formProfile} />
                         </Col>
                     </Row>
 
@@ -144,8 +149,8 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
                         </Col>
                         <Col md={9}>
                             <FormSocialLinks
-                            setProfile={setProfile}
-                            profile={profile}
+                            setProfile={setFormProfile}
+                            profile={formProfile}
                             />
 
 

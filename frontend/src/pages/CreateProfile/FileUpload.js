@@ -4,7 +4,7 @@ import { NFTStorage, Blob } from 'nft.storage'
 import { nftAPI } from '../../utils'
 import { useAccount} from 'wagmi'
 
-function FileUpload({ profile, setProfile }) {
+function FileUpload({ setProfile }) {
         // state for filepath
         const [imagePath, setImagePath] = useState('')
         const [bufferImage, setBufferImage] = useState([])
