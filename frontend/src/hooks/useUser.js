@@ -1,8 +1,5 @@
-/*
- * Hooks (functions) shared across our components.
- */
 import { useEffect, useState } from "react";
-import { baseAPI } from "./utils";
+import { baseAPI } from "../utils";
 
 
 /*

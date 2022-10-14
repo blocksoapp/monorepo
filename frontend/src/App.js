@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import EditProfile from './pages/EditProfile'
 import ViewProfile from './pages/ViewProfile';
 import NavbarComponent from './components/ui/Navbar';
-import { useUser } from './hooks';
+import { useUser } from './hooks/useUser';
 
 
 function App() {

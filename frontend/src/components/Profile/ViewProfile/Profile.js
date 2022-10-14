@@ -5,7 +5,7 @@ import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
 import Post from '../../posts/Post.js'; 
 import { baseAPI, getCookie } from '../../../utils.js'
-import { useUser } from '../../../hooks';
+import { useUser } from '../../../hooks/useUser';
 import { apiGetPosts } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
