@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from 'react-bootstrap'
-import FeaturedList from '../components/explore/FeaturedList';
-import InfoSection from '../components/explore/InfoSection';
+import FeaturedList from '../components/Explore/FeaturedList';
+import InfoSection from '../components/Explore/InfoSection';
 
 function Explore() {
  
