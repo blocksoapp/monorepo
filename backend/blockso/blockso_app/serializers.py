@@ -7,7 +7,7 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import ERC20Transfer, ERC721Transfer, Follow, Post, \
+from .models import Comment, ERC20Transfer, ERC721Transfer, Follow, Post, \
         Profile, Socials, Transaction
 
 
@@ -21,15 +21,6 @@ class SocialsSerializer(serializers.ModelSerializer):
         model = Socials
         fields = ["website", "telegram", "discord", "twitter", "opensea",
                   "looksrare", "snapshot"]
-
-
-class PostSerializer(serializers.ModelSerializer):
-    """ Post model serializer. """
-
-    class Meta:
-        model = Post
-        fields = ["author", "text", "imgUrl", "isShare", "isQuote",
-                  "created", "refPost"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -272,3 +263,39 @@ class PostSerializer(serializers.ModelSerializer):
         # save the changes and return them
         instance.save()
         return instance
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """ Comment model serializer. """
+
+    class Meta:
+        model = Comment
+        fields = ["id", "author", "post", "text", "tagged_users", "created"]
+        read_only_fields = ["id", "author", "created", "post"]
+
+
+    def create(self, validated_data):
+        """ Creates a Comment. """
+
+        # get user from the session
+        author = self.context.get("request").user
+        
+        # get post id from the url
+        post = Post.objects.get(
+            pk=self.context.get("view").kwargs["post_id"]
+        )
+
+        # extract any tagged users
+        tagged_users = validated_data.pop("tagged_users")
+
+        # create Comment
+        comment = Comment.objects.create(
+            author=author,
+            post=post,
+            **validated_data
+        )
+
+        comment.tagged_users.set(tagged_users)
+        comment.save()
+
+        return comment

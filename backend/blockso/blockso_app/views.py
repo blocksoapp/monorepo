@@ -20,7 +20,7 @@ from web3 import Web3
 
 # our imports
 from .models import Follow, Post, Profile, Socials
-from .pagination import PostsPagination
+from .pagination import CommentPagination, PostsPagination
 from . import jobs, pagination, serializers
 
 
@@ -316,3 +316,14 @@ class FeedList(generics.ListAPIView):
         queryset = queryset.order_by("-created")
 
         return queryset
+
+
+class CommentCreateList(generics.ListCreateAPIView):
+
+    """ View that supports creating and listing Comments of a post. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.CommentSerializer
+    pagination_class = CommentPagination
+    lookup_url_kwarg = "post_id"
+    lookup_field = "post"

@@ -183,6 +183,7 @@ class BaseTest(APITestCase):
         resp = self.client.post(url, self.create_post_data)
         return resp
 
+
 class AuthTests(BaseTest):
     """
     Tests authentication using ETH wallet.
@@ -675,6 +676,35 @@ class PostTests(BaseTest):
             resp.data["refTx"]["erc20_transfers"][0]["contract_address"],
             "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
         )
+
+
+class CommentsTests(BaseTest):
+    """
+    Test behavior around comments.
+    """
+
+    def test_create_comment(self):
+        """
+        Assert that a comment is created successfully by a logged in user.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+
+        # make request
+        url = f"/api/posts/{resp.data['id']}/comments/"
+        data = {
+            "text": "I <3 your post!",
+            "tagged_users": []
+        }
+        resp = self.client.post(url, data)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.data["id"], 1)
+        self.assertEqual(resp.data["post"], 1)
+        self.assertEqual(resp.data["text"], data["text"])
+        self.assertEqual(resp.data["tagged_users"], data["tagged_users"])
 
 
 class FeedTests(BaseTest):
