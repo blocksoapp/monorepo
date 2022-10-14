@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Form, Button } from 'react-bootstrap'
-import { NFTStorage, Blob } from 'nft.storage'
-import { nftAPI } from '../../utils'
 import { useAccount} from 'wagmi'
+import { NFTStorage, Blob } from 'nft.storage'
+import { nftAPI } from '../../../utils'
 
 function FileUpload({ setProfile }) {
         // state for filepath
