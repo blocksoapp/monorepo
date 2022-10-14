@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import EnsAndAddress from "./ensName";
+import EnsAndAddress from "./EnsAndAddress";
 
 
 function TxAddress(props) {

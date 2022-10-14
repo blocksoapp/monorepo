@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
-import Search from '../components/form/Search'
 import Feed from '../components/Feed/Feed';
 import { useUser } from "../hooks"
 

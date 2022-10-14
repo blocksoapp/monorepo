@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Row, Col, Image, Form } from 'react-bootstrap'
-import ProfileEnsAndAddress from '../../ProfileEnsAndAddress';
+import ProfileEnsAndAddress from '../ViewProfile/ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
 
 
