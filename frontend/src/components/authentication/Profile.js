@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
-import { useAccount, useEnsAddress, useEnsAvatar } from 'wagmi'
+import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
 import Post from '../post.js'; 
 import { baseAPI, getCookie } from '../../utils.js'
-import Blockies from 'react-blockies';
 import { useUser } from '../../hooks';
 import { apiGetPosts } from '../../api';
 import PostsPlaceholder from '../PostsPlaceholder';
@@ -14,6 +13,7 @@ import PostsNotFound from '../PostsNotFound';
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from '../ProfileEnsAndAddress';
+import Pfp from '../Pfp';
 
 
 function Profile() {
@@ -37,6 +37,7 @@ function Profile() {
             setAddress(urlInput);
         }
     });
+    const ensNameHook = useEnsName({address: urlInput});
     const user = useUser();
 
     // state
@@ -48,6 +49,7 @@ function Profile() {
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
     const [pfpUrl, setPfpUrl] = useState(null);
+    const [ensName, setEnsName] = useState(null);
  
     // functions
     const resolveAddress = (input) => {
@@ -207,7 +209,19 @@ function Profile() {
         fetchPosts();
 
     }, [address])
+
+
+    /*
+     * Set the ENS Name if it exists.
+     */
+    useEffect(() => {
+        if (!ensNameHook.isLoading &&
+            ensNameHook.data !== null) {
+            setEnsName(ensNameHook.data);
+        }
+    }, [ensNameHook])
         
+
     useEffect(() => {
         determineProfilePic()
 
@@ -254,24 +268,14 @@ function Profile() {
                                 {/* Profile picture */}
                                 <Row className="justify-content-center">
                                     <Col className="col-auto">
-                                        {pfpUrl === null
-                                        ? <Blockies
-                                            seed={address}
-                                            size={30}
-                                            scale={8}
-                                            className="rounded-circle"
-                                            color="#ff5412"
-                                            bgColor="#ffb001"
-                                            spotColor="#4db3e4"
-                                        />
-                                        : <Image
-                                            src={pfpUrl}
-                                            roundedCircle
+                                        <Pfp
                                             height="256px"
                                             width="256px"
-                                            className="mb-1"
+                                            imgUrl={pfpUrl}
+                                            address={address}
+                                            ensName={ensName}
+                                            fontSize="1.75rem"
                                         />
-                                        }
                                     </Col>
                                 </Row>
 
@@ -348,6 +352,7 @@ function Profile() {
                                     <Post
                                         key={post.id}
                                         author={post.author}
+                                        ensName={ensName}
                                         text={post.text}
                                         imgUrl={post.imgUrl}
                                         created={post.created}

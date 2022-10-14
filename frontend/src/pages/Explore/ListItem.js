@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge, Col, Image, Row } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
-import Blockies from 'react-blockies';
+import { abbrAddress } from "../../utils";
+import Pfp from "../../components/Pfp";
+
 
 function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
 
@@ -25,15 +27,10 @@ function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
     // react-router dependency
     const navigate = useNavigate()
     
-    // Abbreviate address
-    const getAbbrAddress = (addy) => {
-        return addy.substr(2,5) + "..." + addy.substr(37,5);
-    }
-
     // Show ENS Name
     const displayName = () => {
         if (isLoading) return <p>Fetching name…</p>
-        if (!data) return <h4> {getAbbrAddress(userAddress)} </h4>
+        if (!data) return <h4> {abbrAddress(userAddress)} </h4>
         else if(data) return <h4> {data} </h4>
     }
 
@@ -68,27 +65,15 @@ function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
         onClick={handleClick}
         style={{ cursor: "pointer"}} 
     >
-            {/*
-            Image here
-            Make display image function reusable from wallet feed
-            */}
-            {pfpUrl === null
-            ? <Blockies
-                seed={userAddress}
-                size={31}
-                scale={8}
-                className="rounded-circle"
-                color="#ff5412"
-                bgColor="#ffb001"
-                spotColor="#4db3e4"
-                />
-            : <Image
-                src={pfpUrl}
+            {/* profile pic */}
+            <Pfp
                 height="256px"
                 width="256px"
-                roundedCircle
-                />
-            }
+                imgUrl={pfpUrl}
+                address={userAddress}
+                ensName={data}
+                fontSize="1.75rem"
+            />
             <div className="mt-3">
                 {displayName()}
             </div>

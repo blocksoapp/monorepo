@@ -10,11 +10,11 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import Blockies from 'react-blockies';
 import { baseAPI, getCookie } from '../../../utils'
 import Post from '../../../components/post.js'; 
 import PostsPlaceholder from '../../../components/PostsPlaceholder';
 import FeedError from './FeedError';
+import Pfp from '../../../components/Pfp';
 
 
 function WalletFeed({ profileData, setProfileData, user }) {
@@ -30,23 +30,6 @@ function WalletFeed({ profileData, setProfileData, user }) {
     const [posts, setPosts] = useState(null);
 
     // functions
-
-    /* 
-     * Sets the user's pfp to their ens avatar
-     * if the user has not uploaded a profile pic.
-     * Returns null if the user does not have an
-     * ens avatar. That way a blockie will be
-     * displayed instead.
-     */
-    const determineProfilePic = (pfp) => {
-        // if no image url was passed in
-        if (pfp === null || pfp === undefined || pfp === "") {
-            // if user has an ens avatar then use it
-            if (ensAvatar["data"] !== null) {
-                setPfpUrl(ensAvatar["data"]);
-            }
-        }
-    }
 
     const handleSubmit = async (event) => {
         // prevent default action
@@ -104,14 +87,25 @@ function WalletFeed({ profileData, setProfileData, user }) {
         }
     }
 
-    // set profile pic and fetch feed on mount
+    // fetch feed on mount
     useEffect(() => {
         fetchFeed();
-        determineProfilePic(pfpUrl);
         return () => {
             console.log(pfpUrl)
         }
     }, [])
+
+    /*
+     * Sets the user's pfp to their ens avatar,
+     * if the user has not uploaded a profile pic.
+     */
+    useEffect(() => {
+        if (!pfpUrl) {
+            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
+                setPfpUrl(ensAvatar.data);
+            }
+        }
+    }, [ensAvatar])
 
 
     return (
@@ -126,23 +120,13 @@ function WalletFeed({ profileData, setProfileData, user }) {
                             <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
-                                        {pfpUrl === null || pfpUrl === ''
-                                        ? <Blockies
-                                            seed={address}
-                                            size={15}
-                                            scale={5}
-                                            className="rounded-circle"
-                                            color="#ff5412"
-                                            bgColor="#ffb001"
-                                            spotColor="#4db3e4"
-                                          />
-                                        : <Image
-                                            src={pfpUrl}
+                                        <Pfp
                                             height="100px"
                                             width="100px"
-                                            roundedCircle
-                                          />
-                                        }
+                                            imgUrl={pfpUrl}
+                                            address={address}
+                                            fontSize="1rem"
+                                        />
                                     </Col>
                                     <Col>
                                         <Form onSubmit={handleSubmit}>

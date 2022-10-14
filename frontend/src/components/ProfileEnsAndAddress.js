@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Overlay, Tooltip } from "react-bootstrap";
 import { useEnsName } from "wagmi";
+import { abbrAddress } from "../utils";
 
 
 function ProfileEnsAndAddress(props) {
@@ -14,10 +15,6 @@ function ProfileEnsAndAddress(props) {
     const [showEnsCopiedTooltip, setShowEnsCopiedTooltip] = useState(false);
 
     // functions
-    const getAbbrAddress = function(address) {
-        return address.substr(2,5) + "..." + props.address.substr(37,5);
-    }
-
     const copyEnsName = () => {
         // do copy
         navigator.clipboard.writeText(ensName.data);
@@ -67,7 +64,7 @@ function ProfileEnsAndAddress(props) {
                 onClick={copyAddress}
                 ref={addressSpanRef}
             >
-                ({getAbbrAddress(props.address)})
+                ({abbrAddress(props.address)})
             </span>
 
             {/* Feedback for copying the ens name */}
@@ -108,7 +105,7 @@ function ProfileEnsAndAddress(props) {
                 onClick={copyAddress}
                 ref={addressSpanRef}
             >
-                {getAbbrAddress(props.address)}
+                {abbrAddress(props.address)}
             </span>
 
             {/* Feedback for copying the address */}
