@@ -31,23 +31,6 @@ function WalletFeed({ profileData, setProfileData, user }) {
 
     // functions
 
-    /* 
-     * Sets the user's pfp to their ens avatar
-     * if the user has not uploaded a profile pic.
-     * Returns null if the user does not have an
-     * ens avatar. That way a blockie will be
-     * displayed instead.
-     */
-    const determineProfilePic = (pfp) => {
-        // if no image url was passed in
-        if (pfp === null || pfp === undefined || pfp === "") {
-            // if user has an ens avatar then use it
-            if (ensAvatar["data"] !== null) {
-                setPfpUrl(ensAvatar["data"]);
-            }
-        }
-    }
-
     const handleSubmit = async (event) => {
         // prevent default action
         event.preventDefault();
@@ -104,14 +87,25 @@ function WalletFeed({ profileData, setProfileData, user }) {
         }
     }
 
-    // set profile pic and fetch feed on mount
+    // fetch feed on mount
     useEffect(() => {
         fetchFeed();
-        determineProfilePic(pfpUrl);
         return () => {
             console.log(pfpUrl)
         }
     }, [])
+
+    /*
+     * Sets the user's pfp to their ens avatar,
+     * if the user has not uploaded a profile pic.
+     */
+    useEffect(() => {
+        if (!pfpUrl) {
+            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
+                setPfpUrl(ensAvatar.data);
+            }
+        }
+    }, [ensAvatar])
 
 
     return (

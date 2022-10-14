@@ -8,7 +8,7 @@ import {
     Row 
 } from "react-bootstrap"
 import { Link } from "react-router-dom";
-import { useEnsAvatar } from "wagmi";
+import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
@@ -40,7 +40,9 @@ function Post(props) {
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
+    const [ensName, setEnsName] = useState(props.ensName);
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
+    const ensNameHook = useEnsName({address: props.author});
 
     // functions
 
@@ -69,49 +71,41 @@ function Post(props) {
     }
 
     /* 
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     * Returns null if the user does not have an
-     * ens avatar. That way a blockie will be
-     * displayed instead.
+     * Formats token amount with decimal places.
      */
-    const determineProfilePic = (pfp) => {
-        // if no image url was passed in
-        if (pfp === null || pfp === undefined) {
-            // if user has an ens avatar then use it
-            if (ensAvatar["data"] !== null) {
-                setPfpUrl(ensAvatar["data"]);
-            }
-        }
-    }
-
-
     const formatTokenAmount = function(amount, decimals) {
         return utils.formatUnits(amount, decimals);
     }
 
-    // determine tx type on component mount
+    /* 
+     * Determines tx type on component mount.
+     */
     useEffect(() => {
         determineTxType();
     }, [])
 
+    /* 
+     * Sets the user's ens name if it has not been passed in from props.
+     */
     useEffect(() => {
-        determineProfilePic(props.pfp);
-
-        return () => {
-            if (pfpUrl !== null && pfpUrl !== undefined) {
-                return;
-            }
-    
-            if (pfpUrl === ensAvatar["data"]) {
-                return;
-            }
-            if (ensAvatar["data"] !== "") {
-                setPfpUrl(ensAvatar["data"]);
+        if (!ensName) {
+            if (!ensNameHook.isLoading && ensNameHook.data !== null) {
+                setEnsName(ensNameHook.data);
             }
         }
-        
-    }, [])
+    }, [ensNameHook])
+
+    /* 
+     * Sets the user's pfp to their ens avatar,
+     * if the user has not uploaded a profile pic.
+     */
+    useEffect(() => {
+        if (!pfpUrl) {
+            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
+                setPfpUrl(ensAvatar.data);
+            }
+        }
+    }, [ensAvatar])
 
 
     const render = function () {
@@ -134,7 +128,7 @@ function Post(props) {
                                             width="100px"
                                             imgUrl={pfpUrl}
                                             address={props.author}
-                                            ensName={props.ensName}
+                                            ensName={ensName}
                                             fontSize="1rem"
                                         />
                                     </Col>
