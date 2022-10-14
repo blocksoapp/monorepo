@@ -1,14 +1,12 @@
 import React, { useState, useContext } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useAccount } from 'wagmi'
-import CreateProfile from './pages/CreateProfile/CreateProfile';
-import Explore from './pages/Explore/Explore'
-import Home from './pages/Home/Home';
-import EditProfile from './pages/EditProfile/EditProfile'
-import Profile from './components/authentication/Profile';
+import Explore from './pages/Explore'
+import Home from './pages/Home';
+import EditProfile from './pages/EditProfile'
+import ViewProfile from './pages/ViewProfile';
 import NavbarComponent from './components/ui/Navbar';
-import Footer from './components/ui/Footer';
-import { useUser } from './hooks';
+import { useUser } from './hooks/useUser';
 
 
 function App() {
@@ -26,8 +24,8 @@ function App() {
               }
               <Route path="/home" element={<Home/>}></Route>
               <Route path="/explore" element={<Explore/>}></Route>
-              <Route path="/edit-profile" element={<CreateProfile/>}></Route>
-              <Route path="/:urlInput/profile" element={<Profile/>}></Route>
+              <Route path="/edit-profile" element={<EditProfile/>}></Route>
+              <Route path="/:urlInput/profile" element={<ViewProfile/>}></Route>
             </Routes>
         </Router>
         </>

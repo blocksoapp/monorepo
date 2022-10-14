@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Form, Button } from 'react-bootstrap'
-import { useContractRead } from 'wagmi'
-import { erc721ABI } from 'wagmi'
+import { useContractRead, erc721ABI } from 'wagmi'
 
 function NftForm({ setProfile }) {
   // State

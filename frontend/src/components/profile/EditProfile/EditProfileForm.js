@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Container, Form, Button, Row, Col } from 'react-bootstrap'
-import { baseAPI, getCookie } from '../../utils'
-import NftForm from './NftForm'
 import { useAccount } from 'wagmi'
+import { baseAPI, getCookie } from '../../../utils'
+import NftForm from './NftForm'
 import FileUpload from './FileUpload'
 import CurrentPfp from './CurrentPfp'
-import Loading from '../../components/ui/Loading'
+import Loading from '../../ui/Loading'
 import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
 import FormHeader from './FormHeader'
 
-function CreateProfileForm({ profile, setProfile, getUser }) {
+function EditProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
@@ -174,4 +174,4 @@ function CreateProfileForm({ profile, setProfile, getUser }) {
 )
 }
 
-export default CreateProfileForm
+export default EditProfileForm

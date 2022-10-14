@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
-import Search from '../../components/form/Search'
-import WalletFeed from './WalletFeed/WalletFeed';
-import { useUser } from "../../hooks"
+import Feed from '../components/feed/Feed';
+import { useUser } from "../hooks/useUser"
 
 
 function Home() {  
@@ -33,7 +32,7 @@ function Home() {
           <h1 class="text-muted text-center">Please sign in.</h1>
           }
           {user !== null && profileData !== null && loading === false ?
-          <WalletFeed
+          <Feed
               className="mt-5"
               profileData={profileData}
               setProfileData={setProfileData}

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Overlay, Tooltip } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import { abbrAddress } from "../utils";
+import { abbrAddress } from "../../../utils";
 
 
 function ProfileEnsAndAddress(props) {

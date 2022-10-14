@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { Button, Container, Col, Form, Nav, Navbar, NavDropdown, NavItem } from 'react-bootstrap'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAccount } from 'wagmi';
-import DisplayConnection from '../authentication/DisplayConnection';
 import SignInButton from '../authentication/SignInButton';
 
 

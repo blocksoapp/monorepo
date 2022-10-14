@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
-import CreateProfileForm from './CreateProfileForm'
-import { baseAPI } from '../../utils'
 import { Container } from 'react-bootstrap'
+import { baseAPI } from '../utils'
+import EditProfileForm from '../components/profile/EditProfile/EditProfileForm'
 
 
-function CreateProfile() {
+function EditProfile() {
     const [profile, setProfile] = useState({
         image: '',
         bio: '',
@@ -35,7 +35,7 @@ function CreateProfile() {
             <div className='p-sm-4'>
                 <Container>
                     <h2 className='fw-bold mb-5'>Edit Your Blockso Profile</h2>
-                    <CreateProfileForm
+                    <EditProfileForm
                     profile={profile}
                     setProfile={setProfile}
                     getUser={getUser}/>
@@ -44,4 +44,4 @@ function CreateProfile() {
         )
 }
 
-export default CreateProfile
+export default EditProfile

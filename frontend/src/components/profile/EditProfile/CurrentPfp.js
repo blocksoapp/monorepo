@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Row, Col, Image, Form } from 'react-bootstrap'
-import ProfileEnsAndAddress from '../../components/ProfileEnsAndAddress';
-import Pfp from '../../components/Pfp';
+import ProfileEnsAndAddress from '../ViewProfile/ProfileEnsAndAddress';
+import Pfp from '../../Pfp';
 
 
 function CurrentPfp({ pfp, userAddress }) {

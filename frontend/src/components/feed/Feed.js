@@ -10,14 +10,14 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { baseAPI, getCookie } from '../../../utils'
-import Post from '../../../components/post.js'; 
-import PostsPlaceholder from '../../../components/PostsPlaceholder';
+import { baseAPI, getCookie } from '../../utils'
+import Post from '../posts/Post.js'; 
+import PostsPlaceholder from '../posts/PostsPlaceholder';
 import FeedError from './FeedError';
-import Pfp from '../../../components/Pfp';
+import Pfp from '../Pfp';
 
 
-function WalletFeed({ profileData, setProfileData, user }) {
+function Feed({ profileData, setProfileData, user }) {
 
     const { address, image } = {...profileData.profile}
 
@@ -185,4 +185,4 @@ function WalletFeed({ profileData, setProfileData, user }) {
     )
 }
 
-export default WalletFeed;
+export default Feed;

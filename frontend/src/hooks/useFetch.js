@@ -1,6 +1,3 @@
-/*
- * Hooks (functions) shared across our components.
- */
 import { useEffect, useState } from "react";
 
 /*

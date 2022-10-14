@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Badge, Col, Image, Row } from 'react-bootstrap'
 import { useEnsName, useEnsAvatar } from 'wagmi'
 import { abbrAddress } from "../../utils";
-import Pfp from "../../components/Pfp";
+import Pfp from "../Pfp";
 
 
 function ListItem({userAddress, imageUrl, bio, numFollowers, numFollowing}) {
