@@ -169,6 +169,7 @@ function Profile() {
     useEffect(() => {
         // reset state
         setAddress(null);
+        setEnsName(null);
         setProfileInvalid(false);
         setProfileData({});
         setProfileDataLoading(true);
