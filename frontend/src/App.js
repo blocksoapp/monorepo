@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useAccount } from 'wagmi'
 import CreateProfile from './pages/CreateProfile/CreateProfile';
 import Explore from './pages/Explore/Explore'
-import Home from './pages/Home/Home';
+import Home from './pages/Home';
 import EditProfile from './pages/EditProfile/EditProfile'
 import Profile from './components/authentication/Profile';
 import NavbarComponent from './components/ui/Navbar';
