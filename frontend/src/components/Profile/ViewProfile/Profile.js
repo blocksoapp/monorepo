@@ -3,13 +3,13 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
-import Post from '../../post.js'; 
+import Post from '../../posts/Post.js'; 
 import { baseAPI, getCookie } from '../../../utils.js'
 import { useUser } from '../../../hooks';
 import { apiGetPosts } from '../../../api';
-import PostsPlaceholder from '../../PostsPlaceholder';
-import PostsError from '../../PostsError';
-import PostsNotFound from '../../PostsNotFound';
+import PostsPlaceholder from '../../posts/PostsPlaceholder';
+import PostsError from '../../posts/PostsError';
+import PostsNotFound from '../../posts/PostsNotFound';
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';

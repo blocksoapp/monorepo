@@ -12,8 +12,8 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
-import Pfp from './Pfp';
-import TxAddress from "./TxAddress";
+import Pfp from '../Pfp';
+import TxAddress from "../TxAddress";
 
 
 function Post(props) {
