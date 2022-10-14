@@ -3,7 +3,7 @@ import { Form, Button } from 'react-bootstrap'
 import { useContractRead } from 'wagmi'
 import { erc721ABI } from 'wagmi'
 
-function NftForm({ profile, setProfile }) {
+function NftForm({ setProfile }) {
   // State
   const [nft, setNft] = useState({
     tokenId: null,
