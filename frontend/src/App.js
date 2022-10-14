@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useAccount } from 'wagmi'
 import CreateProfile from './pages/CreateProfile/CreateProfile';
-import Explore from './pages/Explore/Explore'
+import Explore from './pages/Explore'
 import Home from './pages/Home';
 import EditProfile from './pages/EditProfile/EditProfile'
 import Profile from './components/authentication/Profile';
