@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
-import Feed from '../components/Feed/Feed';
+import Feed from '../components/feed/Feed';
 import { useUser } from "../hooks/useUser"
 
 

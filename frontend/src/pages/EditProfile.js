@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import { Container } from 'react-bootstrap'
 import { baseAPI } from '../utils'
-import EditProfileForm from '../components/Profile/EditProfile/EditProfileForm'
+import EditProfileForm from '../components/profile/EditProfile/EditProfileForm'
 
 
 function EditProfile() {
