@@ -174,7 +174,6 @@ function Feed({ profileData, setProfileData, user }) {
                             imgUrl={post.imgUrl}
                             created={post.created}
                             refTx={post.refTx}
-                            pfp={pfpUrl}
                             profileAddress={user['address']}
                         />
                     ))}
