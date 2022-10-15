@@ -9,6 +9,7 @@ import Loading from '../../ui/Loading'
 import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
 import FormHeader from './FormHeader'
+import TabsComponent from '../../components/ui/Tabs'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
 
@@ -116,13 +117,15 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     userAddress={address}/>
                                 </Col>
                                 <Col>
-                                    <FileUpload
-                                    setProfile={setFormProfile}/>
+                                    <TabsComponent
+                                    firstTitle='Upload Image'
+                                    secondTitle='Use NFT'
+                                    thirdTitle='Use ENS'
+                                    firstPane={ <FileUpload setProfile={setFormProfile}/> }
+                                    secondPane={ <NftForm setProfile={setFormProfile}/> }
+                                    thirdPane={<><h3>You can use your ENS as a profile picture.</h3></>}
+                                    />
                                 </Col>
-                                <Col>
-                                    <NftForm
-                                    setProfile={setFormProfile}/>
-                                </Col> 
                         </Col>
                     </Row>
 
