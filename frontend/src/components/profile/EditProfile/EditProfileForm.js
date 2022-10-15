@@ -10,6 +10,7 @@ import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
 import FormHeader from './FormHeader'
 import TabsComponent from '../../ui/Tabs'
+import FormEns from './FormEns'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
 
@@ -123,7 +124,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     thirdTitle='Use ENS'
                                     firstPane={ <FileUpload setProfile={setFormProfile}/> }
                                     secondPane={ <NftForm setProfile={setFormProfile}/> }
-                                    thirdPane={<><h3>You can use your ENS as a profile picture.</h3></>}
+                                    thirdPane={ <FormEns/> }
                                     />
                                 </Col>
                         </Col>

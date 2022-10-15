@@ -91,7 +91,7 @@ function NftForm({ setProfile }) {
   
 
   return (
-    <Form.Group className="mb-3 border p-3">
+    <Form.Group className="mb-3 p-3">
       <Form.Label className='fw-bold'>Upload NFT </Form.Label> <br/>
       {/* <Form.Label>TokenId</Form.Label>   */}
       <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name} placeholder="Token Id"/>

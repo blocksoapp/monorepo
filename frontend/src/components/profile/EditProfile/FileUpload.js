@@ -69,8 +69,8 @@ function FileUpload({ setProfile }) {
     }, [loadingText]);
 
   return (
-    <>
-        <Form.Group className="mb-3 border p-3">
+    <div>
+        <Form.Group className="p-3">
     
             <Form.Group className="mb-1">
               <Form.Label className="fw-bold">Upload Profile Picture</Form.Label>
@@ -84,7 +84,7 @@ function FileUpload({ setProfile }) {
               </Form.Text>
             </div>
         </Form.Group>
-    </>
+    </div>
   )
 }
 
