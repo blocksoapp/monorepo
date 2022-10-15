@@ -9,7 +9,7 @@ import Loading from '../../ui/Loading'
 import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
 import FormHeader from './FormHeader'
-import TabsComponent from '../../components/ui/Tabs'
+import TabsComponent from '../../ui/Tabs'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
 
