@@ -183,6 +183,16 @@ class BaseTest(APITestCase):
         resp = self.client.post(url, self.create_post_data)
         return resp
 
+    def _create_comment(self, post_id, text="", tagged_users=[]):
+        """
+        Utility function to create a comment on a post.
+        Returns the response of creating a comment.
+        """
+        url = f"/api/posts/{post_id}/comments/"
+        data = {"text": text, "tagged_users": tagged_users}
+        resp = self.client.post(url, data)
+        return resp
+
 
 class AuthTests(BaseTest):
     """
@@ -690,21 +700,109 @@ class CommentsTests(BaseTest):
         # set up test
         self._do_login(self.test_signer)
         resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
 
         # make request
-        url = f"/api/posts/{resp.data['id']}/comments/"
-        data = {
-            "text": "I <3 your post!",
-            "tagged_users": []
-        }
-        resp = self.client.post(url, data)
+        text = "I <3 your post!"
+        resp = self._create_comment(post_id, text=text)
 
         # make assertions
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.data["id"], 1)
         self.assertEqual(resp.data["post"], 1)
-        self.assertEqual(resp.data["text"], data["text"])
-        self.assertEqual(resp.data["tagged_users"], data["tagged_users"])
+        self.assertEqual(resp.data["text"], text)
+        self.assertEqual(resp.data["tagged_users"], [])
+
+    def test_tag_users(self):
+        """
+        Assert that a user can tag other users in a comment.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # make request
+        text = f"I <3 @{self.test_signer.address}'s post!"
+        tagged = [self.test_signer.address]
+        resp = self._create_comment(
+            post_id,
+            text=text,
+            tagged_users=tagged
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.data["text"], text)
+        self.assertEqual(resp.data["tagged_users"], tagged)
+
+    def test_list_comments(self):
+        """
+        Assert that a user can view comments on a post.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(post_id, text="hello")
+
+        # make request
+        url = f"/api/posts/{post_id}/comments/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data["results"]), 1)
+
+    def test_list_comments_ordering(self):
+        """
+        Assert that comments are ordered from newest to oldest.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(post_id, text="goodbye")
+        self._create_comment(post_id, text="hello")
+
+        # make request
+        url = f"/api/posts/{post_id}/comments/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        results = resp.data["results"]
+        self.assertEqual(results[0]["text"], "hello")
+        self.assertEqual(results[1]["text"], "goodbye")
+
+    def test_list_comments_pagination(self):
+        """
+        Assert that comments are paginated by 5.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # create 7 comments
+        for i in range(7):
+            self._create_comment(post_id, text=f"comment {i+1}")
+
+        # make request
+        url = f"/api/posts/{post_id}/comments/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data["results"]), 5)
+
+        # make request for second page
+        resp = self.client.get(resp.data["next"])
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data["results"]), 2)
+
 
 
 class FeedTests(BaseTest):

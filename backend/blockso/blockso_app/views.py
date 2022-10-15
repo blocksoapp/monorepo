@@ -19,7 +19,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Follow, Post, Profile, Socials
+from .models import Comment, Follow, Post, Profile, Socials
 from .pagination import CommentPagination, PostsPagination
 from . import jobs, pagination, serializers
 
@@ -325,5 +325,6 @@ class CommentCreateList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
     pagination_class = CommentPagination
+    queryset = Comment.objects.all()
     lookup_url_kwarg = "post_id"
     lookup_field = "post"
