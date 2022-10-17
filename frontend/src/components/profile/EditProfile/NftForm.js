@@ -91,8 +91,8 @@ function NftForm({ setProfile }) {
   
 
   return (
-    <Form.Group className="mb-3 p-3">
-      <Form.Label className='fw-bold'>Upload NFT </Form.Label> <br/>
+    <Form.Group className="p-3">
+      <Form.Label className='fw-bold'>Upload an NFT </Form.Label> <br/>
       {/* <Form.Label>TokenId</Form.Label>   */}
       <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name} placeholder="Token Id"/>
       {/* <Form.Label>Contract Address</Form.Label> */}
@@ -101,7 +101,7 @@ function NftForm({ setProfile }) {
           Alternatively, you can enter your NFT details for your profile picture.  <br/>
       </Form.Text>
       <div className='d-flex align-items-center'>
-              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Verify</Button>
+              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Save</Button>
               <Form.Text className={`${!isError ? 'text-muted' : 'text-danger'}`}>
               {loadingMsg}
               </Form.Text>

@@ -16,7 +16,6 @@ function EditProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
-    const [userAddress, setUserAddress] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [formProfile, setFormProfile] = useState({
         image: '',
@@ -93,7 +92,6 @@ function EditProfileForm({ profile, setProfile, getUser }) {
   useEffect(() => {
     setFormProfile(profile)
     setPfp(profile.image)
-    setUserAddress(profile.address)
   }, [profile])
   
 
@@ -115,7 +113,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                 <Col>
                                     <CurrentPfp
                                     pfp={pfp}
-                                    userAddress={address}/>
+                                    address={address}/>
                                 </Col>
                                 <Col>
                                     <TabsComponent
@@ -124,7 +122,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     thirdTitle='Use ENS'
                                     firstPane={ <FileUpload setProfile={setFormProfile}/> }
                                     secondPane={ <NftForm setProfile={setFormProfile}/> }
-                                    thirdPane={ <FormEns/> }
+                                    thirdPane={ <FormEns address={address}/> }
                                     />
                                 </Col>
                         </Col>

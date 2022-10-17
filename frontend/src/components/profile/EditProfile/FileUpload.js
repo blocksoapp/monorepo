@@ -73,12 +73,12 @@ function FileUpload({ setProfile }) {
         <Form.Group className="p-3">
     
             <Form.Group className="mb-1">
-              <Form.Label className="fw-bold">Upload Profile Picture</Form.Label>
+              <Form.Label className="fw-bold">Upload an Image</Form.Label>
               <Form.Control onChange={handleBufferChange} type="file"/>
             </Form.Group>
 
             <div className='d-flex align-items-center'>
-              <Button className="mt-2 me-3 btn-sm" variant="dark" onClick={handleFileSubmit}>Upload</Button>
+              <Button className="mt-2 me-3 btn-sm" variant="dark" onClick={handleFileSubmit}>Save</Button>
               <Form.Text className={`${!isLoading ? 'text-success' : 'text-muted'}`}>
               {loadingText}
               </Form.Text>

@@ -4,7 +4,7 @@ import ProfileEnsAndAddress from '../ViewProfile/ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
 
 
-function CurrentPfp({ pfp, userAddress }) {
+function CurrentPfp({ pfp, address }) {
 
   return (
     <div className="mb-3">
@@ -15,7 +15,7 @@ function CurrentPfp({ pfp, userAddress }) {
                     height="128px"
                     width="128px"
                     imgUrl={pfp}
-                    address={userAddress}
+                    address={address}
                     fontSize="1rem"
                 />
             </Col>
@@ -25,7 +25,7 @@ function CurrentPfp({ pfp, userAddress }) {
             <Col className="col-auto text-center">
                 <Form.Label>
                     <ProfileEnsAndAddress
-                        address={userAddress}
+                        address={address}
                     />
                 </Form.Label>
             </Col>
