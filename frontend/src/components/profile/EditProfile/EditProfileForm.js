@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Container, Form, Button, Row, Col } from 'react-bootstrap'
+import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
 import { baseAPI, getCookie } from '../../../utils'
 import NftForm from './NftForm'
@@ -11,6 +11,8 @@ import FormBio from './FormBio'
 import FormHeader from './FormHeader'
 import TabsComponent from '../../ui/Tabs'
 import FormEns from './FormEns'
+import Pfp from '../../Pfp'
+import AlertComponent from '../../ui/AlertComponent'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
 
@@ -31,6 +33,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
             snapshot: ''
         }
     })
+    const [isSuccess, setIsSuccess] = useState(false)
     
 
      // Form State Update
@@ -44,7 +47,6 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       })
       console.log(formProfile)
   } 
-
   
   // Form Submission Function
   const handleSubmit = async () => {
@@ -63,6 +65,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       
       if(formRes.status === 200 || 201) {
         console.log('successfully posted data')
+        setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
       } else {
@@ -83,17 +86,19 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       return
     } else console.log('profile does not exist')
   }
-  
 
   // load existing profile data
   useEffect(() => {
       checkForProfile();
   }, [])
-
+  
   useEffect(() => {
     setFormProfile(profile)
     setPfp(profile.image)
   }, [profile])
+
+
+   
   
 
 
@@ -102,6 +107,28 @@ function EditProfileForm({ profile, setProfile, getUser }) {
         {!isLoading ? 
             <Container>
                 <Form>
+                    <AlertComponent
+                    isToggle={isSuccess}
+                    setIsToggle={setIsSuccess}
+                    color='success'
+                    heading='Success!'
+                    subheading='Aww yeah, you successfully made changes to your profile!
+                    Now go out there and use Blockso!'/>
+                    <Row>
+                        <Col>
+                            {pfpPreview ?  
+                            <div className='d-flex flex-column align-items-center'> 
+                                <CurrentPfp pfp={pfpPreview} address={address} />
+                                <Button className="btn-sm mb-3" disabled={!isConnected} variant="dark" onClick={handleSubmit}>
+                                    Update Picture
+                                </Button> 
+                            </div> :
+                            <CurrentPfp
+                            pfp={pfp}
+                            address={address}/> }
+                        </Col>
+                    </Row>
+
                     <Row>
                         <Col>
                             <FormHeader
@@ -109,14 +136,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                             subheader="Upload a picture for your profile so everyone can tell who you are!"
                             />
                         </Col>
-
                         <Col md={9}>
-                                <Col>
-                                    <CurrentPfp
-                                    pfp={pfp}
-                                    address={address}/>
-                                </Col>
-                                <Col>
                                     <TabsComponent
                                     firstTitle='Upload Image'
                                     secondTitle='Use NFT'
@@ -124,19 +144,24 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     firstPane={ 
                                         <FileUpload 
                                         setProfile={setFormProfile}
+                                        setPfpPreview={setPfpPreview}
+                                        pfpPreview={pfpPreview}
                                         /> }
                                     secondPane={ 
                                         <NftForm
                                         setProfile={setFormProfile}
+                                        setPfpPreview={setPfpPreview}
+                                        pfpPreview={pfpPreview}
                                         /> }
                                     thirdPane={ 
                                         <FormEns 
                                         address={address}
                                         setProfile={setFormProfile}
+                                        setPfpPreview={setPfpPreview}
+                                        pfpPreview={pfpPreview}
                                         /> }
                                     />
                                 </Col>
-                        </Col>
                     </Row>
 
                     <Row>

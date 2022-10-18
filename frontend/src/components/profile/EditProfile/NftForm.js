@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { useContractRead, erc721ABI } from 'wagmi'
 
-function NftForm({ setProfile }) {
+function NftForm({ setProfile, setPfpPreview }) {
   // State
   const [nft, setNft] = useState({
     tokenId: null,
@@ -55,6 +55,7 @@ function NftForm({ setProfile }) {
                     image: ipfs
                 }
             })
+            setPfpPreview(ipfs)
             setIsLoading(false)
             setLoadingMsg('Success!')
           } else {
@@ -69,6 +70,7 @@ function NftForm({ setProfile }) {
                     image: ipfs.image
                 }
             })
+            setPfpPreview(ipfs.image)
             setIsLoading(false)
             setLoadingMsg('Success!')
           }
@@ -96,12 +98,12 @@ function NftForm({ setProfile }) {
       {/* <Form.Label>TokenId</Form.Label>   */}
       <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name} placeholder="Token Id"/>
       {/* <Form.Label>Contract Address</Form.Label> */}
-      <Form.Control onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name} placeholder="Contract Address"/>
+      <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name} placeholder="Contract Address"/>
       <Form.Text className="text-muted">
-          Alternatively, you can enter your NFT details for your profile picture.  <br/>
+          Alternatively, you can use a Non Fungible Token as your profile picture.  <br/>
       </Form.Text>
       <div className='d-flex align-items-center'>
-              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Save</Button>
+              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Upload</Button>
               <Form.Text className={`${!isError ? 'text-muted' : 'text-danger'}`}>
               {loadingMsg}
               </Form.Text>

@@ -7,7 +7,7 @@ import Pfp from '../../Pfp';
 function CurrentPfp({ pfp, address }) {
 
   return (
-    <div className="mb-3">
+    <div className="">
         {/* Profile picture */}
         <Row className="justify-content-center text-center p-2">
             <Col className="col-auto">

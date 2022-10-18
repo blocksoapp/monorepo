@@ -1,13 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import EnsAndAddress from '../../EnsAndAddress'
 import { useEnsAvatar } from 'wagmi'
+import Pfp from '../../Pfp'
 
 function FormEns(props) {
     // constants
-    const { setProfile } = props
+    const { setProfile, setPfpPreview  } = props
     const { data } = useEnsAvatar({ addressOrName: 'vitalik.eth' })
-    const [loadingMsg, setLoadingMsg] = useState('')
+    const [loadingMsg, setLoadingMsg] = useState('Set Avatar')
     const [isLoading, setIsLoading] = useState(false)
 
      // functions
@@ -19,12 +20,10 @@ function FormEns(props) {
         // Return if no ens avatar
         if (data === null || '') {
             console.log('data is null or empty')
-            setLoadingMsg(`No ENS avatar associated with ${getAbbrAddress(props.address)}`)
             return
         } else {
-            setLoadingMsg('Fetching your ENS avatar...')
+            setPfpPreview(data)
             setIsLoading(true)
-            console.log('ens avatar: ', data)
             // update profile to include image url 
             setProfile(prevValue => {
                 return {
@@ -32,22 +31,42 @@ function FormEns(props) {
                     image: data
                 }
             })
-            setLoadingMsg('Completed! Please submit the form to update your profile picture.')
             setIsLoading(false)
+            setLoadingMsg('Success')
             // else if no ens avar
                 // return error or set default card img
         }
     }
 
+    
+
+    useEffect(() => {
+    const handleLoad = () => {
+        if(isLoading) {
+            setLoadingMsg("Fetching...")
+        } else return
+    }
+
+    handleLoad()
+    
+    }, [isLoading])
+    
+
   return (
     <div className='p-3'>
-         <Form.Label className='fw-bold'>Use an ENS </Form.Label> 
+         <Form.Label className='fw-bold'>Use an ENS Avatar</Form.Label> 
          <br/>
-         
-        <div className='border p-3 d-flex flex-column'>
-                <EnsAndAddress address={props.address}/>
-                <Button onClick={handleSubmit} className="btn-sm me-4 mt-1" variant="dark">Save</Button>
-                {loadingMsg}
+                       
+        <div className=''>
+                {!data ? `No ENS avatar associated with ${getAbbrAddress(props.address)}`:
+                <div>
+                    <Form.Text className="text-muted">
+                    Alternatively, you can use your ENS avatar as your profile picture.  
+                    </Form.Text> 
+                    <br/>
+                    <Button onClick={handleSubmit} className="btn-sm mt-2" variant="dark">{loadingMsg}</Button> 
+                </div>
+                }               
         </div>        
     </div>
   )
