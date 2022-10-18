@@ -6,7 +6,6 @@ import { nftAPI } from '../../../utils'
 
 function FileUpload({ setProfile }) {
         // state for filepath
-        const [imagePath, setImagePath] = useState('')
         const [bufferImage, setBufferImage] = useState([])
         const [isLoading, setIsLoading] = useState(Boolean)
         const [loadingText, setLoadingText] = useState('')

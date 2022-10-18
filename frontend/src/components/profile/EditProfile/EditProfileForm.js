@@ -16,6 +16,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
+    const [pfpPreview, setPfpPreview] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [formProfile, setFormProfile] = useState({
         image: '',
@@ -120,9 +121,19 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     firstTitle='Upload Image'
                                     secondTitle='Use NFT'
                                     thirdTitle='Use ENS'
-                                    firstPane={ <FileUpload setProfile={setFormProfile}/> }
-                                    secondPane={ <NftForm setProfile={setFormProfile}/> }
-                                    thirdPane={ <FormEns address={address}/> }
+                                    firstPane={ 
+                                        <FileUpload 
+                                        setProfile={setFormProfile}
+                                        /> }
+                                    secondPane={ 
+                                        <NftForm
+                                        setProfile={setFormProfile}
+                                        /> }
+                                    thirdPane={ 
+                                        <FormEns 
+                                        address={address}
+                                        setProfile={setFormProfile}
+                                        /> }
                                     />
                                 </Col>
                         </Col>
