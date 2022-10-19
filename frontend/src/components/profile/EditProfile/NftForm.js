@@ -10,7 +10,6 @@ function NftForm({ setProfile, setPfpPreview }) {
 })
   const [isLoading, setIsLoading] = useState(Boolean)
   const [loadingMsg, setLoadingMsg] = useState('')
-  const [isError, setIsError] = useState(Boolean)
 
   // Instantiate the contract
   const contract = useContractRead({
@@ -77,7 +76,6 @@ function NftForm({ setProfile, setPfpPreview }) {
         } catch (error) {
           console.log("error uploading nft: ", error)
           setIsLoading(false)
-          setIsError(true)
           setLoadingMsg('Error. Please make sure both fields are correct.')
         }
   }
@@ -103,8 +101,8 @@ function NftForm({ setProfile, setPfpPreview }) {
           Alternatively, you can use a Non Fungible Token as your profile picture.  <br/>
       </Form.Text>
       <div className='d-flex align-items-center'>
-              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Upload</Button>
-              <Form.Text className={`${!isError ? 'text-muted' : 'text-danger'}`}>
+              <Button className="btn-sm me-4 mt-1" variant="outline-dark" onClick={getNftMetadata}>Upload</Button>
+              <Form.Text className='text-muted'>
               {loadingMsg}
               </Form.Text>
       </div>

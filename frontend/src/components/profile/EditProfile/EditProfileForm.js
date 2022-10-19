@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap'
+import { Container, Form, Button, Row, Col } from 'react-bootstrap'
 import { useAccount } from 'wagmi'
 import { baseAPI, getCookie } from '../../../utils'
 import NftForm from './NftForm'
@@ -11,7 +11,6 @@ import FormBio from './FormBio'
 import FormHeader from './FormHeader'
 import TabsComponent from '../../ui/Tabs'
 import FormEns from './FormEns'
-import Pfp from '../../Pfp'
 import AlertComponent from '../../ui/AlertComponent'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
@@ -34,6 +33,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
         }
     })
     const [isSuccess, setIsSuccess] = useState(false)
+    const [isError, setIsError] = useState(false)
     
 
      // Form State Update
@@ -63,13 +63,15 @@ function EditProfileForm({ profile, setProfile, getUser }) {
             credentials: 'include'
       })
       
-      if(formRes.status === 200 || 201) {
+      if(formRes.ok) {
         console.log('successfully posted data')
+        setPfpPreview(false)
         setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
       } else {
         console.log('error posting data')
+        setIsError(true)
         setIsLoading(false)
       }
   }
@@ -85,6 +87,27 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       setProfile(profileData);
       return
     } else console.log('profile does not exist')
+  }
+
+  // Alerts for success & fail form submission
+  const handleAlert = () => {
+    if(isSuccess === true) {
+        return <AlertComponent
+        isToggle={isSuccess}
+        setIsToggle={setIsSuccess}
+        color='success'
+        heading='Success!'
+        subheading='Aww yeah, you successfully made changes to your profile!
+        Now go out there and use Blockso!'/>
+    } else if(isError === true) {
+        return <AlertComponent
+        isToggle={isError}
+        setIsToggle={setIsError}
+        color='danger'
+        heading='Error!'
+        subheading='Aww no, you unsuccessfully made changes to your profile!
+        Make sure you are signed into Blockso and try again!'/>
+    } else return
   }
 
   // load existing profile data
@@ -107,25 +130,17 @@ function EditProfileForm({ profile, setProfile, getUser }) {
         {!isLoading ? 
             <Container>
                 <Form>
-                    <AlertComponent
-                    isToggle={isSuccess}
-                    setIsToggle={setIsSuccess}
-                    color='success'
-                    heading='Success!'
-                    subheading='Aww yeah, you successfully made changes to your profile!
-                    Now go out there and use Blockso!'/>
+                    {handleAlert()}
                     <Row>
                         <Col>
                             {pfpPreview ?  
                             <div className='d-flex flex-column align-items-center'> 
                                 <CurrentPfp pfp={pfpPreview} address={address} />
-                                <Button className="btn-sm mb-3" disabled={!isConnected} variant="dark" onClick={handleSubmit}>
-                                    Update Picture
+                                <Button className="btn-sm mb-3" disabled={!isConnected} variant="success" onClick={handleSubmit}>
+                                    Save Changes
                                 </Button> 
                             </div> :
-                            <CurrentPfp
-                            pfp={pfp}
-                            address={address}/> }
+                            <CurrentPfp pfp={pfp} address={address}/> }
                         </Col>
                     </Row>
 
@@ -140,7 +155,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                     <TabsComponent
                                     firstTitle='Upload Image'
                                     secondTitle='Use NFT'
-                                    thirdTitle='Use ENS'
+                                    thirdTitle='Use ENS Avatar'
                                     firstPane={ 
                                         <FileUpload 
                                         setProfile={setFormProfile}
@@ -157,6 +172,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                                         <FormEns 
                                         address={address}
                                         setProfile={setFormProfile}
+                                        profile={formProfile}
                                         setPfpPreview={setPfpPreview}
                                         pfpPreview={pfpPreview}
                                         /> }
@@ -193,8 +209,8 @@ function EditProfileForm({ profile, setProfile, getUser }) {
 
 
                             <div className='mt-3 mb-3'>
-                                <Button disabled={!isConnected} variant="dark" onClick={handleSubmit}>
-                                    Submit
+                                <Button disabled={!isConnected} variant="success" onClick={handleSubmit}>
+                                    Save Changes
                                 </Button> 
                                 {!isConnected ? <Form.Text className="text-muted p-3">
                                 Please connect to Metamask before submitting.
