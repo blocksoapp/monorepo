@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
@@ -16,79 +16,24 @@ import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
 
 
-function Profile() {
+function Profile(props) {
     // constants
-    const { urlInput } = useParams();
-    const routerLocation = useLocation();
-    const navigate = useNavigate();
-    const ensAvatar = useEnsAvatar({addressOrName: urlInput});
-    const ensAddress = useEnsAddress({
-        name: urlInput,
-        onSuccess(data) {
-            if (data === null) {
-                setAddress(urlInput);
-            }
-            else {
-                setAddress(data);
-            }
-        },
-        onError(error) {
-            console.error(error);
-            setAddress(urlInput);
-        }
-    });
-    const ensNameHook = useEnsName({address: urlInput});
+    const ensAvatar = useEnsAvatar({addressOrName: props.address});
     const user = useUser();
 
     // state
-    const [address, setAddress] = useState(null);
-    const [profileInvalid, setProfileInvalid] = useState(false);
     const [profileDataLoading, setProfileDataLoading] = useState(true);
     const [profileData, setProfileData] = useState({});
     const [postsLoading, setPostsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
     const [pfpUrl, setPfpUrl] = useState(null);
-    const [ensName, setEnsName] = useState(null);
  
     // functions
-    const resolveAddress = (input) => {
-        // input is an ens name, resolve it to an address
-        if (input.endsWith(".eth")) {
-
-            // return if ens is still being resolved
-            if (ensAddress.isLoading === true) {
-                return;
-            }
-
-            // set ens if found otherwise use input from url
-            var resolved = ensAddress.data;
-            if (resolved === null || resolved === undefined) {
-                setAddress(input);
-            }
-            else {
-                setAddress(resolved);
-            }
-        }
-
-        // input is not an ens name, set address to the given input
-        else {
-            setAddress(input);
-        }
-    }
-
-    const determineProfilePic = async () => {
-        if ("image" in profileData && profileData["image"] !== "") {
-            setPfpUrl(profileData["image"]);
-        }
-        else {
-            setPfpUrl(ensAvatar["data"]);
-        }
-    }
 
     const fetchPosts = async () => {
         setPostsLoading(true);
-        const res = await apiGetPosts(address);
+        const res = await apiGetPosts(props.address);
 
         if (res.status === 200) {
             var data = await res.json();
@@ -104,7 +49,7 @@ function Profile() {
     }
 
     const fetchProfile = async () => {
-        const url = `${baseAPI}/${address}/profile/`;
+        const url = `${baseAPI}/${props.address}/profile/`;
         setProfileDataLoading(true);
         const res = await fetch(url, {
             method: 'GET',
@@ -126,7 +71,7 @@ function Profile() {
     }
 
     const handleUnfollow = async () => {
-        const url = `${baseAPI}/${address}/follow/`;
+        const url = `${baseAPI}/${props.address}/follow/`;
         const res = await fetch(url, {
             method: 'DELETE',
             headers: {
@@ -144,7 +89,7 @@ function Profile() {
     }
 
     const handleFollow = async () => {
-        const url = `${baseAPI}/${address}/follow/`;
+        const url = `${baseAPI}/${props.address}/follow/`;
         const res = await fetch(url, {
             method: 'POST',
             headers: {
@@ -162,80 +107,42 @@ function Profile() {
     }
 
     // effects
-    /*
-     * Clear existing profile and resolve the given address
-     * from the url when the page is navigated to.
-     */
-    useEffect(() => {
-        // reset state
-        setAddress(null);
-        setEnsName(null);
-        setProfileInvalid(false);
-        setProfileData({});
-        setProfileDataLoading(true);
-        setPosts([]);
-        setPostsLoading(true);
-        setPostsError(false);
-        setPfpUrl(null);
-
-        // resolve the ens or address
-        resolveAddress(urlInput);
-    }, [urlInput, routerLocation.key])
 
     /* 
      * Fetch profile and posts when address is set.
      */
     useEffect(() => {
         // do nothing if address is null or undefined
-        if (address === null || address === undefined) {
+        if (!props.address) {
             return;
         }
 
-        // show invalid profile if address cannot be normalized to checksum
-        try {
-            if (!address.endsWith(".eth")) {
-                ethersUtils.getAddress(address);
-            }
-        }
-        catch (error) {
-            console.error(error);
-            setProfileInvalid(true);
-            setProfileDataLoading(false);
-            setPostsLoading(false);
-            return;
-        }
-
-        // address is valid, fetch profile and posts
         fetchProfile();
         fetchPosts();
 
-    }, [address])
+    }, [props.address])
 
 
     /*
-     * Set the ENS Name if it exists.
+     * Set profile picture if user has uploaded one.
      */
     useEffect(() => {
-        if (!ensNameHook.isLoading &&
-            ensNameHook.data !== null) {
-            setEnsName(ensNameHook.data);
+        if ("image" in profileData && profileData["image"] !== "") {
+            setPfpUrl(profileData["image"]);
         }
-    }, [ensNameHook])
-        
+    }, [profileData])
 
+
+    /*
+     * Set pfp url to the ens avatar if the user does
+     * not have a profile pic and does have an ens avatar.
+     */
     useEffect(() => {
-        determineProfilePic()
-
-        return () => {
-            if (pfpUrl === ensAvatar["data"]) {
-                return;
-            }
-            if (ensAvatar["data"] !== "") {
-                setPfpUrl(ensAvatar["data"]);
-            }
+        if (!pfpUrl && !ensAvatar.isLoading && ensAvatar.data !== null) {
+            setPfpUrl(ensAvatar.data);
         }
+    }, [ensAvatar])
 
-        }, [profileData])
 
     useEffect(() => {
         // TODO clean this up once a job system is added in
@@ -254,117 +161,110 @@ function Profile() {
 
     return (
         <>
-            {profileInvalid === true
-                ? <ProfileInvalid address={address} /> 
-                : <Container className="justify-content-center">
+            {/* show placeholder or profile data */}
+            {profileDataLoading === true
+                ? <Container className="justify-content-center"><ProfilePlaceholder /></Container>
+                : <Container fluid>
 
-                    {/* show placeholder or profile data */}
-                    {profileDataLoading === true
-                        ? <Container className="justify-content-center"><ProfilePlaceholder /></Container>
-                        : <Container fluid>
+                    {/* User Info Section */}
+                    <Container className="border-bottom border-light">
 
-                            {/* User Info Section */}
-                            <Container className="border-bottom border-light">
+                        {/* Profile picture */}
+                        <Row className="justify-content-center">
+                            <Col className="col-auto">
+                                <Pfp
+                                    height="256px"
+                                    width="256px"
+                                    imgUrl={pfpUrl}
+                                    address={props.address}
+                                    ensName={props.ensName}
+                                    fontSize="1.75rem"
+                                />
+                            </Col>
+                        </Row>
 
-                                {/* Profile picture */}
-                                <Row className="justify-content-center">
-                                    <Col className="col-auto">
-                                        <Pfp
-                                            height="256px"
-                                            width="256px"
-                                            imgUrl={pfpUrl}
-                                            address={address}
-                                            ensName={ensName}
-                                            fontSize="1.75rem"
-                                        />
-                                    </Col>
-                                </Row>
-
-                                {/* Address and ENS */}
-                                <Row className="justify-content-center mt-2">
-                                    <Col className="col-auto text-center">
-                                        <h5>
-                                            <ProfileEnsAndAddress
-                                                address={address}
-                                            />
-                                        </h5>
-                                    </Col>
-                                </Row>
-
-                                {/* Bio blurb */}
-                                <Row className="justify-content-center mt-3">
-                                    <Col className="col-auto">
-                                        <p>{profileData["bio"]}</p>
-                                    </Col>
-                                </Row>
-
-                                {/* Follower/Following counts and Follow button */}
-                                <Row className="justify-content-center mt-3 mb-3">
-                                    <Col className="col-auto">
-                                        <h5>
-                                            <Badge bg="secondary">
-                                                {profileData["numFollowers"]}
-                                                {profileData["numFollowers"] === 1 ?
-                                                    " Follower" : " Followers"}
-                                            </Badge> 
-                                        </h5>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        <h5>
-                                            <Badge bg="secondary">
-                                                {profileData["numFollowing"]} Following
-                                            </Badge> 
-                                        </h5>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        {user !== null && profileData["followedByMe"] === true
-                                            ? <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={handleUnfollow}
-                                                disabled={user !== null && user["address"] === address ? true : false}
-                                              >
-                                                Unfollow
-                                              </Button> 
-                                            : <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={handleFollow}
-                                                disabled={user !== null && user["address"] === address ? true : false}
-                                              >
-                                                Follow
-                                              </Button>
-                                        }
-                                    </Col>
-                                </Row>
-
-                            </Container>
-                        </Container>
-                    }
-
-                    {/* Posts Section -- show placeholder or posts */}
-                    {postsLoading === true
-                        ? <PostsPlaceholder />
-                        : postsError === true
-                            ? <PostsError retryAction={fetchPosts} />
-                            : posts.length === 0
-                                ? <PostsNotFound retryAction={fetchPosts} />
-                                : posts.map(post => (
-                                    <Post
-                                        key={post.id}
-                                        author={post.author}
-                                        ensName={ensName}
-                                        text={post.text}
-                                        imgUrl={post.imgUrl}
-                                        created={post.created}
-                                        pfp={pfpUrl}
-                                        refTx={post.refTx}
-                                        profileAddress={address}
+                        {/* Address and ENS */}
+                        <Row className="justify-content-center mt-2">
+                            <Col className="col-auto text-center">
+                                <h5>
+                                    <ProfileEnsAndAddress
+                                        address={props.address}
                                     />
-                    ))}
+                                </h5>
+                            </Col>
+                        </Row>
 
+                        {/* Bio blurb */}
+                        <Row className="justify-content-center mt-3">
+                            <Col className="col-auto">
+                                <p>{profileData["bio"]}</p>
+                            </Col>
+                        </Row>
+
+                        {/* Follower/Following counts and Follow button */}
+                        <Row className="justify-content-center mt-3 mb-3">
+                            <Col className="col-auto">
+                                <h5>
+                                    <Badge bg="secondary">
+                                        {profileData["numFollowers"]}
+                                        {profileData["numFollowers"] === 1 ?
+                                            " Follower" : " Followers"}
+                                    </Badge> 
+                                </h5>
+                            </Col>
+                            <Col className="col-auto">
+                                <h5>
+                                    <Badge bg="secondary">
+                                        {profileData["numFollowing"]} Following
+                                    </Badge> 
+                                </h5>
+                            </Col>
+                            <Col className="col-auto">
+                                {user !== null && profileData["followedByMe"] === true
+                                    ? <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={handleUnfollow}
+                                        disabled={user !== null && user["address"] === props.address ? true : false}
+                                      >
+                                        Unfollow
+                                      </Button> 
+                                    : <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={handleFollow}
+                                        disabled={user !== null && user["address"] === props.address ? true : false}
+                                      >
+                                        Follow
+                                      </Button>
+                                }
+                            </Col>
+                        </Row>
+
+                    </Container>
                 </Container>
             }
+
+            {/* Posts Section -- show placeholder or posts */}
+            {postsLoading === true
+                ? <PostsPlaceholder />
+                : postsError === true
+                    ? <PostsError retryAction={fetchPosts} />
+                    : posts.length === 0
+                        ? <PostsNotFound retryAction={fetchPosts} />
+                        : posts.map(post => (
+                            <Post
+                                key={post.id}
+                                author={post.author}
+                                ensName={props.ensName}
+                                text={post.text}
+                                imgUrl={post.imgUrl}
+                                created={post.created}
+                                pfp={pfpUrl}
+                                refTx={post.refTx}
+                                profileAddress={props.address}
+                            />
+            ))}
         </>
     )
 }
