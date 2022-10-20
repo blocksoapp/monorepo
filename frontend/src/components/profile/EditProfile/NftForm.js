@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { useContractRead, erc721ABI } from 'wagmi'
 
-function NftForm({ setProfile }) {
+function NftForm({ setProfile, setPfpPreview }) {
   // State
   const [nft, setNft] = useState({
     tokenId: null,
@@ -10,7 +10,6 @@ function NftForm({ setProfile }) {
 })
   const [isLoading, setIsLoading] = useState(Boolean)
   const [loadingMsg, setLoadingMsg] = useState('')
-  const [isError, setIsError] = useState(Boolean)
 
   // Instantiate the contract
   const contract = useContractRead({
@@ -55,6 +54,7 @@ function NftForm({ setProfile }) {
                     image: ipfs
                 }
             })
+            setPfpPreview(ipfs)
             setIsLoading(false)
             setLoadingMsg('Success!')
           } else {
@@ -69,13 +69,13 @@ function NftForm({ setProfile }) {
                     image: ipfs.image
                 }
             })
+            setPfpPreview(ipfs.image)
             setIsLoading(false)
             setLoadingMsg('Success!')
           }
         } catch (error) {
           console.log("error uploading nft: ", error)
           setIsLoading(false)
-          setIsError(true)
           setLoadingMsg('Error. Please make sure both fields are correct.')
         }
   }
@@ -91,18 +91,18 @@ function NftForm({ setProfile }) {
   
 
   return (
-    <Form.Group className="mb-3 border p-3">
-      <Form.Label className='fw-bold'>Upload NFT </Form.Label> <br/>
+    <Form.Group className="p-3">
+      <Form.Label className='fw-bold'>Upload an NFT </Form.Label> <br/>
       {/* <Form.Label>TokenId</Form.Label>   */}
       <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="tokenId" value={nft.name} placeholder="Token Id"/>
       {/* <Form.Label>Contract Address</Form.Label> */}
-      <Form.Control onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name} placeholder="Contract Address"/>
+      <Form.Control className="mb-2" onChange={handleNftChange} type="text" size="sm" name="contractAddress" value={nft.name} placeholder="Contract Address"/>
       <Form.Text className="text-muted">
-          Alternatively, you can enter your NFT details for your profile picture.  <br/>
+          Alternatively, you can use a Non Fungible Token as your profile picture.  <br/>
       </Form.Text>
       <div className='d-flex align-items-center'>
-              <Button className="btn-sm me-4 mt-1" variant="dark" onClick={getNftMetadata}>Verify</Button>
-              <Form.Text className={`${!isError ? 'text-muted' : 'text-danger'}`}>
+              <Button className="btn-sm me-4 mt-1" variant="outline-dark" onClick={getNftMetadata}>Upload</Button>
+              <Form.Text className='text-muted'>
               {loadingMsg}
               </Form.Text>
       </div>

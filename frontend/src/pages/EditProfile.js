@@ -19,6 +19,7 @@ function EditProfile() {
         }
     })
 
+
     // Fetch user profile status
     const getUser = async () => {
         const url = `${baseAPI}/user/`
@@ -30,6 +31,8 @@ function EditProfile() {
         const data = res.json()
         return data
       }
+
+      
    
         return (
             <div className='p-sm-4'>

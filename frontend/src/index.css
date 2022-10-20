@@ -22,6 +22,10 @@ code {
   min-height: 100vh;
 }
 
+.tab-min-height{
+  min-height: 20vh
+}
+
 
 /* EXPLORE PAGE */
 

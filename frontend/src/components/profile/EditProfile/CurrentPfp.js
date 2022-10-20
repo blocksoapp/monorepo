@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
-import { Row, Col, Image, Form } from 'react-bootstrap'
+import React from 'react'
+import { Row, Col, Form } from 'react-bootstrap'
 import ProfileEnsAndAddress from '../ViewProfile/ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
 
 
-function CurrentPfp({ pfp, userAddress }) {
+function CurrentPfp({ pfp, address }) {
 
   return (
-    <div className="mb-3">
+    <div className="">
         {/* Profile picture */}
         <Row className="justify-content-center text-center p-2">
             <Col className="col-auto">
@@ -15,7 +15,7 @@ function CurrentPfp({ pfp, userAddress }) {
                     height="128px"
                     width="128px"
                     imgUrl={pfp}
-                    address={userAddress}
+                    address={address}
                     fontSize="1rem"
                 />
             </Col>
@@ -25,7 +25,7 @@ function CurrentPfp({ pfp, userAddress }) {
             <Col className="col-auto text-center">
                 <Form.Label>
                     <ProfileEnsAndAddress
-                        address={userAddress}
+                        address={address}
                     />
                 </Form.Label>
             </Col>
