@@ -1,12 +1,10 @@
-import Profile from "../components/profile/ViewProfile/Profile";
+import ProfileResolver from "../components/profile/ViewProfile/ProfileResolver";
 
 
 function ViewProfile() {
 
     return (
-        <div>
-            <Profile />
-        </div>
+        <ProfileResolver />
     )
 }
 

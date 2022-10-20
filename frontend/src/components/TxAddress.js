@@ -15,7 +15,8 @@ function TxAddress(props) {
     return (
         <span>
             {/* No link if the profileAddress is the subject of the tx */}
-            {props.profileAddress.toLowerCase() === props.address.toLowerCase()
+            {props.profileAddress && props.address &&
+             props.profileAddress.toLowerCase() === props.address.toLowerCase()
                 ? <EnsAndAddress address={props.address} />
                 :   <Link
                         to={`/${props.address}/profile`}

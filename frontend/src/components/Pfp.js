@@ -18,9 +18,7 @@ function Pfp(props) {
     return (
         <div>
         {/* Show placeholder if img url is empty */}
-        {props.imgUrl === null ||
-         props.imgUrl === undefined ||
-         props.imgUrl === ""
+        {!props.imgUrl
             ?   <Card
                     style={{
                         height: props.height,

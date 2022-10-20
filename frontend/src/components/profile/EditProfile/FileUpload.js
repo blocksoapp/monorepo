@@ -4,18 +4,14 @@ import { useAccount} from 'wagmi'
 import { NFTStorage, Blob } from 'nft.storage'
 import { nftAPI } from '../../../utils'
 
-function FileUpload({ setProfile }) {
+function FileUpload({ setProfile, setPfpPreview }) {
         // state for filepath
-        const [imagePath, setImagePath] = useState('')
         const [bufferImage, setBufferImage] = useState([])
         const [isLoading, setIsLoading] = useState(Boolean)
         const [loadingText, setLoadingText] = useState('')
 
         const { isConnected } = useAccount()
 
-        useEffect(() => {
-          console.log("buffer state:",bufferImage)
-        }, [bufferImage])
         
 
       // Updates File Path state
@@ -33,7 +29,6 @@ function FileUpload({ setProfile }) {
         const client = new NFTStorage({ token: nftAPI })
         const content = new Blob([bufferImage])
         var cid = await client.storeBlob(content)
-        console.log('fetching nft storage api')
         const res = await fetch('https://api.nft.storage/upload', {
             method: 'POST',
             body: JSON.stringify({data: content}),
@@ -45,7 +40,6 @@ function FileUpload({ setProfile }) {
         })
         const data = await res.json()
         if(data.ok) {
-            console.log('uploaded to ipfs successfully')
             const ipfs = `https://${cid}.ipfs.nftstorage.link`
             setProfile(prevValue => {
                 return {
@@ -53,6 +47,7 @@ function FileUpload({ setProfile }) {
                     image: ipfs
                 }
             })
+            setPfpPreview(ipfs)
             setIsLoading(false)
             setLoadingText('Successfully uploaded image to ipfs!')
         } else if (!data.ok) {
@@ -69,22 +64,25 @@ function FileUpload({ setProfile }) {
     }, [loadingText]);
 
   return (
-    <>
-        <Form.Group className="mb-3 border p-3">
+    <div>
+        <Form.Group className="p-3">
     
             <Form.Group className="mb-1">
-              <Form.Label className="fw-bold">Upload Profile Picture</Form.Label>
-              <Form.Control onChange={handleBufferChange} type="file"/>
+              <Form.Label className="fw-bold">Upload an Image</Form.Label>
+              <Form.Control className="mb-2" onChange={handleBufferChange} type="file"/>
+              <Form.Text className="text-muted">
+              Upload a PNG or JPG file from your computer to use as your profile picture.
+              </Form.Text>
             </Form.Group>
 
             <div className='d-flex align-items-center'>
-              <Button className="mt-2 me-3 btn-sm" variant="dark" onClick={handleFileSubmit}>Upload</Button>
+              <Button className="mt-2 me-3 btn-sm" variant="outline-dark" onClick={handleFileSubmit}>Upload</Button>
               <Form.Text className={`${!isLoading ? 'text-success' : 'text-muted'}`}>
               {loadingText}
               </Form.Text>
             </div>
         </Form.Group>
-    </>
+    </div>
   )
 }
 
