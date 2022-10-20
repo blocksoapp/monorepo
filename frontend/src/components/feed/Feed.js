@@ -171,6 +171,8 @@ function Feed({ profileData, setProfileData, user }) {
                             key={post.id}
                             author={post.author}
                             text={post.text}
+                            pfp={pfpUrl}
+                            setPfp={setPfpUrl}
                             imgUrl={post.imgUrl}
                             created={post.created}
                             refTx={post.refTx}
