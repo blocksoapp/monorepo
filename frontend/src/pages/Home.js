@@ -14,11 +14,9 @@ function Home() {
     // state
     useEffect(() => {
       setProfileData(user)
-      console.log('setProfileData to user')
     }, [user])
 
     useEffect(() => {
-      console.log('profile data recognized')
       setLoading(false)
         console.log('profile data: ', profileData)
     }, [profileData])
