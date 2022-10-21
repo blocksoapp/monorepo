@@ -255,6 +255,7 @@ function Profile(props) {
                         : posts.map(post => (
                             <Post
                                 key={post.id}
+                                id={post.id}
                                 author={post.author}
                                 ensName={props.ensName}
                                 text={post.text}

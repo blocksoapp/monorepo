@@ -14,6 +14,8 @@ import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-
 import { utils } from "ethers";
 import Pfp from '../Pfp';
 import TxAddress from "../TxAddress";
+import Comment from "./Comment";
+import NewComment from "./NewComment";
 
 
 function Post(props) {
@@ -36,15 +38,25 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
+    const ensAvatar = useEnsAvatar({addressOrName: props.author});
+    const ensNameHook = useEnsName({address: props.author});
     const [pfpUrl, setPfpUrl] = useState(props.pfp)
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const [ensName, setEnsName] = useState(props.ensName);
-    const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const ensNameHook = useEnsName({address: props.author});
+    const [comments, setComments] = useState(props.comments);
+    const [showComments, setShowComments] = useState(false);
 
     // functions
+    const submitCommentCallback = (newComment) => {
+        if (comments !== undefined) {
+            setComments([newComment].concat(comments));
+        }
+        else {
+            setComments([newComment]);
+        }
+    }
 
     // TODO this will be adjusted in the future to deal
     // with more complex transactions
@@ -275,6 +287,32 @@ function Post(props) {
                             </Card.Body>
                             }
 
+
+                            {/* Comments section of a Post */}
+                            {/* hidden until user presses comment button */}
+                            {showComments === true &&
+                                <Card.Body className="bg-light">
+                                    <Row>
+                                        {comments && comments.map(comment => (
+                                            <Comment
+                                                key={comment["id"]}
+                                                author={comment["author"]}
+                                                text={comment["text"]}
+                                                imgUrl={comment["imgUrl"]}
+                                                created={comment["created"]}
+                                                profileAddress={props.profileAddress}
+                                            />
+                                        ))}
+
+                                        <NewComment
+                                            profileData={{profile: {address: props.profileAddress, image: props.profileImg}}}
+                                            submitCommentCallback={submitCommentCallback}
+                                            postId={props.id}
+                                        />
+                                    </Row>
+                                </Card.Body>
+                            }
+
                             {/* Card footer that includes the action buttons. */}
                             <Card.Footer>
                                 <Row className="justify-content-around align-items-center">
@@ -291,13 +329,22 @@ function Post(props) {
                                         <Button size="sm" variant="light"><FontAwesomeIcon icon={faQuoteRight} /></Button>
                                     </Col>
                                     <Col className="col-auto">
-                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faComment} /></Button>
+                                        <Button
+                                            size="sm"
+                                            variant="light"
+                                            onClick={() => {setShowComments(!showComments)}}
+                                        >
+                                            <FontAwesomeIcon icon={faComment} />
+                                        </Button>
                                     </Col>
+
                                 </Row>
                             </Card.Footer>
                         </Card>
                     </Col>
                 </Row>
+
+                
             </Container>
         )
     }
