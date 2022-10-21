@@ -92,7 +92,6 @@ function Comment(props) {
                                 </Row>
                                 <Row>
                                     <Col className="col-auto">
-                                        {props.imgUrl !== "" && <Card.Img src={props.imgUrl} />}
                                         <Card.Text>
                                             {props.text}
                                         </Card.Text>

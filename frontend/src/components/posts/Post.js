@@ -7,7 +7,7 @@ import {
     Image,
     Row 
 } from "react-bootstrap"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
@@ -38,6 +38,7 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
+    const navigate = useNavigate();
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
     const ensNameHook = useEnsName({address: props.author});
     const [pfpUrl, setPfpUrl] = useState(props.pfp)
@@ -332,7 +333,7 @@ function Post(props) {
                                         <Button
                                             size="sm"
                                             variant="light"
-                                            onClick={() => {setShowComments(!showComments)}}
+                                            onClick={() => {navigate(`/posts/${props.id}`)}}
                                         >
                                             <FontAwesomeIcon icon={faComment} />
                                         </Button>
