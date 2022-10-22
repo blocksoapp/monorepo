@@ -63,33 +63,38 @@ function Comment(props) {
         const dateObj = new Date(props.created);
 
         return (
-            <Container className="mt-1">
+            <Container className="mt-3">
                 <Row className="justify-content-center mb-2">
-                    <Col xs={12}>
+                    <Col xs={12} lg={6}>
                         <Card>
-                            {/* Card body that includes the comment details. */}
-                            <Card.Body>
-                                <Row className="border-bottom">
+                            {/* Card header that includes pfp, address, created time. */}
+                            <Card.Header>
+                                <Row className="align-items-end">
                                     <Col className="col-auto">
                                         <Pfp
-                                            height="50px"
-                                            width="50px"
+                                            height="100px"
+                                            width="100px"
                                             imgUrl={pfpUrl}
                                             address={props.author}
-                                            ensName={ensName}
-                                            fontSize="0.5rem"
+                                            fontSize="1rem"
                                         />
                                     </Col>
                                     <Col className="col-auto">
-                                        <TxAddress
-                                            address={props.author}
-                                            profileAddress={props.profileAddress}
-                                        />
+                                        <h5>
+                                            <TxAddress
+                                                address={props.author}
+                                                profileAddress={props.profileAddress}
+                                            />
+                                        </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}
                                         </p>
                                     </Col>
                                 </Row>
+                            </Card.Header>
+
+                            {/* Card body that includes the comment details. */}
+                            <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
@@ -98,6 +103,15 @@ function Comment(props) {
                                     </Col>
                                 </Row>
                             </Card.Body>
+
+                            {/* Card footer that includes the action buttons. */}
+                            <Card.Footer>
+                                <Row className="justify-content-around align-items-center">
+                                    <Col className="col-auto">
+                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faHeart} /></Button>
+                                    </Col>
+                                </Row>
+                            </Card.Footer>
                         </Card>
                     </Col>
                 </Row>

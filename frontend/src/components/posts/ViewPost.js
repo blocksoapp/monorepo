@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost } from "../../api.js";
+import { useUser } from "../../hooks/useUser";
 import Comment from "./Comment";
 import NewComment from "./NewComment";
 import Post from "./Post";
@@ -13,7 +14,8 @@ import PostsPlaceholder from "./PostsPlaceholder";
 
 function ViewPost(props) {
     // constants
-    const postId = useParams();
+    const { postId } = useParams();
+    const user = useUser();  // TODO create context for set/getting the user
 
     // state
     const [postLoading, setPostLoading] = useState(true);
@@ -30,7 +32,7 @@ function ViewPost(props) {
 
         if (res.status === 200) {
             var data = await res.json();
-            setPost(data["results"]);
+            setPost(data);
             setPostError(false);
             setPostLoading(false);
         }
@@ -76,6 +78,8 @@ function ViewPost(props) {
 
     const render = function () {
         return (
+            <>
+            {user !== null &&
             <Container className="mt-4">
 
                 {/* Post Section -- show placeholder or post */}
@@ -84,6 +88,7 @@ function ViewPost(props) {
                     : postError === true
                         ?   <PostsError retryAction={fetchPost} />
                         :   <Post
+                                bg="#fff0f0"
                                 key={post.id}
                                 id={post.id}
                                 author={post.author}
@@ -91,13 +96,13 @@ function ViewPost(props) {
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 refTx={post.refTx}
-                                profileAddress={props.address}
+                                profileAddress={user.profile.address}
                             />
                 }
 
                 {/* New Comment Section -- show form for new comment */}
                 <NewComment
-                    profileData={{profile: {address: props.profileAddress, image: props.profileImg}}}  // TODO
+                    profileData={user}
                     submitCommentCallback={submitCommentCallback}
                     postId={postId}
                 />
@@ -116,11 +121,13 @@ function ViewPost(props) {
                                     text={comment.text}
                                     created={comment.created}
                                     pfp={comment.pfp}
-                                    profileAddress={props.authedAddress}
+                                    profileAddress={user.profile.address}
                                 />
                 ))}
 
             </Container>
+            }
+            </>
         )
     }
 

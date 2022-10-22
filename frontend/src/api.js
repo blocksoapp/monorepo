@@ -24,7 +24,7 @@ export const apiGetExplore = async () => {
 
 /* Returns the response for a specific post. */
 export const apiGetPost = async (postId) => {
-    const url = `${baseAPI}/posts/${postId}/`;
+    const url = `${baseAPI}/post/${postId}/`;
     const res = await fetch(url, {
         method: 'GET',
         credentials: 'include'

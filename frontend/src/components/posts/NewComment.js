@@ -70,18 +70,18 @@ function NewComment({ profileData, submitCommentCallback, postId }) {
     return (
         <Container>
             <Row className="justify-content-center">
-                <Col xs={12}>
+                <Col xs={12} lg={6}>
                     <Card style={{ backgroundColor: "#fffff0" }}>
                         {/* Card body that includes the comment form details. */}
                         <Card.Body>
-                            <Row>
+                            <Row className="align-items-end">
                                 <Col className="col-auto">
                                     <Pfp
-                                        height="50px"
-                                        width="50px"
+                                        height="75px"
+                                        width="75px"
                                         imgUrl={pfpUrl}
                                         address={address}
-                                        fontSize="0.5rem"
+                                        fontSize="0.75rem"
                                     />
                                 </Col>
                                 <Col>
@@ -94,7 +94,7 @@ function NewComment({ profileData, submitCommentCallback, postId }) {
                                                         aria-label="With textarea"
                                                         placeholder="What's on your mind?"
                                                         type="text"
-                                                        size="sm"
+                                                        size="md"
                                                         value={commentText}
                                                         onChange={(event) => setCommentText(event.target.value)}
                                                     />
