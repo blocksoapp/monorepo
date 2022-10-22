@@ -14,8 +14,6 @@ import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-
 import { utils } from "ethers";
 import Pfp from '../Pfp';
 import TxAddress from "../TxAddress";
-import Comment from "./Comment";
-import NewComment from "./NewComment";
 
 
 function Post(props) {
@@ -46,18 +44,8 @@ function Post(props) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const [ensName, setEnsName] = useState(props.ensName);
-    const [comments, setComments] = useState(props.comments);
-    const [showComments, setShowComments] = useState(false);
 
     // functions
-    const submitCommentCallback = (newComment) => {
-        if (comments !== undefined) {
-            setComments([newComment].concat(comments));
-        }
-        else {
-            setComments([newComment]);
-        }
-    }
 
     // TODO this will be adjusted in the future to deal
     // with more complex transactions
@@ -133,7 +121,7 @@ function Post(props) {
                     <Col xs={12} lg={6}>
                         <Card>
                             {/* Card header that includes pfp, address, created time. */}
-                            <Card.Header>
+                            <Card.Header style={{ backgroundColor: props.bg}}>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
                                         <Pfp
@@ -286,32 +274,6 @@ function Post(props) {
                                     </Col>
                                 </Row>
                             </Card.Body>
-                            }
-
-
-                            {/* Comments section of a Post */}
-                            {/* hidden until user presses comment button */}
-                            {showComments === true &&
-                                <Card.Body className="bg-light">
-                                    <Row>
-                                        {comments && comments.map(comment => (
-                                            <Comment
-                                                key={comment["id"]}
-                                                author={comment["author"]}
-                                                text={comment["text"]}
-                                                imgUrl={comment["imgUrl"]}
-                                                created={comment["created"]}
-                                                profileAddress={props.profileAddress}
-                                            />
-                                        ))}
-
-                                        <NewComment
-                                            profileData={{profile: {address: props.profileAddress, image: props.profileImg}}}
-                                            submitCommentCallback={submitCommentCallback}
-                                            postId={props.id}
-                                        />
-                                    </Row>
-                                </Card.Body>
                             }
 
                             {/* Card footer that includes the action buttons. */}
