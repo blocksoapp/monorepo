@@ -183,7 +183,7 @@ class BaseTest(APITestCase):
         resp = self.client.post(url, self.create_post_data)
         return resp
 
-    def _create_comment(self, post_id, text="", tagged_users=[]):
+    def _create_comment(self, post_id, text, tagged_users=[]):
         """
         Utility function to create a comment on a post.
         Returns the response of creating a comment.
