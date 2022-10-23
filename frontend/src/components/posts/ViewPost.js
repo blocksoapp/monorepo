@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost } from "../../api.js";
 import { useUser } from "../../hooks/useUser";
@@ -7,7 +7,7 @@ import Comment from "./Comment";
 import NewComment from "./NewComment";
 import Post from "./Post";
 import PostsError from "./PostsError";
-import PostsNotFound from "./PostsError";
+import CommentsNotFound from "./CommentsNotFound";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
 
@@ -26,7 +26,7 @@ function ViewPost(props) {
     const [comments, setComments] = useState([]);
 
     // functions
-    const fetchPost = async (postId) => {
+    const fetchPost = async () => {
         setPostLoading(true);
         const res = await apiGetPost(postId);
 
@@ -43,7 +43,7 @@ function ViewPost(props) {
         }
     }
 
-    const fetchComments = async (postId) => {
+    const fetchComments = async () => {
         setCommentsLoading(true);
         const res = await apiGetComments(postId);
 
@@ -71,9 +71,18 @@ function ViewPost(props) {
      * Fetches Post, Comments on component mount.
      */
     useEffect(() => {
-        fetchPost(postId);
-        fetchComments(postId);
-    }, [])
+        // reset state
+        setPostLoading(true);
+        setPost(null);
+        setPostError(false)
+        setCommentsLoading(true);
+        setComments([]);
+        setCommentsError(false);
+
+        // fetch post and comments
+        fetchPost();
+        fetchComments();
+    }, [postId])
 
 
     const render = function () {
@@ -113,7 +122,7 @@ function ViewPost(props) {
                     : commentsError === true
                         ? <PostsError retryAction={fetchComments} />
                         : comments.length === 0
-                            ? <PostsNotFound retryAction={fetchComments} />
+                            ? <CommentsNotFound retryAction={fetchComments} />
                             : comments.map(comment => (
                                 <Comment
                                     key={comment.id}

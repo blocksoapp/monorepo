@@ -325,6 +325,10 @@ class CommentCreateList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
     pagination_class = CommentPagination
-    queryset = Comment.objects.all()
-    lookup_url_kwarg = "post_id"
-    lookup_field = "post"
+
+
+    def get_queryset(self):
+        """
+        Return Comments of the post specified in the url.
+        """
+        return Comment.objects.filter(post__pk=self.kwargs["post_id"])

@@ -10,7 +10,6 @@ import ProfileInvalid from "./ProfileInvalid";
 function ProfileResolver() {
     // constants
     const { urlInput } = useParams();
-    const routerLocation = useLocation();
     const ensAddressHook = useEnsAddress({name: urlInput});
     const ensNameHook = useEnsName({address: urlInput});
 

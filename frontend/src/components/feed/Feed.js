@@ -67,6 +67,7 @@ function Feed({ profileData, setProfileData, user }) {
                     {posts && posts.map(post => (
                         <Post
                             key={post.id}
+                            id={post.id}
                             author={post.author}
                             text={post.text}
                             imgUrl={post.imgUrl}
