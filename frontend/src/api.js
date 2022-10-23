@@ -41,3 +41,12 @@ export const apiGetPosts = async (address) => {
     });
     return res;
 }
+
+/* Returns the response for the given url. */
+export const apiGetUrl = async (url) => {
+    const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return res;
+}

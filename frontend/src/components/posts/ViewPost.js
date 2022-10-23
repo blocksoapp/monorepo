@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
-import { apiGetComments, apiGetPost } from "../../api.js";
+import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
 import { useUser } from "../../hooks/useUser";
 import Comment from "./Comment";
 import NewComment from "./NewComment";
 import Post from "./Post";
 import PostsError from "./PostsError";
 import CommentsNotFound from "./CommentsNotFound";
+import MoreComments from "./MoreComments";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
 
@@ -24,6 +25,9 @@ function ViewPost(props) {
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [commentsError, setCommentsError] = useState(false);
     const [comments, setComments] = useState([]);
+    const [commentsNextPage, setCommentsNextPage] = useState(null);
+    const [moreCommentsLoading, setMoreCommentsLoading] = useState(false);
+    const [moreCommentsError, setMoreCommentsError] = useState(false);
 
     // functions
     const fetchPost = async () => {
@@ -45,18 +49,41 @@ function ViewPost(props) {
 
     const fetchComments = async () => {
         setCommentsLoading(true);
-        const res = await apiGetComments(postId);
+        const resp = await apiGetComments(postId);
 
-        if (res.status === 200) {
-            var data = await res.json();
+        // success
+        if (resp.status === 200) {
+            var data = await resp.json();
             setComments(data["results"]);
             setCommentsError(false);
             setCommentsLoading(false);
+            setCommentsNextPage(data["next"]);
         }
+        // error
         else {
             setCommentsError(true);
             setCommentsLoading(false);
-            console.error(res);
+            console.error(resp);
+        }
+    }
+
+    const fetchMoreComments = async () => {
+        setMoreCommentsLoading(true);
+        const resp = await apiGetUrl(commentsNextPage);
+
+        // success
+        if (resp.status === 200) {
+            var data = await resp.json();
+            setComments(comments.concat(data["results"]));
+            setMoreCommentsError(false);
+            setMoreCommentsLoading(false);
+            setCommentsNextPage(data["next"]);
+        }
+        // error
+        else {
+            setMoreCommentsError(true);
+            setMoreCommentsLoading(false);
+            console.error(resp);
         }
     }
 
@@ -78,6 +105,9 @@ function ViewPost(props) {
         setCommentsLoading(true);
         setComments([]);
         setCommentsError(false);
+        setMoreCommentsError(false);
+        setMoreCommentsLoading(false);
+        setCommentsNextPage(null);
 
         // fetch post and comments
         fetchPost();
@@ -105,7 +135,6 @@ function ViewPost(props) {
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 refTx={post.refTx}
-                                profileAddress={user.profile.address}
                             />
                 }
 
@@ -130,9 +159,18 @@ function ViewPost(props) {
                                     text={comment.text}
                                     created={comment.created}
                                     pfp={comment.pfp}
-                                    profileAddress={user.profile.address}
                                 />
                 ))}
+
+                {/* More Comments Link (pagination) */}
+                {commentsNextPage === null
+                    ? <></>
+                    : moreCommentsLoading === true
+                        ? <PostsPlaceholder />
+                        : moreCommentsError === true
+                            ? <PostsError retryAction={fetchMoreComments} />
+                            : <MoreComments action={fetchMoreComments} />
+                }
 
             </Container>
             }
