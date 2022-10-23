@@ -263,6 +263,7 @@ function Profile(props) {
                                 created={post.created}
                                 pfp={pfpUrl}
                                 refTx={post.refTx}
+                                numComments={post.numComments}
                                 profileAddress={props.address}
                             />
             ))}

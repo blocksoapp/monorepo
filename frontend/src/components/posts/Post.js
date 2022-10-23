@@ -297,6 +297,7 @@ function Post(props) {
                                             variant="light"
                                             onClick={() => {navigate(`/posts/${props.id}`)}}
                                         >
+                                            {props.numComments}&nbsp;&nbsp;
                                             <FontAwesomeIcon icon={faComment} />
                                         </Button>
                                     </Col>

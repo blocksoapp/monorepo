@@ -222,10 +222,11 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
-                  "refPost", "refTx", "created"]
-        read_only_fields = ["id", "author", "refPost", "refTx", "created"]
+                  "refPost", "refTx", "numComments", "created"]
+        read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
 
     refTx = serializers.SerializerMethodField()
+    numComments = serializers.SerializerMethodField()
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
@@ -236,6 +237,11 @@ class PostSerializer(serializers.ModelSerializer):
             ).data
 
         return None
+
+    def get_numComments(self, instance):
+        """ Returns number of comments on the post. """
+
+        return instance.comments.count()
 
     def create(self, validated_data):
         """ Creates a Post. """

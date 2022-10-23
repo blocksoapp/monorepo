@@ -161,7 +161,8 @@ class Comment(models.Model):
     post = models.ForeignKey(
         to=Post,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        related_name="comments"
     )
     text = models.TextField(blank=True)
     tagged_users = models.ManyToManyField(

@@ -687,6 +687,25 @@ class PostTests(BaseTest):
             "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
         )
 
+    def test_get_num_comments(self):
+        """
+        Assert that a post includes the
+        number of comments on it.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(post_id, text="hello")
+        self._create_comment(post_id, text="world")
+
+        # get the post details
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["numComments"], 2)
+
 
 class CommentsTests(BaseTest):
     """

@@ -135,6 +135,7 @@ function ViewPost(props) {
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 refTx={post.refTx}
+                                numComments={post.numComments}
                             />
                 }
 
