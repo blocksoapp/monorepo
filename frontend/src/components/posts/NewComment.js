@@ -13,10 +13,10 @@ import { baseAPI, getCookie } from '../../utils'
 import Pfp from '../Pfp';
 
 
-function NewComment({ profileData, submitCommentCallback, postId }) {
+function NewComment({ authedUser, submitCommentCallback, postId }) {
 
     // state
-    const { address, image } = {...profileData.profile}
+    const { address, image } = {...authedUser.profile}
     const ensAvatar = useEnsAvatar({addressOrName: address});
     const [pfpUrl, setPfpUrl] = useState(image);
     const [commentText, setCommentText] = useState("");

@@ -5,6 +5,7 @@ import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
 import { useUser } from "../../hooks/useUser";
 import Comment from "./Comment";
 import NewComment from "./NewComment";
+import SignInToComment from "./SignInToComment";
 import Post from "./Post";
 import PostsError from "./PostsError";
 import CommentsNotFound from "./CommentsNotFound";
@@ -117,8 +118,6 @@ function ViewPost(props) {
 
     const render = function () {
         return (
-            <>
-            {user !== null &&
             <Container className="mt-4">
 
                 {/* Post Section -- show placeholder or post */}
@@ -140,11 +139,14 @@ function ViewPost(props) {
                 }
 
                 {/* New Comment Section -- show form for new comment */}
-                <NewComment
-                    profileData={user}
-                    submitCommentCallback={submitCommentCallback}
-                    postId={postId}
-                />
+                {user === null
+                    ?   <SignInToComment />
+                    :   <NewComment
+                            authedUser={user}
+                            submitCommentCallback={submitCommentCallback}
+                            postId={postId}
+                        />
+                }
 
                 {/* Comments Section -- show placeholder or comments */}
                 {commentsLoading === true
@@ -174,8 +176,6 @@ function ViewPost(props) {
                 }
 
             </Container>
-            }
-            </>
         )
     }
 
