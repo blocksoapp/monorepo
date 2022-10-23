@@ -262,6 +262,7 @@ function Profile(props) {
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 pfp={pfpUrl}
+                                setPfp={setPfpUrl}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
                                 profileAddress={props.address}

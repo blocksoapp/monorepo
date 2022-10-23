@@ -135,6 +135,8 @@ function ViewPost(props) {
                                 created={post.created}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
+                                pfp={null}
+                                setPfp={() => {}}
                             />
                 }
 

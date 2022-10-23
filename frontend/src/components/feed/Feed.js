@@ -9,7 +9,11 @@ import FeedError from './FeedError';
 
 function Feed({ profileData, setProfileData, user }) {
 
+    // constants
+    const { address, image } = {...profileData.profile}
+
     // state
+    const [pfpUrl, setPfpUrl] = useState(image);
     const [loadingFeed, setLoadingFeed] = useState(true);
     const [feedError, setFeedError] = useState(false);
     const [posts, setPosts] = useState(null);
@@ -70,6 +74,8 @@ function Feed({ profileData, setProfileData, user }) {
                             id={post.id}
                             author={post.author}
                             text={post.text}
+                            pfp={pfpUrl}
+                            setPfp={setPfpUrl}
                             imgUrl={post.imgUrl}
                             created={post.created}
                             refTx={post.refTx}

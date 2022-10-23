@@ -34,12 +34,13 @@ function Post(props) {
         ERC721Transfer: "erc721transfer",
     }
 
+    const { pfp, setPfp } = props
+
     // state
     const refTx = props.refTx;
     const navigate = useNavigate();
     const ensAvatar = useEnsAvatar({addressOrName: props.author});
     const ensNameHook = useEnsName({address: props.author});
-    const [pfpUrl, setPfpUrl] = useState(props.pfp)
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
@@ -101,9 +102,9 @@ function Post(props) {
      * if the user has not uploaded a profile pic.
      */
     useEffect(() => {
-        if (!pfpUrl) {
+        if (!pfp) {
             if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfpUrl(ensAvatar.data);
+                setPfp(ensAvatar.data);
             }
         }
     }, [ensAvatar])
@@ -127,7 +128,7 @@ function Post(props) {
                                         <Pfp
                                             height="100px"
                                             width="100px"
-                                            imgUrl={pfpUrl}
+                                            imgUrl={pfp}
                                             address={props.author}
                                             ensName={ensName}
                                             fontSize="1rem"
