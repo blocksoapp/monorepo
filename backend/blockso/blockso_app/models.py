@@ -164,7 +164,7 @@ class Comment(models.Model):
         null=True,
         related_name="comments"
     )
-    text = models.TextField(blank=True)
+    text = models.TextField(blank=False)
     tagged_users = models.ManyToManyField(
         to=settings.AUTH_USER_MODEL,
         blank=True

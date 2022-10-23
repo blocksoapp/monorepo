@@ -732,6 +732,22 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.data["text"], text)
         self.assertEqual(resp.data["tagged_users"], [])
 
+    def test_create_comment_empty(self):
+        """
+        Assert that creating an empty comment
+        returns a 400 BAD REQUEST.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # make request
+        resp = self._create_comment(post_id, text="")
+
+        # make assertions
+        self.assertEqual(resp.status_code, 400)
+
     def test_tag_users(self):
         """
         Assert that a user can tag other users in a comment.
