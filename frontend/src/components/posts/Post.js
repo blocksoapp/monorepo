@@ -34,8 +34,6 @@ function Post(props) {
         ERC721Transfer: "erc721transfer",
     }
 
-    const { pfp, setPfp } = props
-
     // state
     const refTx = props.refTx;
     const navigate = useNavigate();
@@ -45,6 +43,7 @@ function Post(props) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const [ensName, setEnsName] = useState(props.ensName);
+    const [pfp, setPfp] = useState(props.pfp);
 
     // functions
 

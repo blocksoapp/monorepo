@@ -261,8 +261,7 @@ function Profile(props) {
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
-                                pfp={pfpUrl}
-                                setPfp={setPfpUrl}
+                                pfp={post.pfp}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
                                 profileAddress={props.address}
