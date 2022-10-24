@@ -282,9 +282,16 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ["id", "author", "post", "text", "tagged_users", "created"]
-        read_only_fields = ["id", "author", "created", "post"]
+        fields = ["id", "author", "pfp", "post", "text", "tagged_users", "created"]
+        read_only_fields = ["id", "author", "pfp", "created", "post"]
 
+
+    pfp = serializers.SerializerMethodField()
+
+    def get_pfp(self, instance):
+        """ Return the comment author's pfp. """
+
+        return instance.author.profile.image
 
     def create(self, validated_data):
         """ Creates a Comment. """

@@ -749,6 +749,7 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.data["post"], 1)
         self.assertEqual(resp.data["text"], text)
         self.assertEqual(resp.data["tagged_users"], [])
+        self.assertEqual(resp.data["author"], self.test_signer.address)
 
     def test_create_comment_empty(self):
         """
@@ -856,6 +857,27 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp.data["results"]), 2)
 
+    def test_list_comments_pfp(self):
+        """
+        Assert that a comment includes the pfp of its author
+        as part of its deserialized data.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        self._update_profile(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(post_id, text="hello")
+
+        # make request
+        url = f"/api/posts/{post_id}/comments/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(
+            resp.data["results"][0]["pfp"],
+            self.update_profile_data["image"]
+        )
 
 
 class FeedTests(BaseTest):
