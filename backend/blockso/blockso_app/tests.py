@@ -706,6 +706,24 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.data["numComments"], 2)
 
+    def test_get_post_pfp(self):
+        """
+        Assert that a post includes the
+        pfp of the author of the post.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        self._update_profile(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # make request
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["pfp"], self.update_profile_data["image"])
+
 
 class CommentsTests(BaseTest):
     """

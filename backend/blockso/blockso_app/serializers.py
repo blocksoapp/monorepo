@@ -221,12 +221,18 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
+        fields = ["id", "author", "pfp", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created"]
         read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
 
+    pfp = serializers.SerializerMethodField()
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
+
+    def get_pfp(self, instance):
+        """ Return the post author's pfp. """
+
+        return instance.author.profile.image
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
