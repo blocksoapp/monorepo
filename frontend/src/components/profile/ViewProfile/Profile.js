@@ -117,6 +117,15 @@ function Profile(props) {
             return;
         }
 
+        // reset the current profile state
+        setProfileDataLoading(true);
+        setProfileData({});
+        setPostsLoading(true);
+        setPosts([]);
+        setPostsError(false);
+        setPfpUrl(null);
+
+        // load the new profile and its posts
         fetchProfile();
         fetchPosts();
 
@@ -184,13 +193,13 @@ function Profile(props) {
                         </Row>
 
                         {/* Address and ENS */}
-                        <Row className="justify-content-center mt-2">
+                        <Row className="justify-content-center mt-4">
                             <Col className="col-auto text-center">
-                                <h5>
+                                <h4>
                                     <ProfileEnsAndAddress
                                         address={props.address}
                                     />
-                                </h5>
+                                </h4>
                             </Col>
                         </Row>
 
