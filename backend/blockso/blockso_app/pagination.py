@@ -9,6 +9,14 @@ from rest_framework.pagination import PageNumberPagination
 # our imports
 
 
+class CommentPagination(PageNumberPagination):
+    """
+    Pagination for listing Comments.
+    """
+    page_size = 5
+    max_page_size = 5 
+
+
 class PostsPagination(PageNumberPagination):
     """
     Pagination for listing Posts.

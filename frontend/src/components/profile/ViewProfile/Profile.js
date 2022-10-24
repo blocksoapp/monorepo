@@ -255,13 +255,16 @@ function Profile(props) {
                         : posts.map(post => (
                             <Post
                                 key={post.id}
+                                id={post.id}
                                 author={post.author}
                                 ensName={props.ensName}
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 pfp={pfpUrl}
+                                setPfp={setPfpUrl}
                                 refTx={post.refTx}
+                                numComments={post.numComments}
                                 profileAddress={props.address}
                             />
             ))}

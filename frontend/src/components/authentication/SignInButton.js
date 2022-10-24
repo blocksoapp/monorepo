@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 import {
     useAccount,
@@ -18,6 +18,7 @@ function SignInButton({setUser}) {
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
     const [error, setError] = useState(Error)
 
+    const routerLocation = useLocation()
     const navigate = useNavigate()
 
     // Dependencies from wagmi
@@ -64,7 +65,7 @@ function SignInButton({setUser}) {
       } else if (fetchUser.status === 200) {
         const json = await fetchUser.json()
         setUser(json);
-        navigate('/home')
+        navigate(routerLocation.path)
       }
     }
     
@@ -148,7 +149,7 @@ function SignInButton({setUser}) {
         if(logoutRes.status === 200)  {
           setIsAuthenticated(false)
           setUser(null);
-          navigate("/explore");
+          navigate(routerLocation.path);
           fetchNonce()
         }
         else if(logoutRes.status === 400 || 403) console.log('logout error')

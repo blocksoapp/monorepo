@@ -35,7 +35,7 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
             {user !== null && <Nav.Link as={Link} to="/edit-profile">Edit Profile</Nav.Link>}
             {user !== null && <Nav.Link as={Link} to={`${user["address"]}/profile`}>My Profile</Nav.Link>}
-            <Col auto>
+            <Col className="col-auto">
             </Col>
             <Col xs={10} lg={5}>
                 <Form.Control

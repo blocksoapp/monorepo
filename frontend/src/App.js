@@ -5,6 +5,7 @@ import Explore from './pages/Explore'
 import Home from './pages/Home';
 import EditProfile from './pages/EditProfile'
 import ViewProfile from './pages/ViewProfile';
+import PostPage from './pages/PostPage';
 import NavbarComponent from './components/ui/Navbar';
 import { useUser } from './hooks/useUser';
 
@@ -26,6 +27,7 @@ function App() {
               <Route path="/explore" element={<Explore/>}></Route>
               <Route path="/edit-profile" element={<EditProfile/>}></Route>
               <Route path="/:urlInput/profile" element={<ViewProfile/>}></Route>
+              <Route path="/posts/:postId" element={<PostPage/>}></Route>
             </Routes>
         </Router>
         </>

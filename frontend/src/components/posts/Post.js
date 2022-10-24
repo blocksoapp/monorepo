@@ -7,7 +7,7 @@ import {
     Image,
     Row 
 } from "react-bootstrap"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
@@ -38,12 +38,13 @@ function Post(props) {
 
     // state
     const refTx = props.refTx;
+    const navigate = useNavigate();
+    const ensAvatar = useEnsAvatar({addressOrName: props.author});
+    const ensNameHook = useEnsName({address: props.author});
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const [ensName, setEnsName] = useState(props.ensName);
-    const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const ensNameHook = useEnsName({address: props.author});
 
     // functions
 
@@ -121,7 +122,7 @@ function Post(props) {
                     <Col xs={12} lg={6}>
                         <Card>
                             {/* Card header that includes pfp, address, created time. */}
-                            <Card.Header>
+                            <Card.Header style={{ backgroundColor: props.bg}}>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
                                         <Pfp
@@ -292,13 +293,23 @@ function Post(props) {
                                         <Button size="sm" variant="light"><FontAwesomeIcon icon={faQuoteRight} /></Button>
                                     </Col>
                                     <Col className="col-auto">
-                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faComment} /></Button>
+                                        <Button
+                                            size="sm"
+                                            variant="light"
+                                            onClick={() => {navigate(`/posts/${props.id}`)}}
+                                        >
+                                            {props.numComments}&nbsp;&nbsp;
+                                            <FontAwesomeIcon icon={faComment} />
+                                        </Button>
                                     </Col>
+
                                 </Row>
                             </Card.Footer>
                         </Card>
                     </Col>
                 </Row>
+
+                
             </Container>
         )
     }

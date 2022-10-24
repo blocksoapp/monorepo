@@ -144,3 +144,29 @@ class Post(models.Model):
         blank=False
     )
     created = models.DateTimeField(blank=False)
+
+
+class Comment(models.Model):
+    """ Represents a Comment created by a user. """
+
+    class Meta:
+        ordering = ["-created"]
+
+    
+    author = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="comments"
+    )
+    text = models.TextField(blank=False)
+    tagged_users = models.ManyToManyField(
+        to=settings.AUTH_USER_MODEL,
+        blank=True
+    )
+    created = models.DateTimeField(auto_now_add=True)
