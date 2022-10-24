@@ -18,6 +18,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
     const [pfpPreview, setPfpPreview] = useState(null)
+    const [pfpRemoved, setPfpRemoved] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [formProfile, setFormProfile] = useState({
         image: '',
@@ -65,7 +66,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       
       if(formRes.ok) {
         console.log('successfully posted data')
-        setPfpPreview(false)
+        setPfpPreview(null)
         setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
@@ -75,6 +76,18 @@ function EditProfileForm({ profile, setProfile, getUser }) {
         setIsLoading(false)
       }
   }
+
+  const removePfp = () => {
+     setPfp('')
+    // Set image to empty string
+     setFormProfile(prevValue => {
+        return {
+            ...prevValue,
+            image: ''
+        }
+    })
+    setPfpRemoved(true)
+  } 
 
   const checkForProfile = async () => {
     const res = await getUser();
@@ -110,6 +123,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
     } else return
   }
 
+
   // load existing profile data
   useEffect(() => {
       checkForProfile();
@@ -121,10 +135,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
   }, [profile])
 
 
-   
   
-
-
   return (
     <div className="p-3 border mb-5 mt-3">
         {!isLoading ? 
@@ -133,14 +144,22 @@ function EditProfileForm({ profile, setProfile, getUser }) {
                     {handleAlert()}
                     <Row>
                         <Col>
-                            {pfpPreview ?  
+                            { pfpPreview ?  
                             <div className='d-flex flex-column align-items-center'> 
-                                <CurrentPfp pfp={pfpPreview} address={address} />
+                                <CurrentPfp pfp={pfpPreview} address={address} removePfp={removePfp} />
                                 <Button className="btn-sm mb-3" disabled={!isConnected} variant="success" onClick={handleSubmit}>
                                     Save Changes
                                 </Button> 
                             </div> :
-                            <CurrentPfp pfp={pfp} address={address}/> }
+                              pfpRemoved ? 
+                             <div className='d-flex flex-column align-items-center'> 
+                                <CurrentPfp pfp={pfp} address={address} removePfp={removePfp} />
+                                <Button className="btn-sm mb-3" disabled={!isConnected} variant="success" onClick={handleSubmit}>
+                                    Save Changes
+                                </Button> 
+                            </div> :
+                            <CurrentPfp pfp={pfp} address={address} removePfp={removePfp}/> 
+                            }
                         </Col>
                     </Row>
 

@@ -64,3 +64,8 @@ code {
 .btn-primary.custom-btn:hover {
   background-color: #007EA7;
 }
+
+/* Current PFP */
+.delete-icon:hover {
+  color: red;
+}
