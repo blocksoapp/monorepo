@@ -64,14 +64,12 @@ function EditProfileForm({ profile, setProfile, getUser }) {
       })
       
       if(formRes.ok) {
-        console.log('successfully posted data')
         setPfpPreview(null)
         setIsPfpRemoved(null)
         setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
       } else {
-        console.log('error posting data')
         setIsPfpRemoved(null)
         setPfpPreview(null)
         setIsError(true)
