@@ -9,7 +9,9 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { baseAPI, getCookie } from '../../utils'
+import { MentionsInput, Mention } from "react-mentions";
+import { abbrAddress, baseAPI, getCookie } from '../../utils'
+import { apiGetSuggestedUsers } from '../../api';
 import Pfp from '../Pfp';
 
 
@@ -55,6 +57,25 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
     }
 
     /*
+     * Requests a list of users that start with the given query.
+     * Calls callback with the results of the response.
+     */
+    const fetchSuggestedUsers = async (query, callback) => {
+        if (!query) return
+        const resp = await apiGetSuggestedUsers(query);
+        if (!resp.ok) {
+            const results = await resp.json();
+            const formatted = results.map(
+                user => ({
+                    display: `0x${abbrAddress(user.address)}`,
+                    id: user.address
+                })
+            );
+            return callback(formatted);
+        }
+    }
+
+    /*
      * Sets the user's pfp to their ens avatar,
      * if the user has not uploaded a profile pic.
      */
@@ -74,6 +95,16 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                     <Card style={{ backgroundColor: "#fffff0" }}>
                         {/* Card body that includes the comment form details. */}
                         <Card.Body>
+                <MentionsInput
+                    value={commentText}
+                    onChange={(event) => setCommentText(event.target.value)}
+                    placeholder="What's on your mind?"
+                >
+                    <Mention
+                        trigger="@"
+                        data={fetchSuggestedUsers}
+                    />
+                </MentionsInput>
                             <Row className="align-items-end">
                                 <Col className="col-auto">
                                     <Pfp
@@ -88,7 +119,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                                     <Form onSubmit={handleSubmit}>
                                         <Row>
                                             <Col>
-                                                <InputGroup>
+                                                <InputGroup> 
                                                     <Form.Control
                                                         as="textarea"
                                                         aria-label="With textarea"

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -170,6 +170,36 @@ class ProfileCreateRetrieveUpdate(
         """ Retrieve the Profile of the given address. """
 
         return self.retrieve(request, *args, **kwargs)
+
+
+class UserList(
+    mixins.ListModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports querying users. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UserSerializer
+
+    def get_queryset(self):
+        """
+        Return queryset containing users starting with
+        the given query.
+        """
+        # grab query param
+        query = self.request.query_params.get("q", "")
+
+        # return 400 if query isn't N chars long
+        # can adjust this in the future to prevent user enumeration if needed 
+        if len(query) < 1:
+            raise ValidationError("Query must be at least 1 character.")
+
+        return UserModel.objects.filter(pk__startswith=query)
+
+    def get(self, request, *args, **kwargs):
+        """ Return a list of users matching the query. """
+
+        return self.list(request, *args, **kwargs)
 
 
 class UserRetrieve(
