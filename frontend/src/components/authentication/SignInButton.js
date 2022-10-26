@@ -12,10 +12,9 @@ import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
 
 
-function SignInButton({setUser}) {
+function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
     const [nonceData, setNonceData] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
-    const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
     const [error, setError] = useState(Error)
 
     const routerLocation = useLocation()
