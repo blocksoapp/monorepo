@@ -77,7 +77,7 @@ function Feed({ profileData, setProfileData, user }) {
                             created={post.created}
                             refTx={post.refTx}
                             numComments={post.numComments}
-                            profileAddress={user['address']}
+                            profileAddress={profileData['address']}
                         />
                     ))}
                 </Container>
