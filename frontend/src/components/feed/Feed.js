@@ -7,7 +7,7 @@ import PostsPlaceholder from '../posts/PostsPlaceholder';
 import FeedError from './FeedError';
 
 
-function Feed({ profileData, setProfileData, user }) {
+function Feed({ profileData }) {
 
     // constants
 

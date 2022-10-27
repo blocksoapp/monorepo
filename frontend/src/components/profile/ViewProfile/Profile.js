@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
 import Post from '../../posts/Post.js'; 
 import { baseAPI, getCookie } from '../../../utils.js'
-import { useUser } from '../../../hooks/useUser';
 import { apiGetPosts } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
@@ -14,12 +13,13 @@ import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
+import { UserContext } from '../../../contexts/UserContext'
 
 
 function Profile(props) {
     // constants
     const ensAvatar = useEnsAvatar({addressOrName: props.address});
-    const user = useUser();
+    const { user } = useContext(UserContext)
 
     // state
     const [profileDataLoading, setProfileDataLoading] = useState(true);

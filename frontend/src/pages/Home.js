@@ -16,9 +16,6 @@ function Home() {
           <Feed
               className="mt-5"
               profileData={user}
-              setProfileData={setUser}
-              author={user["address"]}
-              user={user}
           /> : 
           <h1 class="text-muted text-center">Please sign in.</h1>
           }
