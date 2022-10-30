@@ -13,7 +13,7 @@ import { MentionsInput, Mention } from "react-mentions";
 import { abbrAddress, baseAPI, getCookie } from '../../utils'
 import { apiGetSuggestedUsers } from '../../api';
 import Pfp from '../Pfp';
-
+import "./mentions-custom.css";
 
 function NewComment({ authedUser, submitCommentCallback, postId }) {
 
@@ -117,18 +117,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                     <Card style={{ backgroundColor: "#fffff0" }}>
                         {/* Card body that includes the comment form details. */}
                         <Card.Body>
-                <MentionsInput
-                    value={commentText}
-                    onChange={(event) => setCommentText(event.target.value)}
-                    placeholder="What's on your mind?"
-                >
-                    <Mention
-                        trigger="@"
-                        data={fetchSuggestedUsers}
-                        appendSpaceOnAdd={true}
-                    />
-                </MentionsInput>
-                            <Row className="align-items-end">
+                            <Row className="align-items-center">
                                 <Col className="col-auto">
                                     <Pfp
                                         height="75px"
@@ -143,19 +132,22 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                                         <Row>
                                             <Col>
                                                 <InputGroup> 
-                                                    <Form.Control
-                                                        as="textarea"
-                                                        aria-label="With textarea"
-                                                        placeholder="What's on your mind?"
-                                                        type="text"
-                                                        size="md"
+                                                    <MentionsInput
+                                                        className="form-control"
                                                         value={commentText}
                                                         onChange={(event) => setCommentText(event.target.value)}
-                                                    />
+                                                        placeholder="What's on your mind?"
+                                                    >
+                                                        <Mention
+                                                            trigger="@"
+                                                            data={fetchSuggestedUsers}
+                                                            appendSpaceOnAdd={true}
+                                                        />
+                                                    </MentionsInput>
                                                 </InputGroup>
                                             </Col>
                                             <Col className="col-auto">
-                                                <Button className="mt-3 float-end" variant="primary" type="submit">
+                                                <Button className="float-end" variant="primary" type="submit">
                                                     Submit
                                                 </Button>
                                             </Col>
