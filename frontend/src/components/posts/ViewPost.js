@@ -3,13 +3,13 @@ import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
 import { useUser } from "../../hooks/useUser";
-import Comment from "./Comment";
-import NewComment from "./NewComment";
+import Comment from "./comments/Comment";
+import NewComment from "./comments/NewComment";
 import SignInToComment from "./SignInToComment";
 import Post from "./Post";
 import PostsError from "./PostsError";
-import CommentsNotFound from "./CommentsNotFound";
-import MoreComments from "./MoreComments";
+import CommentsNotFound from "./comments/CommentsNotFound";
+import MoreComments from "./comments/MoreComments";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
 

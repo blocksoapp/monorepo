@@ -10,9 +10,9 @@ import {
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
 import { MentionsInput, Mention } from "react-mentions";
-import { abbrAddress, baseAPI, getCookie } from '../../utils'
-import { apiGetSuggestedUsers } from '../../api';
-import Pfp from '../Pfp';
+import { abbrAddress, baseAPI, getCookie } from '../../../utils'
+import { apiGetSuggestedUsers } from '../../../api';
+import Pfp from '../../Pfp';
 import "./mentions-custom.css";
 
 function NewComment({ authedUser, submitCommentCallback, postId }) {
