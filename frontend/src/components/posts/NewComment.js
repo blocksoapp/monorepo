@@ -25,15 +25,37 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
 
     // functions
 
+    /*
+     * Parses user addresses from the given text.
+     * Returns an array of user addresses.
+     */
+    const parseTaggedUsers = (commentText) => {
+        // look for mentions pattern and capture the address
+        // mentions pattern: @[__display__](__0xaddress__)
+        const regexp = /@\[[\w\.]*\]\((0x\w{40})\)/gmi;
+        const matches = [...commentText.matchAll(regexp)];
+
+        // create array of mentioned user addresses
+        var addresses = [];
+        for (const match of matches) {
+            addresses.push(match[1]);
+        }
+
+        return addresses; 
+    }
+
     const handleSubmit = async (event) => {
         // prevent default action
         event.preventDefault();
+
+        // extract the tagged users
+        const taggedUsers = parseTaggedUsers(commentText); 
 
         // post data to api
         const url = `${baseAPI}/posts/${postId}/comments/`;
         const data = {
             text: commentText,
-            tagged_users: []
+            tagged_users: taggedUsers
         }
         const resp = await fetch(url, {
             method: 'POST',
@@ -63,7 +85,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
     const fetchSuggestedUsers = async (query, callback) => {
         if (!query) return
         const resp = await apiGetSuggestedUsers(query);
-        if (!resp.ok) {
+        if (resp.ok) {
             const results = await resp.json();
             const formatted = results.map(
                 user => ({
@@ -103,6 +125,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                     <Mention
                         trigger="@"
                         data={fetchSuggestedUsers}
+                        appendSpaceOnAdd={true}
                     />
                 </MentionsInput>
                             <Row className="align-items-end">

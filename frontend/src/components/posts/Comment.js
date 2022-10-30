@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
+import MentionsOutput from './MentionsOutput';
 import Pfp from '../Pfp';
 import TxAddress from "../TxAddress";
 
@@ -98,7 +99,9 @@ function Comment(props) {
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
-                                            {props.text}
+                                            <MentionsOutput
+                                                text={props.text}
+                                            />
                                         </Card.Text>
                                     </Col>
                                 </Row>
