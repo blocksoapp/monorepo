@@ -62,19 +62,16 @@ function EditProfileForm({ profile, setProfile, getUser }) {
             },
             credentials: 'include'
       })
-      
       if(formRes.ok) {
-        setPfpPreview(null)
-        setIsPfpRemoved(null)
         setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
       } else {
-        setIsPfpRemoved(null)
-        setPfpPreview(null)
         setIsError(true)
         setIsLoading(false)
       }
+      setPfpPreview(null)
+      setIsPfpRemoved(null)
   }
 
   const removePfp = () => {
