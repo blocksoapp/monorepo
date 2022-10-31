@@ -5,14 +5,16 @@ from django.urls import path
 
 # our imports
 from .views import auth_nonce, auth_login, auth_logout, CommentCreateList, \
-        ExploreList, FeedList, FollowCreateDestroy, PostCreateList, \
-        PostRetrieveUpdateDestroy, ProfileCreateRetrieveUpdate, UserList, \
-        UserRetrieve
+        ExploreList, FeedList, FollowCreateDestroy, FollowersList, \
+        FollowingList, PostCreateList, PostRetrieveUpdateDestroy, \
+        ProfileCreateRetrieveUpdate, UserList, UserRetrieve
 
 
 urlpatterns = [
         path("<str:address>/profile/", ProfileCreateRetrieveUpdate.as_view()),
         path("<str:address>/follow/", FollowCreateDestroy.as_view()),
+        path("<str:address>/followers/", FollowersList.as_view()),
+        path("<str:address>/following/", FollowingList.as_view()),
         path("feed/", FeedList.as_view()),
         path("explore/", ExploreList.as_view()),
         path("user/", UserRetrieve.as_view()),
