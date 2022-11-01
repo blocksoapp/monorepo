@@ -64,3 +64,24 @@ code {
 .btn-primary.custom-btn:hover {
   background-color: #007EA7;
 }
+
+/* Form PFP */
+.delete-icon {
+  font-size: 15px;
+}
+
+.delete-icon:hover {
+  color: red;
+}
+/* Used for testing UI */
+.red-border {
+  border: red solid 2px;
+}
+
+.blue-border {
+  border: blue solid 2px;
+}
+
+.green-border {
+  border: green solid 2px;
+}

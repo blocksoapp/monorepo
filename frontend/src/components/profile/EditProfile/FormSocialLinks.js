@@ -12,7 +12,6 @@ function FormSocialLinks({ profile, setProfile }) {
                     socials: {...prevValue.socials, [name]: value}
                 }
             })
-            console.log(profile)
         } 
 
   return (
