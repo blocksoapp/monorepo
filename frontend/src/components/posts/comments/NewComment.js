@@ -9,9 +9,11 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { baseAPI, getCookie } from '../../utils'
-import Pfp from '../Pfp';
-
+import { MentionsInput, Mention } from "react-mentions";
+import { abbrAddress, baseAPI, getCookie } from '../../../utils'
+import { apiGetSuggestedUsers } from '../../../api';
+import Pfp from '../../Pfp';
+import "./mentions-custom.css";
 
 function NewComment({ authedUser, submitCommentCallback, postId }) {
 
@@ -23,15 +25,37 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
 
     // functions
 
+    /*
+     * Parses user addresses from the given text.
+     * Returns an array of user addresses.
+     */
+    const parseTaggedUsers = (commentText) => {
+        // look for mentions pattern and capture the address
+        // mentions pattern: @[__display__](__0xaddress__)
+        const regexp = /@\[[\w\.]*\]\((0x\w{40})\)/gmi;
+        const matches = [...commentText.matchAll(regexp)];
+
+        // create array of mentioned user addresses
+        var addresses = [];
+        for (const match of matches) {
+            addresses.push(match[1]);
+        }
+
+        return addresses; 
+    }
+
     const handleSubmit = async (event) => {
         // prevent default action
         event.preventDefault();
+
+        // extract the tagged users
+        const taggedUsers = parseTaggedUsers(commentText); 
 
         // post data to api
         const url = `${baseAPI}/posts/${postId}/comments/`;
         const data = {
             text: commentText,
-            tagged_users: []
+            tagged_users: taggedUsers
         }
         const resp = await fetch(url, {
             method: 'POST',
@@ -55,6 +79,25 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
     }
 
     /*
+     * Requests a list of users that start with the given query.
+     * Calls callback with the results of the response.
+     */
+    const fetchSuggestedUsers = async (query, callback) => {
+        if (!query) return
+        const resp = await apiGetSuggestedUsers(query);
+        if (resp.ok) {
+            const results = await resp.json();
+            const formatted = results.map(
+                user => ({
+                    display: `0x${abbrAddress(user.address)}`,
+                    id: user.address
+                })
+            );
+            return callback(formatted);
+        }
+    }
+
+    /*
      * Sets the user's pfp to their ens avatar,
      * if the user has not uploaded a profile pic.
      */
@@ -74,7 +117,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                     <Card style={{ backgroundColor: "#fffff0" }}>
                         {/* Card body that includes the comment form details. */}
                         <Card.Body>
-                            <Row className="align-items-end">
+                            <Row className="align-items-center">
                                 <Col className="col-auto">
                                     <Pfp
                                         height="75px"
@@ -88,20 +131,23 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                                     <Form onSubmit={handleSubmit}>
                                         <Row>
                                             <Col>
-                                                <InputGroup>
-                                                    <Form.Control
-                                                        as="textarea"
-                                                        aria-label="With textarea"
-                                                        placeholder="What's on your mind?"
-                                                        type="text"
-                                                        size="md"
+                                                <InputGroup> 
+                                                    <MentionsInput
+                                                        className="form-control"
                                                         value={commentText}
                                                         onChange={(event) => setCommentText(event.target.value)}
-                                                    />
+                                                        placeholder="What's on your mind?"
+                                                    >
+                                                        <Mention
+                                                            trigger="@"
+                                                            data={fetchSuggestedUsers}
+                                                            appendSpaceOnAdd={true}
+                                                        />
+                                                    </MentionsInput>
                                                 </InputGroup>
                                             </Col>
                                             <Col className="col-auto">
-                                                <Button className="mt-3 float-end" variant="primary" type="submit">
+                                                <Button className="float-end" variant="primary" type="submit">
                                                     Submit
                                                 </Button>
                                             </Col>

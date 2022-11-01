@@ -7,7 +7,7 @@ import {
     Image,
     Row 
 } from "react-bootstrap"
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'

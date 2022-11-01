@@ -42,6 +42,16 @@ export const apiGetPosts = async (address) => {
     return res;
 }
 
+/* Returns the response for the suggested users of the given query. */
+export const apiGetSuggestedUsers = async (query) => {
+    const url = `${baseAPI}/users/?q=${query}`;
+    const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return res;
+}
+
 /* Returns the response for the given url. */
 export const apiGetUrl = async (url) => {
     const res = await fetch(url, {
