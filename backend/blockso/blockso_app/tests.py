@@ -162,6 +162,20 @@ class BaseTest(APITestCase):
         url = "/api/auth/logout/"
         return self.client.post(url)
 
+    def _create_users(self, amount):
+        """
+        Utility function to create amount number of users.
+        Returns a list of signers that contain the wallets
+        of all the created users.
+        """
+        signers = []
+        for i in range(amount):
+            signer = eth_account.Account.create()
+            self._do_login(signer)  # a user is created when signer logs in
+            signers.append(signer)
+
+        return signers
+
     def _update_profile(self, signer):
         """
         Utility function to create a Profile using
@@ -191,6 +205,15 @@ class BaseTest(APITestCase):
         url = f"/api/posts/{post_id}/comments/"
         data = {"text": text, "tagged_users": tagged_users}
         resp = self.client.post(url, data)
+        return resp
+
+    def _follow_user(self, address):
+        """
+        Utility function to follow the user with the given address.
+        Returns the response of following the user.
+        """
+        url = f"/api/{address}/follow/"
+        resp = self.client.post(url)
         return resp
 
 
@@ -415,7 +438,7 @@ class FollowTests(BaseTest):
         Assert that a user can follow another.
         """
         # prepare test
-        # create user 1 and log them in
+        # create user 1
         self._do_login(self.test_signer)
         self._do_logout()
 
@@ -462,6 +485,95 @@ class FollowTests(BaseTest):
             Follow.objects.get(
                 src_id=self.test_signer.address,
                 dest_id=self.test_signer_2.address
+            )
+
+    def test_get_followers_following(self):
+        """
+        Assert that a user can see who follows a user.
+        Assert that a user can see who a user follows.
+        """
+        # prepare test
+        # create users 1 and 2
+        # and make user 2 follow user 1
+        self._do_login(self.test_signer)
+        self._do_logout()
+        self._do_login(self.test_signer_2)
+        self._follow_user(self.test_signer.address)
+
+        # make request to get followers of user 1
+        url = f"/api/{self.test_signer.address}/followers/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data["results"]), 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer_2.address
+        )
+        self.assertIsNone(resp.data["next"])
+
+        # make request to get following of user 2
+        url = f"/api/{self.test_signer_2.address}/following/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.data["results"]), 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer.address
+        )
+        self.assertIsNone(resp.data["next"])
+
+    def test_get_followers_ordering(self):
+        """
+        Assert that the followers of a user are
+        ordered based on when they were followed,
+        from most recent to least recent.
+        """
+        # prepare test
+        # create 5 users and make them follow user 1
+        signers = self._create_users(5)
+        for i in range(1, len(signers)):
+            self._do_login(signers[i])
+            self._follow_user(signers[0].address)
+
+        # get the followers of user 1
+        url = f"/api/{signers[0].address}/followers/"
+        resp = self.client.get(url)
+
+        # assert that the followers are ordered by most recent
+        followers = resp.data["results"]
+        for i in range(len(followers)):
+            self.assertEqual(
+                followers[i]["address"],
+                signers[4-i].address
+            )
+
+    def test_get_following_ordering(self):
+        """
+        Assert that the following of a user
+        are ordered based on when they were followed
+        by the user, from most recent to least recent.
+        """
+        # prepare test
+        # create 5 users and make user 1 follow them all
+        signers = self._create_users(5)
+        self._do_login(signers[0])
+        for i in range(1, len(signers)):
+            self._follow_user(signers[i].address)
+
+        # get the following of user 1
+        url = f"/api/{signers[0].address}/following/"
+        resp = self.client.get(url)
+
+        # assert that the following are ordered by most recent
+        following = resp.data["results"]
+        for i in range(len(following)):
+            self.assertEqual(
+                following[i]["address"],
+                signers[4-i].address
             )
 
 
@@ -1000,11 +1112,7 @@ class ExploreTests(BaseTest):
         """
         # set up test
         # create 10 profiles
-        signers = []
-        for i in range(10):
-            signer = eth_account.Account.create()
-            self._do_login(signer)  # a user is created when signer logs in
-            signers.append(signer)
+        signers = self._create_users(10)
 
         # make each user follow the remaining users
         # so user 1 follows users 2-10

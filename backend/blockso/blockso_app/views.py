@@ -119,6 +119,62 @@ class FollowCreateDestroy(
         return self.destroy(request, *args, **kwargs)
 
 
+class FollowersList(
+    mixins.ListModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports listing the followers of a user. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.UserSerializer
+    pagination_class = pagination.UserPagination
+
+    def get_queryset(self):
+        """
+        Return Users that follow the address specified in the url.
+        """
+        # get users that follow the given address
+        user = UserModel.objects.get(pk=self.kwargs["address"])
+        follow_src = Follow.objects.filter(dest=user)
+        followers = UserModel.objects.filter(follow_src__in=follow_src)
+        followers = followers.order_by("-follow_src")
+
+        return followers
+
+    def get(self, request, *args, **kwargs):
+        """ List the users that follow the given address. """
+
+        return self.list(request, *args, **kwargs)
+
+
+class FollowingList(
+    mixins.ListModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports listing the users that a user follows. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.UserSerializer
+    pagination_class = pagination.UserPagination
+
+    def get_queryset(self):
+        """
+        Return Users that are followed by the address specified in the url.
+        """
+        # get users that are followed by the given address
+        user = UserModel.objects.get(pk=self.kwargs["address"])
+        follow_dest = Follow.objects.filter(src=user)
+        following = UserModel.objects.filter(follow_dest__in=follow_dest)
+        following = following.order_by("-follow_dest")
+
+        return following
+
+    def get(self, request, *args, **kwargs):
+        """ List the users that the given address follows. """
+
+        return self.list(request, *args, **kwargs)
+
+
 class ProfileCreateRetrieveUpdate(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
