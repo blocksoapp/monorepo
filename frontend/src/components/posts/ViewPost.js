@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
@@ -12,12 +12,14 @@ import CommentsNotFound from "./comments/CommentsNotFound";
 import MoreComments from "./comments/MoreComments";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
+import { UserContext } from '../../contexts/UserContext'
 
 
 function ViewPost(props) {
     // constants
     const { postId } = useParams();
-    const user = useUser();  // TODO create context for set/getting the user
+    const { user } = useContext(UserContext)
+
 
     // state
     const [postLoading, setPostLoading] = useState(true);

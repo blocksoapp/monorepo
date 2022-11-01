@@ -4,7 +4,6 @@ import { useAccount } from 'wagmi'
 import { baseAPI, getCookie } from '../../../utils'
 import NftForm from './NftForm'
 import FileUpload from './FileUpload'
-import CurrentPfp from './CurrentPfp'
 import Loading from '../../ui/Loading'
 import FormSocialLinks from './FormSocialLinks'
 import FormBio from './FormBio'
@@ -12,12 +11,14 @@ import FormHeader from './FormHeader'
 import TabsComponent from '../../ui/Tabs'
 import FormEns from './FormEns'
 import AlertComponent from '../../ui/AlertComponent'
+import FormPfp from './FormPfp'
 
 function EditProfileForm({ profile, setProfile, getUser }) {
 
     const { isConnected, address } = useAccount();
     const [pfp, setPfp] = useState(null)
     const [pfpPreview, setPfpPreview] = useState(null)
+    const [isPfpRemoved, setIsPfpRemoved] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [formProfile, setFormProfile] = useState({
         image: '',
@@ -45,7 +46,6 @@ function EditProfileForm({ profile, setProfile, getUser }) {
               [name]: value
           }
       })
-      console.log(formProfile)
   } 
   
   // Form Submission Function
@@ -62,19 +62,30 @@ function EditProfileForm({ profile, setProfile, getUser }) {
             },
             credentials: 'include'
       })
-      
       if(formRes.ok) {
-        console.log('successfully posted data')
-        setPfpPreview(false)
         setIsSuccess(true)
         setIsLoading(false)
         checkForProfile()
       } else {
-        console.log('error posting data')
         setIsError(true)
         setIsLoading(false)
       }
+      setPfpPreview(null)
+      setIsPfpRemoved(null)
   }
+
+  const removePfp = () => {
+     setPfp('')
+     setPfpPreview(null)
+    // Set image to empty string
+     setFormProfile(prevValue => {
+        return {
+            ...prevValue,
+            image: ''
+        }
+    })
+    setIsPfpRemoved(true)
+  } 
 
   const checkForProfile = async () => {
     const res = await getUser();
@@ -110,6 +121,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
     } else return
   }
 
+
   // load existing profile data
   useEffect(() => {
       checkForProfile();
@@ -121,26 +133,36 @@ function EditProfileForm({ profile, setProfile, getUser }) {
   }, [profile])
 
 
-   
-  
-
-
   return (
     <div className="p-3 border mb-5 mt-3">
         {!isLoading ? 
             <Container>
-                <Form>
+                <Form onSubmit={handleSubmit}>
                     {handleAlert()}
                     <Row>
-                        <Col>
-                            {pfpPreview ?  
-                            <div className='d-flex flex-column align-items-center'> 
-                                <CurrentPfp pfp={pfpPreview} address={address} />
-                                <Button className="btn-sm mb-3" disabled={!isConnected} variant="success" onClick={handleSubmit}>
-                                    Save Changes
-                                </Button> 
+                        <Col className='d-flex justify-content-center p-2'>
+                            { pfpPreview ?  
+                            <div> 
+                                <FormPfp 
+                                pfp={pfpPreview}
+                                pfpPreview={pfpPreview} 
+                                address={address} 
+                                removePfp={removePfp} 
+                                isPfpRemoved={isPfpRemoved} 
+                                isConnected={isConnected}
+                                />
                             </div> :
-                            <CurrentPfp pfp={pfp} address={address}/> }
+                            <div>
+                                <FormPfp
+                                pfp={pfp} 
+                                address={address} 
+                                removePfp={removePfp} 
+                                isPfpRemoved={isPfpRemoved} 
+                                isConnected={isConnected}
+                                /> 
+                            </div>
+                           
+                            }
                         </Col>
                     </Row>
 
@@ -209,7 +231,7 @@ function EditProfileForm({ profile, setProfile, getUser }) {
 
 
                             <div className='mt-3 mb-3'>
-                                <Button disabled={!isConnected} variant="success" onClick={handleSubmit}>
+                                <Button disabled={!isConnected} variant="success" type="submit">
                                     Save Changes
                                 </Button> 
                                 {!isConnected ? <Form.Text className="text-muted p-3">

@@ -7,7 +7,7 @@ import PostsPlaceholder from '../posts/PostsPlaceholder';
 import FeedError from './FeedError';
 
 
-function Feed({ profileData, setProfileData, user }) {
+function Feed({ profileData }) {
 
     // constants
 
@@ -77,7 +77,7 @@ function Feed({ profileData, setProfileData, user }) {
                             created={post.created}
                             refTx={post.refTx}
                             numComments={post.numComments}
-                            profileAddress={user['address']}
+                            profileAddress={profileData['address']}
                         />
                     ))}
                 </Container>
