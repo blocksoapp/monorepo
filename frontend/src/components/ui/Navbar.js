@@ -1,14 +1,14 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import { Button, Container, Col, Form, Nav, Navbar, NavDropdown, NavItem } from 'react-bootstrap'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAccount } from 'wagmi';
 import SignInButton from '../authentication/SignInButton';
-
+import { UserContext } from '../../contexts/UserContext'
 
 function NavbarComponent() {
+    const { user, setUser, isAuthenticated, setIsAuthenticated } = useContext(UserContext)
     const navigate = useNavigate();
     const account = useAccount();
-    const [user, setUser] = useState(null);
     const [searchVal, setSearchVal] = useState("");
 
     const handleSearch = () => {
@@ -53,7 +53,11 @@ function NavbarComponent() {
             </Col>
           </Nav>
         </Navbar.Collapse>
-          <SignInButton setUser={setUser} />
+          <SignInButton 
+          setUser={setUser} 
+          isAuthenticated={isAuthenticated}
+          setIsAuthenticated={setIsAuthenticated}
+          />
       </Container>
     </Navbar>
   );

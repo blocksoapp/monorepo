@@ -1,46 +1,27 @@
-import React, { useEffect, useState } from 'react'
-import { Col, Container, Row } from 'react-bootstrap'
-import { useAccount } from 'wagmi'
+import React, { useEffect, useState, useContext } from 'react'
+import { Container } from 'react-bootstrap'
 import Feed from '../components/feed/Feed';
-import { useUser } from "../hooks/useUser"
+import { UserContext } from '../contexts/UserContext'
 
 
 function Home() {  
     // constants
-    const user = useUser();
-    const [profileData, setProfileData] = useState(null)
-    const [loading, setLoading] = useState(true)
-
-    // state
-    useEffect(() => {
-      setProfileData(user)
-    }, [user])
-
-    useEffect(() => {
-      setLoading(false)
-        console.log('profile data: ', profileData)
-    }, [profileData])
-    
+    const { user, setUser, isAuthenticated } = useContext(UserContext)
     
     // functions
 
     return (
         <Container>
-          {user === null &&
-          <h1 class="text-muted text-center">Please sign in.</h1>
-          }
-          {user !== null && profileData !== null && loading === false ?
+          {user !== null && isAuthenticated ?
           <Feed
               className="mt-5"
-              profileData={profileData}
-              setProfileData={setProfileData}
-              author={user["address"]}
-              user={user}
+              profileData={user}
           /> : 
-          <h1 class="text-muted text-center">Loading...</h1>
+          <h1 class="text-muted text-center">Please sign in.</h1>
           }
         </Container>
     );
 }
 
 export default Home;
+
