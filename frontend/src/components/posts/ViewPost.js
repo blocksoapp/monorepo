@@ -2,7 +2,6 @@ import { useEffect, useState, useContext } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
-import { useUser } from "../../hooks/useUser";
 import Comment from "./comments/Comment";
 import NewComment from "./comments/NewComment";
 import SignInToComment from "./SignInToComment";
