@@ -1,0 +1,7 @@
+#nav-notifications-dropdown::before {
+    display: none;
+}
+
+.popup-width {
+    width: 25vw;
+}

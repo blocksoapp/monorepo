@@ -22,6 +22,16 @@ export const apiGetExplore = async () => {
     return res;
 }
 
+/* Returns the response for the notifications of the authed user. */
+export const apiGetNotifications = async () => {
+    const url = `${baseAPI}/notifications/`;
+    const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return resp;
+}
+
 /* Returns the response for a specific post. */
 export const apiGetPost = async (postId) => {
     const url = `${baseAPI}/post/${postId}/`;
