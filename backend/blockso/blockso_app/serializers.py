@@ -8,8 +8,8 @@ from web3 import Web3
 
 # our imports
 from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
-        ERC721Transfer, Follow, MentionedInCommentEvent, Notification, \
-        Post, Profile, Socials, Transaction
+        ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
+        Notification, Post, Profile, Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -142,6 +142,14 @@ class FollowSerializer(serializers.ModelSerializer):
         follow = Follow.objects.create(
             src=user,
             dest=to_follow
+        )
+
+        # notify the user that was followed
+        notif = Notification.objects.create(user=to_follow)
+        FollowedEvent.objects.create(
+            notification=notif,
+            follow=follow,
+            followed_by=user
         )
 
         return follow
@@ -371,6 +379,23 @@ class CommentOnPostEventSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class FollowedEventSerializer(serializers.ModelSerializer):
+    """ FollowedEvent model serializer. """
+
+    class Meta:
+        model = FollowedEvent
+        fields = ["followedBy", "created"]
+        read_only_fields = fields
+
+    followedBy = serializers.SerializerMethodField("get_followed_by")
+
+
+    def get_followed_by(self, obj):
+        """ Returns the user that did the following. """
+
+        return obj.followed_by_id
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     """ Notification model serializer. """
 
@@ -389,6 +414,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         events["mentionedInCommentEvent"] = self.\
             get_mentioned_in_comment_event(obj)
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
+        events["followedEvent"] = self.get_followed_event(obj)
 
         return events
 
@@ -416,4 +442,17 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return MentionedInCommentEventSerializer(
             obj.mentioned_in_comment_event
+        ).data
+
+    def get_followed_event(self, obj):
+        """
+        Returns the FollowedEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "followed_event"):
+            return None
+
+        return FollowedEventSerializer(
+            obj.followed_event
         ).data

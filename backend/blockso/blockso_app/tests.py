@@ -1208,7 +1208,7 @@ class NotificationTests(BaseTest):
     def test_mentioned_in_comment_notif(self):
         """
         Assert that a user gets a notification when
-        another user mentions them in a comments.
+        another user mentions them in a comment.
         """
         # set up test
         # create users 1 and 2
@@ -1239,3 +1239,28 @@ class NotificationTests(BaseTest):
         event = notification["events"]["mentionedInCommentEvent"]
         self.assertEqual(event["post"], post_id)
         self.assertEqual(event["mentionedBy"], self.test_signer.address)
+
+    def test_follow_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user follows them.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+        # user 2 follows user 1
+        self._follow_user(self.test_signer.address)
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 1 has a notification for the follow
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["followedEvent"]
+        self.assertEqual(event["followedBy"], self.test_signer_2.address)

@@ -208,7 +208,7 @@ class MentionedInCommentEvent(models.Model):
 
 
 class CommentOnPostEvent(models.Model):
-    """ An event respresenting when someone commetns on a user's post. """
+    """ An event respresenting when someone comments on a user's post. """
 
     notification = models.OneToOneField(
         to=Notification,
@@ -224,6 +224,25 @@ class CommentOnPostEvent(models.Model):
         on_delete=models.CASCADE
     )
     commentor = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class FollowedEvent(models.Model):
+    """ An event respresenting when a user is followed by another. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="followed_event",
+        on_delete=models.CASCADE
+    )
+    follow = models.ForeignKey(
+        to=Follow,
+        on_delete=models.CASCADE
+    )
+    followed_by = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
