@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { useNavigate, Link } from 'react-router-dom';
 import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
@@ -20,6 +21,7 @@ function Profile(props) {
     // constants
     const ensAvatar = useEnsAvatar({addressOrName: props.address});
     const { user } = useContext(UserContext)
+    const navigate = useNavigate()
 
     // state
     const [profileDataLoading, setProfileDataLoading] = useState(true);
@@ -105,6 +107,13 @@ function Profile(props) {
             });
         }
     }
+
+        // Navigate to user's followers
+        const handleFollowerClick = () => {
+            console.log('view profile requested')
+            navigate(`/followers`, { state: { address: props.address } })
+        }
+    
 
     // effects
 
@@ -214,18 +223,21 @@ function Profile(props) {
                         <Row className="justify-content-center mt-3 mb-3">
                             <Col className="col-auto">
                                 <h5>
-                                    <Badge bg="secondary">
-                                        {profileData["numFollowers"]}
-                                        {profileData["numFollowers"] === 1 ?
-                                            " Follower" : " Followers"}
-                                    </Badge> 
+                                        <Badge bg="secondary" onClick={handleFollowerClick}>
+                                        
+                                            {profileData["numFollowers"]}
+                                            {profileData["numFollowers"] === 1 ?
+                                                " Follower" : " Followers"}
+                                        </Badge> 
                                 </h5>
                             </Col>
                             <Col className="col-auto">
                                 <h5>
-                                    <Badge bg="secondary">
-                                        {profileData["numFollowing"]} Following
-                                    </Badge> 
+                                    <Link as={Link} to="/following">
+                                        <Badge bg="secondary">
+                                            {profileData["numFollowing"]} Following
+                                        </Badge> 
+                                    </Link>
                                 </h5>
                             </Col>
                             <Col className="col-auto">

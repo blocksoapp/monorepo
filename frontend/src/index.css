@@ -85,3 +85,11 @@ code {
 .green-border {
   border: green solid 2px;
 }
+
+.yellow-border {
+  border: yellow solid 2px;
+}
+
+.w-min-100 {
+  min-width: 100%
+}

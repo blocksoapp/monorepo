@@ -16,7 +16,7 @@ function Pfp(props) {
 
     // render
     return (
-        <div>
+        <div className="green-border">
         {/* Show placeholder if img url is empty */}
         {!props.imgUrl
             ?   <Card

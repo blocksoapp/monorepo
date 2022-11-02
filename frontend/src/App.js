@@ -1,5 +1,5 @@
 import React, { useState, useContext, createContext } from 'react'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useAccount } from 'wagmi'
 import Explore from './pages/Explore'
 import Home from './pages/Home';
@@ -8,12 +8,14 @@ import ViewProfile from './pages/ViewProfile';
 import PostPage from './pages/PostPage';
 import NavbarComponent from './components/ui/Navbar';
 import { UserContext } from './contexts/UserContext'
+import Following from './components/follow/Following';
+import Followers from './components/follow/Followers';
 
 
-function App() {
+function App(props) {
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean)
     const [user, setUser] = useState(null);
-    
+   
     return (
         <>
         <UserContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated }}>
@@ -30,6 +32,8 @@ function App() {
                 <Route path="/edit-profile" element={<EditProfile/>}></Route>
                 <Route path="/:urlInput/profile" element={<ViewProfile/>}></Route>
                 <Route path="/posts/:postId" element={<PostPage/>}></Route>
+                <Route path="/following" element={ <Following/>}></Route>
+                <Route path="/followers" element={ <Followers/>}></Route>
               </Routes>
           </Router>
         </UserContext.Provider>
