@@ -1196,7 +1196,14 @@ class NotificationTests(BaseTest):
         url = "/api/notifications/"
         resp = self.client.get(url)
 
-        # TODO make assertions
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["commentOnPostEvent"]
+        self.assertEqual(event["post"], post_id)
+        self.assertEqual(event["commentor"], self.test_signer_2.address)
 
     def test_mentioned_in_comment_notif(self):
         """

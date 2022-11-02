@@ -196,14 +196,35 @@ class MentionedInCommentEvent(models.Model):
         related_name="mentioned_in_comment_event",
         on_delete=models.CASCADE
     )
-    comment = models.OneToOneField(
+    comment = models.ForeignKey(
         to=Comment,
-        related_name="comment",
         on_delete=models.CASCADE
     )
-    mentioned_by = models.OneToOneField(
+    mentioned_by = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
-        related_name="mentioned_by",
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class CommentOnPostEvent(models.Model):
+    """ An event respresenting when someone commetns on a user's post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="comment_on_post_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    commentor = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)

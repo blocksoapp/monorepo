@@ -7,9 +7,9 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import Comment, ERC20Transfer, ERC721Transfer, Follow, \
-        MentionedInCommentEvent, Notification, Post, Profile, Socials, \
-        Transaction
+from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
+        ERC721Transfer, Follow, MentionedInCommentEvent, Notification, \
+        Post, Profile, Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -318,6 +318,15 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.tagged_users.set(tagged_users)
         comment.save()
 
+        # create a notification for the post author
+        notif = Notification.objects.create(user=post.author)
+        CommentOnPostEvent.objects.create(
+            notification=notif,
+            comment=comment,
+            post=post,
+            commentor=author
+        )
+
         # create a notifications for the tagged users
         for user in tagged_users:
             notif = Notification.objects.create(user=user)
@@ -353,6 +362,15 @@ class MentionedInCommentEventSerializer(serializers.ModelSerializer):
         return obj.comment.post_id
 
 
+class CommentOnPostEventSerializer(serializers.ModelSerializer):
+    """ CommentOnPostEvent model serializer. """
+
+    class Meta:
+        model = CommentOnPostEvent
+        fields = ["comment", "commentor", "created", "post"]
+        read_only_fields = fields
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     """ Notification model serializer. """
 
@@ -370,13 +388,32 @@ class NotificationSerializer(serializers.ModelSerializer):
         events = {}
         events["mentionedInCommentEvent"] = self.\
             get_mentioned_in_comment_event(obj)
+        events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
+
         return events
+
+    def get_comment_on_post_event(self, obj):
+        """
+        Returns the CommentOnPostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "comment_on_post_event"):
+            return None
+
+        return CommentOnPostEventSerializer(
+            obj.comment_on_post_event
+        ).data
 
     def get_mentioned_in_comment_event(self, obj):
         """
-        Returns the MentionedInCommentEvents associated
+        Returns the MentionedInCommentEvent associated
         with the notification.
         """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "mentioned_in_comment_event"):
+            return None
+
         return MentionedInCommentEventSerializer(
             obj.mentioned_in_comment_event
         ).data
