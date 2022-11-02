@@ -1138,3 +1138,97 @@ class ExploreTests(BaseTest):
         # user 3 should have the least followers
         for i in range(8):
             self.assertEqual(resp.data[i]["address"], signers[9-i].address)
+
+
+class NotificationTests(BaseTest):
+    """
+    Test behavior around notifications.
+    """
+
+    def test_get_notifs(self):
+        """
+        Assert that a logged in user can get a list of notifications.
+        """
+        # set up test
+        # user 1 logs in
+        self._do_login(self.test_signer)
+
+        # make request for notifications
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["results"], [])
+
+    def test_get_notifs_unauthed(self):
+        """
+        Assert that a logged out user cannot get a list of notifications.
+        """
+        # set up test
+
+        # make request for notifications
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_comment_on_post_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user comments on their post.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._do_logout()
+
+        # user 2 comments on user 1's post
+        self._do_login(self.test_signer_2)
+        self._create_comment(post_id, text="hello")
+        self._do_logout()
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # TODO make assertions
+
+    def test_mentioned_in_comment_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user mentions them in a comments.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+        # user 1 creates a post and a comment
+        # where they mention user 2
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(
+            post_id,
+            text="hello user 2",
+            tagged_users=[self.test_signer_2.address]
+        )
+        self._do_logout()
+
+        # make request to get user 2's notifications
+        self._do_login(self.test_signer_2)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 2 has a notification for the comment mention
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["mentionedInCommentEvent"]
+        self.assertEqual(event["post"], post_id)
+        self.assertEqual(event["mentionedBy"], self.test_signer.address)

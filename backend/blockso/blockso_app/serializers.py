@@ -7,8 +7,9 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import Comment, ERC20Transfer, ERC721Transfer, Follow, Post, \
-        Profile, Socials, Transaction
+from .models import Comment, ERC20Transfer, ERC721Transfer, Follow, \
+        MentionedInCommentEvent, Notification, Post, Profile, Socials, \
+        Transaction
 
 
 UserModel = get_user_model()
@@ -298,7 +299,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
         # get user from the session
         author = self.context.get("request").user
-        
+
         # get post id from the url
         post = Post.objects.get(
             pk=self.context.get("view").kwargs["post_id"]
@@ -317,4 +318,65 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.tagged_users.set(tagged_users)
         comment.save()
 
+        # create a notifications for the tagged users
+        for user in tagged_users:
+            notif = Notification.objects.create(user=user)
+            MentionedInCommentEvent.objects.create(
+                notification=notif,
+                comment=comment,
+                mentioned_by=author
+            )
+
         return comment
+
+
+class MentionedInCommentEventSerializer(serializers.ModelSerializer):
+    """ MentionedInCommentEvent model serializer. """
+
+    class Meta:
+        model = MentionedInCommentEvent
+        fields = ["comment", "created", "mentionedBy", "post"]
+        read_only_fields = fields
+
+    mentionedBy = serializers.SerializerMethodField("get_mentioned_by")
+    post = serializers.SerializerMethodField("get_post")
+
+
+    def get_mentioned_by(self, obj):
+        """ Returns the user that did the mentioning. """
+
+        return obj.mentioned_by_id
+
+    def get_post(self, obj):
+        """ Returns the post id associated with the comment. """
+
+        return obj.comment.post_id
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """ Notification model serializer. """
+
+    class Meta:
+        model = Notification
+        fields = ["id", "created", "events", "viewed"]
+        read_only_fields = fields
+
+    events = serializers.SerializerMethodField("get_events")
+
+
+    def get_events(self, obj):
+        """ Returns the events associated with the notification. """
+
+        events = {}
+        events["mentionedInCommentEvent"] = self.\
+            get_mentioned_in_comment_event(obj)
+        return events
+
+    def get_mentioned_in_comment_event(self, obj):
+        """
+        Returns the MentionedInCommentEvents associated
+        with the notification.
+        """
+        return MentionedInCommentEventSerializer(
+            obj.mentioned_in_comment_event
+        ).data

@@ -19,8 +19,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, Follow, Post, Profile, Socials
-from .pagination import CommentPagination, PostsPagination
+from .models import Comment, Follow, Notification, Post, Profile, Socials
 from . import jobs, pagination, serializers
 
 
@@ -290,7 +289,7 @@ class PostCreateList(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
-    pagination_class = PostsPagination
+    pagination_class = pagination.PostsPagination
     lookup_url_kwarg = "address"
     lookup_field = "author"
 
@@ -404,13 +403,35 @@ class FeedList(generics.ListAPIView):
         return queryset
 
 
+class NotificationList(generics.ListAPIView):
+
+    """ View that lists the notifications of an authenticated user. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.NotificationSerializer
+    pagination_class = pagination.NotificationPagination
+
+    def get_queryset(self):
+        """
+        Return Notifications of the authenticated user.
+        The queryset is sorted from newest to oldest in the model class.
+        """
+        # get user
+        user = self.request.user
+
+        # get all notifications for the user
+        queryset = Notification.objects.filter(user=user)
+
+        return queryset
+
+
 class CommentCreateList(generics.ListCreateAPIView):
 
     """ View that supports creating and listing Comments of a post. """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
-    pagination_class = CommentPagination
+    pagination_class = pagination.CommentPagination
 
 
     def get_queryset(self):

@@ -170,3 +170,40 @@ class Comment(models.Model):
         blank=True
     )
     created = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    """ Represents a Notification created for a user. """
+
+    class Meta:
+        ordering = ["-created"]
+
+    
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+
+
+class MentionedInCommentEvent(models.Model):
+    """ An event respresenting when a user is mentioned in a comment. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="mentioned_in_comment_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.OneToOneField(
+        to=Comment,
+        related_name="comment",
+        on_delete=models.CASCADE
+    )
+    mentioned_by = models.OneToOneField(
+        to=settings.AUTH_USER_MODEL,
+        related_name="mentioned_by",
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
