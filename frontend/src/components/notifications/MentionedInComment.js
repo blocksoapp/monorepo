@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import EnsAndAddress from "../EnsAndAddress.js";
 
 
 function MentionedInComment({data}) {
@@ -10,7 +11,8 @@ function MentionedInComment({data}) {
 
     return (
         <NavDropdown.Item as={Link} to={href}>
-            {data.mentionedBy} mentioned you in a comment!
+            <EnsAndAddress address={data.mentionedBy} />
+            &nbsp; mentioned you in a comment!
         </NavDropdown.Item>
     )
 }

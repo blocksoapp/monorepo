@@ -420,7 +420,7 @@ class NotificationList(generics.ListAPIView):
         user = self.request.user
 
         # get all notifications for the user
-        queryset = Notification.objects.filter(user=user)
+        queryset = Notification.objects.filter(user=user.profile)
 
         return queryset
 

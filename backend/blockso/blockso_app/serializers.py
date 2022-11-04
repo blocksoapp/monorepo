@@ -63,6 +63,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         # get authed user
         request = self.context.get("request")
+        if request is None:
+            return None
         authed_user = request.user
 
         # check if authed user follows the profile
@@ -145,11 +147,11 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
         # notify the user that was followed
-        notif = Notification.objects.create(user=to_follow)
+        notif = Notification.objects.create(user=to_follow.profile)
         FollowedEvent.objects.create(
             notification=notif,
             follow=follow,
-            followed_by=user
+            followed_by=user.profile
         )
 
         return follow
@@ -327,21 +329,22 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.save()
 
         # create a notification for the post author
-        notif = Notification.objects.create(user=post.author)
+        notif = Notification.objects.create(user=post.author.profile)
         CommentOnPostEvent.objects.create(
             notification=notif,
             comment=comment,
             post=post,
-            commentor=author
+            commentor=author.profile
         )
 
         # create a notifications for the tagged users
         for user in tagged_users:
-            notif = Notification.objects.create(user=user)
+            profile = Profile.objects.get(user=user)
+            notif = Notification.objects.create(user=profile)
             MentionedInCommentEvent.objects.create(
                 notification=notif,
                 comment=comment,
-                mentioned_by=author
+                mentioned_by=author.profile
             )
 
         return comment
@@ -362,7 +365,7 @@ class MentionedInCommentEventSerializer(serializers.ModelSerializer):
     def get_mentioned_by(self, obj):
         """ Returns the user that did the mentioning. """
 
-        return obj.mentioned_by_id
+        return ProfileSerializer(obj.mentioned_by).data
 
     def get_post(self, obj):
         """ Returns the post id associated with the comment. """
@@ -377,6 +380,8 @@ class CommentOnPostEventSerializer(serializers.ModelSerializer):
         model = CommentOnPostEvent
         fields = ["comment", "commentor", "created", "post"]
         read_only_fields = fields
+
+    commentor = ProfileSerializer()
 
 
 class FollowedEventSerializer(serializers.ModelSerializer):
@@ -393,7 +398,7 @@ class FollowedEventSerializer(serializers.ModelSerializer):
     def get_followed_by(self, obj):
         """ Returns the user that did the following. """
 
-        return obj.followed_by_id
+        return ProfileSerializer(obj.followed_by).data
 
 
 class NotificationSerializer(serializers.ModelSerializer):

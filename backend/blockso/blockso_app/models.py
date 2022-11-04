@@ -180,7 +180,7 @@ class Notification(models.Model):
 
     
     user = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="notifications"
     )
@@ -201,7 +201,7 @@ class MentionedInCommentEvent(models.Model):
         on_delete=models.CASCADE
     )
     mentioned_by = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)
@@ -224,7 +224,7 @@ class CommentOnPostEvent(models.Model):
         on_delete=models.CASCADE
     )
     commentor = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)
@@ -243,7 +243,7 @@ class FollowedEvent(models.Model):
         on_delete=models.CASCADE
     )
     followed_by = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)

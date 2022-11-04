@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Card, Image } from "react-bootstrap";
-import { useEnsAvatar, useEnsName } from "wagmi";
 import { abbrAddress } from "../utils";
 
 

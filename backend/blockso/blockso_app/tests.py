@@ -1203,7 +1203,10 @@ class NotificationTests(BaseTest):
         self.assertEqual(notification["viewed"], False)
         event = notification["events"]["commentOnPostEvent"]
         self.assertEqual(event["post"], post_id)
-        self.assertEqual(event["commentor"], self.test_signer_2.address)
+        self.assertEqual(
+            event["commentor"]["address"],
+            self.test_signer_2.address
+        )
 
     def test_mentioned_in_comment_notif(self):
         """
@@ -1238,7 +1241,10 @@ class NotificationTests(BaseTest):
         self.assertEqual(notification["viewed"], False)
         event = notification["events"]["mentionedInCommentEvent"]
         self.assertEqual(event["post"], post_id)
-        self.assertEqual(event["mentionedBy"], self.test_signer.address)
+        self.assertEqual(
+            event["mentionedBy"]["address"],
+            self.test_signer.address
+        )
 
     def test_follow_notif(self):
         """
@@ -1263,4 +1269,7 @@ class NotificationTests(BaseTest):
         notification = resp.data["results"][0]
         self.assertEqual(notification["viewed"], False)
         event = notification["events"]["followedEvent"]
-        self.assertEqual(event["followedBy"], self.test_signer_2.address)
+        self.assertEqual(
+            event["followedBy"]["address"],
+            self.test_signer_2.address
+        )
