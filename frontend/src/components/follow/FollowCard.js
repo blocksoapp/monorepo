@@ -1,34 +1,84 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Container, Image, Button } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
 import EnsAndAddress from '../EnsAndAddress'
 import Pfp from '../Pfp'
+import { FollowContext } from '../../contexts/FollowContext'
+import { getCookie, baseAPI } from '../../utils'
+
 
 function FollowCard(props) {
+
+    const { setProfileData, profileData, setProfileDataLoading } = useContext(FollowContext)
+    const navigate = useNavigate()
+
+    const handleFollow = async () => {
+        const url = `${baseAPI}/${props.address}/follow/`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+        if (res.ok) {
+            console.log('followed')
+            setProfileData({
+                ...profileData,
+                numFollowers: profileData["numFollowers"] + 1,
+                followedByMe: true
+            });
+        }
+    }
+
+    const handleUnfollow = async () => {
+        const url = `${baseAPI}/${props.address}/follow/`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+        if (res.ok) {
+            console.log('unfollowed')
+            setProfileData({
+                ...profileData,
+                numFollowers: profileData["numFollowers"] - 1,
+                followedByMe: false
+            });
+        }
+    }
+
   return (
-    <Container key={props.index} className="d-flex red-border w-auto">
-        <Pfp
-        height="80px"
-        width="80px"
-        imgUrl={props.imgUrl}
-        address={props.address}
-        fontSize=".8rem"
-        />
-        <Container className='blue-border p-2 d-flex-inline flex-column align-items-center'>
-            <div className='d-flex justify-content-between'>
-                <div>
-                    <EnsAndAddress address={props.address}/>
-                    {props.followedByYou ? <span className='border p-2'>Followed By You</span> : <span></span>}
-                </div>
-                <div>
-                    <Button className="btn-dark">Follow</Button>
-                </div>
-            </div>
-            <div>
-                {props.bio && <p>{props.bio}</p>}
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias quibusdam iste incidunt aliquam quae neque dignissimos nihil sint autem eligendi, molestias consequatur dolor, asperiores libero, ullam similique. Corporis, non aut?</p>
-            </div>
+    <span>
+        <Container key={props.index} className="d-flex red-border w-auto">
+                <Pfp
+                height="80px"
+                width="80px"
+                imgUrl={props.imgUrl}
+                address={props.address}
+                fontSize=".9rem"
+                onClick={() => navigate(`/${props.address}/profile`)}
+                />
+                <Container className='blue-border p-2 d-flex-inline flex-column align-items-center'>
+                    <div className='d-flex justify-content-between'>
+                        <div>
+                            <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={() => navigate(`/${props.address}/profile`)}/>
+                            <p className='fs-6'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </p>
+                        </div>
+                        <div>
+                            {props.followedByMe ? <Button className="btn-outline-dark" onClick={handleUnfollow} >Following</Button>
+                            : <Button className="btn-dark" onClick={handleFollow}>Follow</Button> }
+                        </div>
+                    </div>
+                    <div>
+                        {props.bio && <p className='fs-6'>{props.bio}</p>}
+                    </div>
+                </Container>
         </Container>
-    </Container>
+    </span>
+   
   )
 }
 

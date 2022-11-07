@@ -26,6 +26,21 @@ code {
   min-height: 20vh
 }
 
+.link-style {
+  color: black;
+}
+
+.link-style:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 15%;
+}
+
+.link-active {
+  color:#00A8E8;
+  text-decoration: underline;
+  text-decoration-thickness: 30%;
+}
+
 
 /* EXPLORE PAGE */
 

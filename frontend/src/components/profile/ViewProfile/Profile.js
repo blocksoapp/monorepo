@@ -14,7 +14,8 @@ import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
-import { UserContext } from '../../../contexts/UserContext'
+import { UserContext } from '../../../contexts/UserContext';
+import { FollowContext } from '../../../contexts/FollowContext';
 
 
 function Profile(props) {
@@ -32,7 +33,6 @@ function Profile(props) {
     const [pfpUrl, setPfpUrl] = useState(null);
  
     // functions
-
     const fetchPosts = async () => {
         setPostsLoading(true);
         const res = await apiGetPosts(props.address);
@@ -107,13 +107,15 @@ function Profile(props) {
             });
         }
     }
-
+    
         // Navigate to user's followers
         const handleFollowerClick = () => {
-            console.log('view profile requested')
-            navigate(`/followers`, { state: { address: props.address } })
+            navigate(`/${props.address}/profile/followers`)
         }
-    
+
+        const handleFollowingClick = () => {
+            navigate(`/${props.address}/profile/following`)
+        }
 
     // effects
 
@@ -220,47 +222,47 @@ function Profile(props) {
                         </Row>
 
                         {/* Follower/Following counts and Follow button */}
-                        <Row className="justify-content-center mt-3 mb-3">
-                            <Col className="col-auto">
-                                <h5>
-                                        <Badge bg="secondary" onClick={handleFollowerClick}>
-                                        
-                                            {profileData["numFollowers"]}
-                                            {profileData["numFollowers"] === 1 ?
-                                                " Follower" : " Followers"}
-                                        </Badge> 
-                                </h5>
-                            </Col>
-                            <Col className="col-auto">
-                                <h5>
-                                    <Link as={Link} to="/following">
-                                        <Badge bg="secondary">
-                                            {profileData["numFollowing"]} Following
-                                        </Badge> 
-                                    </Link>
-                                </h5>
-                            </Col>
-                            <Col className="col-auto">
-                                {user !== null && profileData["followedByMe"] === true
-                                    ? <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={handleUnfollow}
-                                        disabled={user !== null && user["address"] === props.address ? true : false}
-                                      >
-                                        Unfollow
-                                      </Button> 
-                                    : <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={handleFollow}
-                                        disabled={user !== null && user["address"] === props.address ? true : false}
-                                      >
-                                        Follow
-                                      </Button>
-                                }
-                            </Col>
-                        </Row>
+                        <FollowContext.Provider value={{ profileData, setProfileData, setProfileDataLoading }}>
+                            <Row className="justify-content-center mt-3 mb-3">
+                                <Col className="col-auto">
+                                    <h5>
+                                            <Badge bg="secondary" onClick={handleFollowerClick}>
+                                            
+                                                {profileData["numFollowers"]}
+                                                {profileData["numFollowers"] === 1 ?
+                                                    " Follower" : " Followers"}
+                                            </Badge> 
+                                    </h5>
+                                </Col>
+                                <Col className="col-auto">
+                                    <h5>   
+                                            <Badge bg="secondary" onClick={handleFollowingClick}>
+                                                {profileData["numFollowing"]} Following
+                                            </Badge> 
+                                    </h5>
+                                </Col>
+                                <Col className="col-auto">
+                                    {user !== null && profileData["followedByMe"] === true
+                                        ? <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={handleUnfollow}
+                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                        >
+                                            Unfollow
+                                        </Button> 
+                                        : <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={handleFollow}
+                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                        >
+                                            Follow
+                                        </Button>
+                                    }
+                                </Col>
+                            </Row>
+                        </FollowContext.Provider>
 
                     </Container>
                 </Container>

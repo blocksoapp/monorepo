@@ -27,7 +27,7 @@ function EnsAndAddress(props) {
 
     // no ens name
     else return (
-        <span>{getAbbrAddress(props.address)}</span>
+        <span className={props.className} onClick={props.onClick}>{getAbbrAddress(props.address)}</span>
     )
 }
 

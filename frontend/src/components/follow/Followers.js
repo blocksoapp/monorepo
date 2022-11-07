@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
 import { UseFetch } from '../../hooks/useFetch'
+import { useEnsAddress, useEnsName } from 'wagmi'
 import { baseAPI } from '../../utils'
 import FollowNav from './FollowNav'
-import { UserContext } from '../../contexts/UserContext'
 import Loading from '../ui/Loading'
 import FollowCard from './FollowCard'
 
@@ -12,12 +12,12 @@ function Followers() {
 
   const [followers, setFollowers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  //const { data, isLoading, error } = UseFetch()
-  const { state } = useLocation()
+  const [error, setError] = useState(false)
+  const { urlInput } = useParams();
   
   const fetchFollowers = async () => {
       setIsLoading(true)
-      const url = `${baseAPI}/${state.address}/followers/`
+      const url = `${baseAPI}/${urlInput}/followers/`
       const res = await fetch(url, {
           method: 'GET',
           credentials: 'include'
@@ -27,8 +27,12 @@ function Followers() {
         const json = await res.json()
         console.log("json: ", json)
         setFollowers(json.results)
-      } else return
-      setIsLoading(false)
+        setIsLoading(false)
+      } else if (!res.ok) {
+        setIsLoading(false)
+        setError(true)
+        console.log('couldnt fetch followers')
+      }
   } 
 
   useEffect(() => {
@@ -44,7 +48,8 @@ function Followers() {
   return (
     <Container className="border w-auto">
         <FollowNav
-        address={state.address}/>
+        address={urlInput}
+        />
              <Container className="mt-3">
                   {followers.map( (follower, index) => {
                     return (
@@ -54,6 +59,7 @@ function Followers() {
                           address={follower.address}
                           bio={follower.profile.bio}
                           followedByMe={follower.profile.followedByMe}
+                          numFollowers={follower.profile.numFollowers}
                           />
                     )})}
               </Container>
