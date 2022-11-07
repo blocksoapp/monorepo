@@ -5,3 +5,11 @@
 .popup-width {
     width: 25vw;
 }
+
+.notif-item {
+    cursor: pointer;
+}
+
+.notif-item:hover {
+    background-color: #e9ecef!important;
+}
