@@ -3,8 +3,8 @@ import { Button, NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
 import { apiGetNotifications } from "../../api.js";
+import NotificationItem from "./NotificationItem.js";
 import "./styles.css";
-import NotificationItemResolver from "./NotificationItemResolver.js";
 
 
 function NotificationsDropdown() {
@@ -77,7 +77,7 @@ function NotificationsDropdown() {
             {/* list of notifications */}
             {/* TODO handle loading and error cases*/}
             {notifs && notifs.map(notif => (
-                <NotificationItemResolver data={notif} />
+                <NotificationItem data={notif} />
             ))}
         </NavDropdown>
     )

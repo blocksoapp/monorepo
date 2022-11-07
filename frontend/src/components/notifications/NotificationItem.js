@@ -4,13 +4,16 @@ import { Col, Container, NavDropdown, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import EnsAndAddress from "../EnsAndAddress.js";
 import PfpResolver from "../PfpResolver";
+import EventResolver from "./EventResolver";
 
 
-function CommentOnPost({data}) {
+function NotificationItem({data}) {
 
     // constants
-    const href = `/posts/${data.post}#${data.comment}`;
     const navigate = useNavigate();
+
+    // state
+    const [href, setHref] = useState("");
 
     // functions
     const getTimeAgo = (timestamp) => {
@@ -50,26 +53,15 @@ function CommentOnPost({data}) {
         <Container
             className="p-2 notif-item"
             style={{ backgroundColor: data.viewed ? "transparent" : "#fffff0" }}
-            onClick={() => navigate(href)}
+            onClick={() => navigate(href)}  // notification link
         >
             <Row className="align-items-center">
-                {/* avatar */}
-                <Col xs={1}>
-                    <PfpResolver
-                        address={data.commentor.address}
-                        imgUrl={data.commentor.image}
-                        height="30px"
-                        width="30px"
-                        fontSize="0.5rem"
+                {/* event avatar and description */}
+                <Col xs={10}>
+                    <EventResolver
+                        data={data.events}
+                        setHref={setHref}
                     />
-                </Col>
-
-                {/* event description */}
-                <Col xs={9} className="ps-3">
-                    <span>
-                        <EnsAndAddress address={data.commentor.address} />
-                        &nbsp;commented on your post!
-                    </span>
                 </Col>
 
                 {/* notification time */}
@@ -84,4 +76,4 @@ function CommentOnPost({data}) {
 }
 
 
-export default CommentOnPost;
+export default NotificationItem;
