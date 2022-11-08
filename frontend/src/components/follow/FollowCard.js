@@ -50,9 +50,12 @@ function FollowCard(props) {
         }
     }
 
+    const navigateProfile = () => {
+        navigate(`/${props.address}/profile`)
+      }
+
   return (
-    <span>
-        <div key={props.index} className="d-flex red-border">
+        <div key={props.index} className="d-flex red-border p-3">
                 <Pfp
                 height="80px"
                 width="80px"
@@ -61,23 +64,22 @@ function FollowCard(props) {
                 fontSize=".9rem"
                 onClick={() => navigate(`/${props.address}/profile`)}
                 />
-                <div className='blue-border flex-grow-1 p-0 align-items-center'>
+                <div className='blue-border flex-grow-1 p-2 align-items-center'>
                     <div className='d-flex justify-content-between red-border'>
                         <div className='d-flex flex-column border'>
-                            <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={() => navigate(`/${props.address}/profile`)}/>
-                            <Badge className='fs-6 bg-light text-dark'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                            <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={navigateProfile}/>
+                            <Badge className='text-dark text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
-                        <div>
+                        <div className='align-self-center'>
                             {props.followedByMe ? <Button className="btn-outline-dark" onClick={handleUnfollow} >Following</Button>
                             : <Button className="btn-dark" onClick={handleFollow}>Follow</Button> }
                         </div>
                     </div>
                     <div>
-                        {props.bio && <p className='fs-6'>{props.bio}</p>}
+                        {props.bio && <p className='fs-6 pt-1'>{props.bio}</p>}
                     </div>
                 </div>
         </div>
-    </span>
    
   )
 }
