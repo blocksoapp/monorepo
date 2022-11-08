@@ -12,6 +12,7 @@ function Followers() {
 
   const [followers, setFollowers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [active, setActive] = useState(true)
   const [error, setError] = useState(false)
   const { urlInput } = useParams();
   
@@ -47,7 +48,7 @@ function Followers() {
 
   return (
     <Container className="border p-0">
-        <FollowNav address={urlInput}/>
+        <FollowNav address={urlInput} active={active}/>
         <div className="mt-3">
             {followers.map( (follower, index) => {
               return (

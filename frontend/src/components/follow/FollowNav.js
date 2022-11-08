@@ -1,10 +1,12 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Button, Container } from 'react-bootstrap'
 import EnsAndAddress from '../EnsAndAddress'
 
 function FollowNav(props) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [activeFollowerTab, setActiveFollowerTab] = useState()
 
   const navigateFollowing = () => {
    navigate(`/${props.address}/profile/following`)
@@ -18,6 +20,20 @@ function FollowNav(props) {
     navigate(`/${props.address}/profile`)
   }
 
+  useEffect(() => {
+    if(location.pathname.includes('followers')) {
+      console.log('on followers page')
+      const followersTab = document.getElementById('followersTab')
+      followersTab.classList.add('link-active')
+    } else if (location.pathname.includes('following')) {
+      console.log('on following page')
+      const followingTab = document.getElementById('followingTab')
+      followingTab.classList.add('link-active')
+    } else return
+  }, [])
+  
+  //className={`w-50 border fw-bold p-2 ${props.active ? 'link-active' : ''}`} 
+
   return (
         <div className=''>
               <div className='p-3'>
@@ -25,8 +41,8 @@ function FollowNav(props) {
                 <span className='fw-bold fs-5'><EnsAndAddress address={props.address}/></span> 
               </div>
             <div className='d-flex text-center'>
-                <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowers}>Followers</Button>
-                <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowing}>Following</Button>
+                <span className='w-50 border fw-bold p-2' onClick={navigateFollowers} id="followersTab">Followers</span>
+                <span className='w-50 border fw-bold p-2' onClick={navigateFollowing} id="followingTab">Following</span>
             </div>
         </div>
   )
