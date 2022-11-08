@@ -46,23 +46,21 @@ function Followers() {
   }
 
   return (
-    <Container className="border w-auto">
-        <FollowNav
-        address={urlInput}
-        />
-             <Container className="mt-3">
-                  {followers.map( (follower, index) => {
-                    return (
-                          <FollowCard
-                          index={index}
-                          imgUrl={follower.profile.image}
-                          address={follower.address}
-                          bio={follower.profile.bio}
-                          followedByMe={follower.profile.followedByMe}
-                          numFollowers={follower.profile.numFollowers}
-                          />
-                    )})}
-              </Container>
+    <Container className="blue-border p-0">
+        <FollowNav address={urlInput}/>
+        <div className="mt-3">
+            {followers.map( (follower, index) => {
+              return (
+                    <FollowCard
+                    index={index}
+                    imgUrl={follower.profile.image}
+                    address={follower.address}
+                    bio={follower.profile.bio}
+                    followedByMe={follower.profile.followedByMe}
+                    numFollowers={follower.profile.numFollowers}
+                    />
+              )})}
+        </div>
     </Container>
   )
 }

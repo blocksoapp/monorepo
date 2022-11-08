@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { Container, Image, Button } from 'react-bootstrap'
+import { Container, Image, Button, Badge } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import EnsAndAddress from '../EnsAndAddress'
 import Pfp from '../Pfp'
@@ -52,7 +52,7 @@ function FollowCard(props) {
 
   return (
     <span>
-        <Container key={props.index} className="d-flex red-border w-auto">
+        <div key={props.index} className="d-flex red-border">
                 <Pfp
                 height="80px"
                 width="80px"
@@ -61,11 +61,11 @@ function FollowCard(props) {
                 fontSize=".9rem"
                 onClick={() => navigate(`/${props.address}/profile`)}
                 />
-                <Container className='blue-border p-2 d-flex-inline flex-column align-items-center'>
-                    <div className='d-flex justify-content-between'>
-                        <div>
+                <div className='blue-border flex-grow-1 p-0 align-items-center'>
+                    <div className='d-flex justify-content-between red-border'>
+                        <div className='d-flex flex-column border'>
                             <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={() => navigate(`/${props.address}/profile`)}/>
-                            <p className='fs-6'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </p>
+                            <Badge className='fs-6 bg-light text-dark'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div>
                             {props.followedByMe ? <Button className="btn-outline-dark" onClick={handleUnfollow} >Following</Button>
@@ -75,8 +75,8 @@ function FollowCard(props) {
                     <div>
                         {props.bio && <p className='fs-6'>{props.bio}</p>}
                     </div>
-                </Container>
-        </Container>
+                </div>
+        </div>
     </span>
    
   )

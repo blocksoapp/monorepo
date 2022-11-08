@@ -44,12 +44,9 @@ function Following() {
   }
 
   return (
-    <Container className="border w-auto">
-         <FollowNav
-        address={urlInput}
-        followerStyle='w-50 p-3'
-        followingStyle='w-50 p-3'/>
-             <Container className="mt-3">
+    <Container className="blue-border p-0">
+         <FollowNav address={urlInput}/>
+             <div className="mt-3">
                   {followingList.map( (following, index) => {
                     return (
                           <FollowCard
@@ -61,7 +58,7 @@ function Following() {
                           numFollowers={following.profile.numFollowers}
                           />
                     )})}
-              </Container>
+              </div>
     </Container>
   )
 }

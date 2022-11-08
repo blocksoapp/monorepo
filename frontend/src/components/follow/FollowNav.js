@@ -14,17 +14,20 @@ function FollowNav(props) {
     navigate(`/${props.address}/profile/followers`)
    }
 
+  const navigateProfile = () => {
+    navigate(`/${props.address}/profile`)
+  }
+
   return (
-        <Container className='d-flex flex-column green-border'>
-          <div>
-            <span>{props.address}</span>
-          </div>
-            <div className='d-flex w-100 text-center red-border'>
-                <Button className='w-50 border' variant="outline-dark" onClick={navigateFollowers}>Followers</Button>
-                <Button className={props.followingStyle} variant="outline-dark" onClick={navigateFollowing}>Following</Button>
+        <div className='green-border'>
+              <Button className="btn-sm" variant="outline-dark" onClick={navigateProfile}>Back</Button> <br/>
+              <span>{props.address}</span> 
+            <div className='d-flex text-center red-border'>
+                <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowers}>Followers</Button>
+                <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowing}>Following</Button>
                 {/* <span className={props.followingStyle}>Following</span> */}
             </div>
-        </Container>
+        </div>
   )
 }
 
