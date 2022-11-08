@@ -7,6 +7,8 @@ import {
     apiMarkNotificationsRead
 } from "../../api.js";
 import NotificationItem from "./NotificationItem.js";
+import NotificationsError from "./NotificationsError.js";
+import NotificationsPlaceholder from "./NotificationsPlaceholder.js";
 import "./styles.css";
 
 
@@ -127,11 +129,14 @@ function NotificationsDropdown() {
                 <h5>Notifications</h5>
             </NavDropdown.Header>
 
-            {/* list of notifications */}
-            {/* TODO handle loading and error cases*/}
-            {notifs && notifs.map(notif => (
-                <NotificationItem data={notif} />
-            ))}
+            {/* Notifications list -- show placeholder or list of notifs */}
+            {notifsLoading === true
+                ? <NotificationsPlaceholder />
+                : notifsError === true
+                    ? <NotificationsError retryAction={fetchNotifications} />
+                    : notifs.map(notif => (
+                        <NotificationItem data={notif} />
+                    ))}
         </NavDropdown>
     )
 }
