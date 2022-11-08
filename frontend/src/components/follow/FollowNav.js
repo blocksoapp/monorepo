@@ -19,15 +19,14 @@ function FollowNav(props) {
   }
 
   return (
-        <div className='green-border'>
+        <div className=''>
               <div className='p-3'>
                 <Button className="btn-sm" variant="outline-dark" onClick={navigateProfile}>Back</Button> <br/>
                 <span className='fw-bold fs-5'><EnsAndAddress address={props.address}/></span> 
               </div>
-            <div className='d-flex text-center red-border'>
+            <div className='d-flex text-center'>
                 <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowers}>Followers</Button>
                 <Button className='w-50 border fw-bold p-2' variant="outline-dark" onClick={navigateFollowing}>Following</Button>
-                {/* <span className={props.followingStyle}>Following</span> */}
             </div>
         </div>
   )

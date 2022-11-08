@@ -44,7 +44,7 @@ function Following() {
   }
 
   return (
-    <Container className="blue-border p-0">
+    <Container className="border p-0">
          <FollowNav address={urlInput}/>
              <div className="mt-3">
                   {followingList.map( (following, index) => {
