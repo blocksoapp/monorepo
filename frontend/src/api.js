@@ -1,5 +1,5 @@
 /* Module containing AJAX calls to the backend. */
-import { baseAPI } from './utils';
+import { baseAPI, getCookie } from './utils';
 
 
 /* Returns the response for the comments of a post. */
@@ -69,4 +69,20 @@ export const apiGetUrl = async (url) => {
         credentials: 'include'
     });
     return res;
+}
+
+/* Returns the response of marking the authed user's notifications as read. */
+export const apiMarkNotificationsRead = async (ids) => {
+    const url = `${baseAPI}/notifications/`;
+    const data = {"notifications": ids}
+    const resp = await fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
 }

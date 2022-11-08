@@ -6,7 +6,7 @@ from django.urls import path
 # our imports
 from .views import auth_nonce, auth_login, auth_logout, CommentCreateList, \
         ExploreList, FeedList, FollowCreateDestroy, FollowersList, \
-        FollowingList, NotificationList, PostCreateList, \
+        FollowingList, NotificationListUpdate, PostCreateList, \
         PostRetrieveUpdateDestroy, ProfileCreateRetrieveUpdate, UserList, \
         UserRetrieve
 
@@ -24,7 +24,7 @@ urlpatterns = [
         path("posts/<int:post_id>/comments/", CommentCreateList.as_view()),
         path("explore/", ExploreList.as_view()),
         path("feed/", FeedList.as_view()),
-        path("notifications/", NotificationList.as_view()),
+        path("notifications/", NotificationListUpdate.as_view()),
         path("user/", UserRetrieve.as_view()),
         path("users/", UserList.as_view()),
 ]
