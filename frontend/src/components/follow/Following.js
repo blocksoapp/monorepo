@@ -49,7 +49,7 @@ function Following() {
          <FollowNav address={urlInput}/>
              <>
                   {(followingList === undefined || followingList.length === 0)
-                  ? <p className="fs-2 text-center align-item-center p-2">User is not following anyone.</p>
+                  ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
                   : followingList.map( (following, index) => {
                     return (
                           <FollowCard
