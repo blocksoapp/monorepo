@@ -36,9 +36,9 @@ code {
 }
 
 .link-active {
-  color:#00A8E8;
   text-decoration: underline;
-  text-decoration-thickness: 50%;
+  text-decoration-color:#00A8E8;
+  text-decoration-thickness: 20%;
 }
 
 
@@ -106,5 +106,19 @@ code {
 }
 
 .w-min-100 {
-  min-width: 100%
+  min-width: 100vw;
+}
+
+.h-min-100 {
+  min-height: 100vh;
+}
+
+/* FOLLOWER/FOLLOWING PAGE */
+
+.light-hover:hover {
+  background-color: whitesmoke;
+}
+
+.primary-color-hover:hover {
+  color:#00A8E8;
 }

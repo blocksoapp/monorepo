@@ -14,6 +14,7 @@ function FollowCard(props) {
     const [buttonMsg, setButtonMsg] = useState('')
     const [profileData, setProfileData] = useState({})
     const [profileDataLoading, setProfileDataLoading] = useState(false)
+    const [readMore, setReadMore] = useState(false)
 
     const handleFollow = async () => {
         const url = `${baseAPI}/${props.address}/follow/`;
@@ -77,6 +78,23 @@ function FollowCard(props) {
         navigate(`/${props.address}/profile`)
       }
 
+    // shorten bio
+    const abbrBio = (bio) => {
+        if(bio.length > 200) {
+            if(readMore === false) {
+                return <div>
+                    {bio.substr(0,200) + '...'} 
+                    <span className="link-style" onClick={() => setReadMore(true)}> read more</span>
+                    </div>
+            } else if (readMore === true) {
+                return <div>
+                    {bio} 
+                    </div>
+            }
+        } else return bio
+}
+
+
     // Fetch profile data / set button text
     useEffect(() => {
     fetchProfile()
@@ -89,17 +107,11 @@ function FollowCard(props) {
 
     }, [])
 
-
-      
-      
-
-      
-
   return (
-        <div key={props.index} className="d-flex p-3">
+        <div key={props.index} className="d-flex py-3 px-sm-5 border-bottom">
                 <Pfp
-                height="80px"
-                width="80px"
+                height="90px"
+                width="90px"
                 imgUrl={props.imgUrl}
                 address={props.address}
                 fontSize=".9rem"
@@ -109,15 +121,15 @@ function FollowCard(props) {
                     <div className='d-flex justify-content-between'>
                         <div className='d-flex flex-column'>
                             <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={navigateProfile}/>
-                            <Badge className='text-dark text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                            <Badge className='text-dark bg-light text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center'>
-                            {buttonMsg === 'Following' ? <Button className="btn-outline-dark" onClick={handleUnfollow} >{buttonMsg}</Button>
-                            : <Button className="btn-dark" onClick={handleFollow}>{buttonMsg}</Button> }
+                            {buttonMsg === 'Following' ? <Button className="fw-bold" variant="outline-dark" onClick={handleUnfollow} >{buttonMsg}</Button>
+                            : <Button className="btn-dark fw-bold" onClick={handleFollow}>{buttonMsg}</Button> }
                         </div>
                     </div>
                     <div>
-                        {props.bio && <p className='fs-6 pt-1'>{props.bio}</p>}
+                        {props.bio && <p className='fs-6 pt-1'>{abbrBio(props.bio)}</p>}
                     </div>
                 </div>
         </div>

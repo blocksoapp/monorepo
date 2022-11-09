@@ -35,6 +35,7 @@ function Following() {
 
   useEffect(() => {
     fetchFollowing()
+
   
   }, [])
   
@@ -44,10 +45,12 @@ function Following() {
   }
 
   return (
-    <Container className="border p-0">
+    <Container className="border p-0 h-min-100">
          <FollowNav address={urlInput}/>
              <div className="mt-3">
-                  {followingList.map( (following, index) => {
+                  {(followingList === undefined || followingList.length === 0)
+                  ? <p className="fs-2 text-center align-item-center p-2">User is not following anyone.</p>
+                  : followingList.map( (following, index) => {
                     return (
                           <FollowCard
                           index={index}
@@ -57,7 +60,7 @@ function Following() {
                           followedByMe={following.profile.followedByMe}
                           numFollowers={following.profile.numFollowers}
                           />
-                    )})}
+                    )}) }
               </div>
     </Container>
   )
