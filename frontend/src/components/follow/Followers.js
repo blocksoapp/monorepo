@@ -47,7 +47,7 @@ function Followers() {
   return (
     <Container className="border p-0 h-min-100">
         <FollowNav address={urlInput} active={active}/>
-        <div className="mt-3 ">
+        <>
             {(followers === undefined || followers.length === 0)
             ? <p className="fs-2 text-center align-item-center p-2">User does not have any followers.</p>
             : followers.map( (follower, index) => {
@@ -61,7 +61,7 @@ function Followers() {
                     numFollowers={follower.profile.numFollowers}
                     />
               )})}
-        </div>
+        </>
     </Container>
   )
 }

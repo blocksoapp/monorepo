@@ -47,7 +47,7 @@ function Following() {
   return (
     <Container className="border p-0 h-min-100">
          <FollowNav address={urlInput}/>
-             <div className="mt-3">
+             <>
                   {(followingList === undefined || followingList.length === 0)
                   ? <p className="fs-2 text-center align-item-center p-2">User is not following anyone.</p>
                   : followingList.map( (following, index) => {
@@ -61,7 +61,7 @@ function Following() {
                           numFollowers={following.profile.numFollowers}
                           />
                     )}) }
-              </div>
+              </>
     </Container>
   )
 }

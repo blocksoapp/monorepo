@@ -106,7 +106,7 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div key={props.index} className="d-flex py-3 px-sm-5 border-bottom">
+        <div key={props.index} className="d-flex py-3 px-sm-5 light-hover">
                 <Pfp
                 height="90px"
                 width="90px"
