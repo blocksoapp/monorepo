@@ -15,8 +15,6 @@ import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import Pfp from '../../Pfp';
 import { UserContext } from '../../../contexts/UserContext';
-import { FollowContext } from '../../../contexts/FollowContext';
-
 
 function Profile(props) {
     // constants
@@ -222,7 +220,6 @@ function Profile(props) {
                         </Row>
 
                         {/* Follower/Following counts and Follow button */}
-                        <FollowContext.Provider value={{ profileData, setProfileData, setProfileDataLoading }}>
                             <Row className="justify-content-center mt-3 mb-3">
                                 <Col className="col-auto">
                                     <h5>
@@ -262,7 +259,6 @@ function Profile(props) {
                                     }
                                 </Col>
                             </Row>
-                        </FollowContext.Provider>
 
                     </Container>
                 </Container>

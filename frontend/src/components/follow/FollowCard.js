@@ -1,11 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { Container, Image, Button, Badge } from 'react-bootstrap'
+import React, { useState, useEffect } from 'react'
+import { Button, Badge } from 'react-bootstrap'
 import { json, useNavigate } from 'react-router-dom'
 import EnsAndAddress from '../EnsAndAddress'
 import Pfp from '../Pfp'
-import { FollowContext } from '../../contexts/FollowContext'
 import { getCookie, baseAPI } from '../../utils'
-import { UserContext } from '../../contexts/UserContext'
 
 
 function FollowCard(props) {
@@ -26,7 +24,7 @@ function FollowCard(props) {
             credentials: 'include'
         });
         if (res.ok) {
-            console.log('followed')
+            console.log('follow success')
             setButtonMsg('Following')
             setProfileData({
                 ...profileData,
@@ -46,7 +44,7 @@ function FollowCard(props) {
             credentials: 'include'
         });
         if (res.ok) {
-            console.log('unfollowed')
+            console.log('unfollow success')
             setButtonMsg('Follow')
             setProfileData({
                 ...profileData,

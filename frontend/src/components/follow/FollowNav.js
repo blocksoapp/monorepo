@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Button, Container } from 'react-bootstrap'
 import EnsAndAddress from '../EnsAndAddress'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
@@ -23,11 +22,9 @@ function FollowNav(props) {
 
   useEffect(() => {
     if(location.pathname.includes('followers')) {
-      console.log('on followers page')
       const followersTab = document.getElementById('followersTab')
       followersTab.classList.add('link-active')
     } else if (location.pathname.includes('following')) {
-      console.log('on following page')
       const followingTab = document.getElementById('followingTab')
       followingTab.classList.add('link-active')
     } else return
@@ -41,7 +38,7 @@ function FollowNav(props) {
                   <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg primary-color-hover" />
                 </div>
                 <div className='flex-grow-1 px-4 align-self-center'>
-                  <span className='fw-bold fs-2 link-style'><EnsAndAddress address={props.address} onClick={navigateProfile}/></span> 
+                  <span className='fw-bold fs-3 link-style'><EnsAndAddress address={props.address} onClick={navigateProfile}/></span> 
                 </div>
               </div>
             <div className='d-flex text-center border-bottom'>
