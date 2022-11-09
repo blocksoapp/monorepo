@@ -45,7 +45,7 @@ function Following() {
   }
 
   return (
-    <Container className="border p-0 h-min-100">
+    <Container className="border p-0 h-min-100 follow-container">
          <FollowNav address={urlInput}/>
              <>
                   {(followingList === undefined || followingList.length === 0)
