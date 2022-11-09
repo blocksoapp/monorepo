@@ -115,7 +115,7 @@ function FollowCard(props) {
                 imgUrl={props.imgUrl}
                 address={props.address}
                 fontSize=".9rem"
-                onClick={() => navigate(`/${props.address}/profile`)}
+                onClick={navigateProfile}
                 />
                 <div className='flex-grow-1 p-2 align-items-center'>
                     <div className='d-flex justify-content-between'>
