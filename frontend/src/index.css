@@ -133,7 +133,7 @@ code {
   }
 }
 
-@media(max-width: 80px){
+@media(max-width: 800px){
   .follow-container {
     max-width: 80vw;
   }
