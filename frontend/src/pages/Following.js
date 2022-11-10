@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap';
-import Loading from '../ui/Loading';
-import { baseAPI } from '../../utils'
-import FollowNav from './FollowNav';
-import FollowCard from './FollowCard';
+import { baseAPI } from '../utils'
+import Loading from '../components/ui/Loading'
+import FollowNav from '../components/follow/FollowNav'
+import FollowCard from '../components/follow/FollowCard'
 
 
 function Following() {

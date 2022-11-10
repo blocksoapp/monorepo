@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
-import { baseAPI } from '../../utils'
-import FollowNav from './FollowNav'
-import Loading from '../ui/Loading'
-import FollowCard from './FollowCard'
+import { baseAPI } from '../utils'
+import Loading from '../components/ui/Loading'
+import FollowNav from '../components/follow/FollowNav'
+import FollowCard from '../components/follow/FollowCard'
+
 
 function Followers() {
 
@@ -43,6 +44,7 @@ function Followers() {
   if (isLoading) {
     return <Loading/>
   }
+ 
 
   return (
     <Container className="border p-0 h-min-100 follow-container">

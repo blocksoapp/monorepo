@@ -8,8 +8,9 @@ import ViewProfile from './pages/ViewProfile';
 import PostPage from './pages/PostPage';
 import NavbarComponent from './components/ui/Navbar';
 import { UserContext } from './contexts/UserContext'
-import Following from './components/follow/Following';
-import Followers from './components/follow/Followers';
+import Following from './pages/Following';
+import Followers from './pages/Followers';
+
 
 
 function App(props) {
