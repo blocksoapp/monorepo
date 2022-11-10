@@ -1,0 +1,31 @@
+/* FOLLOWER/FOLLOWING PAGE */
+
+.follow-container {
+    max-width: 50vw;
+  }
+  
+  .light-hover:hover {
+    background-color: whitesmoke;
+  }
+  
+  .primary-color-hover:hover {
+    color:#00A8E8;
+  }
+  
+  @media(max-width: 1200px){
+    .follow-container {
+      max-width: 70vw;
+    }
+  }
+  
+  @media(max-width: 800px){
+    .follow-container {
+      max-width: 80vw;
+    }
+  }
+  
+  @media(max-width: 650px){
+    .follow-container {
+      max-width: 100vw;
+    }
+  }

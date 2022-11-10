@@ -5,6 +5,7 @@ import { baseAPI } from '../utils'
 import Loading from '../components/ui/Loading'
 import FollowNav from '../components/follow/FollowNav'
 import FollowCard from '../components/follow/FollowCard'
+import "../components/follow/follow-custom.css"
 
 
 function Followers() {
