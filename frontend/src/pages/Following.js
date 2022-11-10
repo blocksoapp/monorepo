@@ -40,29 +40,26 @@ function Following() {
   
   }, [])
   
-  
-  if (isLoading) {
-    return <Loading/>
-  }
 
   return (
-    <Container className="border p-0 h-min-100 follow-container">
+    <Container className="border p-0">
          <FollowNav address={urlInput}/>
-             <>
-                  {(followingList === undefined || followingList.length === 0)
-                  ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
-                  : followingList.map( (following, index) => {
-                    return (
-                          <FollowCard
-                          index={index}
-                          imgUrl={following.profile.image}
-                          address={following.address}
-                          bio={following.profile.bio}
-                          followedByMe={following.profile.followedByMe}
-                          numFollowers={following.profile.numFollowers}
-                          />
-                    )}) }
-              </>
+            {isLoading ? <Loading/>
+              :  <>
+              {(followingList === undefined || followingList.length === 0)
+              ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
+              : followingList.map( (following, index) => {
+                return (
+                      <FollowCard
+                      index={index}
+                      imgUrl={following.profile.image}
+                      address={following.address}
+                      bio={following.profile.bio}
+                      followedByMe={following.profile.followedByMe}
+                      numFollowers={following.profile.numFollowers}
+                      />
+                )}) }
+              </>}
     </Container>
   )
 }

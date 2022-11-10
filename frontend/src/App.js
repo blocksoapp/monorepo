@@ -10,6 +10,7 @@ import NavbarComponent from './components/ui/Navbar';
 import { UserContext } from './contexts/UserContext'
 import Following from './pages/Following';
 import Followers from './pages/Followers';
+import Follow from './pages/Follow';
 
 
 
@@ -33,8 +34,7 @@ function App(props) {
                 <Route path="/edit-profile" element={<EditProfile/>}></Route>
                 <Route path="/:urlInput/profile/" element={<ViewProfile/>}></Route>
                 <Route path="/posts/:postId" element={<PostPage/>}></Route>
-                <Route path="/:urlInput/profile/following" element={ <Following/>}></Route>
-                <Route path="/:urlInput/profile/followers" element={ <Followers/>}></Route>
+                <Route path="/:urlInput/profile/follow" element={ <Follow/>}></Route>
               </Routes>
           </Router>
         </UserContext.Provider>

@@ -41,30 +41,26 @@ function Followers() {
   
   }, [])
   
-  
-  if (isLoading) {
-    return <Loading/>
-  }
  
-
   return (
-    <Container className="border p-0 h-min-100 follow-container">
+    <Container className="border p-0">
         <FollowNav address={urlInput} active={active}/>
-        <>
-            {(followers === undefined || followers.length === 0)
-            ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
-            : followers.map( (follower, index) => {
-              return (
-                    <FollowCard
-                    index={index}
-                    imgUrl={follower.profile.image}
-                    address={follower.address}
-                    bio={follower.profile.bio}
-                    followedByMe={follower.profile.followedByMe}
-                    numFollowers={follower.profile.numFollowers}
-                    />
-              )})}
-        </>
+       {isLoading ? <Loading/>
+        :  <>
+        {(followers === undefined || followers.length === 0)
+        ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
+        : followers.map( (follower, index) => {
+          return (
+                <FollowCard
+                index={index}
+                imgUrl={follower.profile.image}
+                address={follower.address}
+                bio={follower.profile.bio}
+                followedByMe={follower.profile.followedByMe}
+                numFollowers={follower.profile.numFollowers}
+                />
+          )})}
+          </>}
     </Container>
   )
 }

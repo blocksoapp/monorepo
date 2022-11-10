@@ -29,6 +29,7 @@ function Profile(props) {
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
     const [pfpUrl, setPfpUrl] = useState(null);
+    const [activeLeftTab, setActiveLeftTab] = useState('first')
  
     // functions
     const fetchPosts = async () => {
@@ -108,11 +109,11 @@ function Profile(props) {
     
         // Navigate to user's followers
         const handleFollowerClick = () => {
-            navigate(`/${props.address}/profile/followers`)
+            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'first' } })
         }
 
         const handleFollowingClick = () => {
-            navigate(`/${props.address}/profile/following`)
+            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'second' } })
         }
 
     // effects
