@@ -224,7 +224,7 @@ function Profile(props) {
                             <Row className="justify-content-center mt-3 mb-3">
                                 <Col className="col-auto">
                                     <h5>
-                                            <Badge bg="secondary" onClick={handleFollowerClick}>
+                                            <Badge bg="secondary" className="pointer" onClick={handleFollowerClick}>
                                             
                                                 {profileData["numFollowers"]}
                                                 {profileData["numFollowers"] === 1 ?
@@ -234,7 +234,7 @@ function Profile(props) {
                                 </Col>
                                 <Col className="col-auto">
                                     <h5>   
-                                            <Badge bg="secondary" onClick={handleFollowingClick}>
+                                            <Badge bg="secondary" className="pointer" onClick={handleFollowingClick}>
                                                 {profileData["numFollowing"]} Following
                                             </Badge> 
                                     </h5>

@@ -95,13 +95,13 @@ function FollowCard(props) {
 
     // Fetch profile data / set button text
     useEffect(() => {
-    fetchProfile()
+        fetchProfile()
 
-    if(props.followedByMe === true) {
-        setButtonMsg('Following')
-    } else {
-        setButtonMsg('Follow')
-    }
+        if(props.followedByMe === true) {
+            setButtonMsg('Following')
+        } else {
+            setButtonMsg('Follow')
+        }
 
     }, [])
 
@@ -114,16 +114,17 @@ function FollowCard(props) {
                 address={props.address}
                 fontSize=".9rem"
                 onClick={navigateProfile}
+                className="pointer"
                 />
                 <div className='flex-grow-1 p-2 align-items-center'>
                     <div className='d-flex justify-content-between'>
                         <div className='d-flex flex-column'>
-                            <EnsAndAddress address={props.address} className='fw-bold fs-5 link-style' onClick={navigateProfile}/>
+                            <EnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
                             <Badge className='text-dark bg-light text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center'>
-                            {buttonMsg === 'Following' ? <Button className="fw-bold" variant="outline-dark" onClick={handleUnfollow} >{buttonMsg}</Button>
-                            : <Button className="btn-dark fw-bold" onClick={handleFollow}>{buttonMsg}</Button> }
+                            {buttonMsg === 'Following' ? <Button className="" variant="outline-dark" onClick={handleUnfollow} >{buttonMsg}</Button>
+                            : <Button className="btn-dark" onClick={handleFollow}>{buttonMsg}</Button> }
                         </div>
                     </div>
                     <div>

@@ -16,7 +16,7 @@ function Pfp(props) {
 
     // render
     return (
-        <div onClick={props.onClick}>
+        <div className={props.className} onClick={props.onClick}>
         {/* Show placeholder if img url is empty */}
         {!props.imgUrl
             ?   <Card

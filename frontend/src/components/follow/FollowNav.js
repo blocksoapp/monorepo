@@ -27,10 +27,10 @@ function FollowNav(props) {
         <>
               <div className='d-flex py-3 px-sm-5'>
                 <div className='px-4 align-self-center'>
-                  <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg primary-color-hover" />
+                  <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg primary-color-hover pointer" />
                 </div>
                 <div className='flex-grow-1 px-4 align-self-center'>
-                  <span className='fs-3 primary-color-hover'><EnsAndAddress address={props.address} onClick={navigateProfile}/></span> 
+                  <span className='fs-3 primary-color-hover pointer'><EnsAndAddress address={props.address} onClick={navigateProfile}/></span> 
                 </div>
               </div>
         </>

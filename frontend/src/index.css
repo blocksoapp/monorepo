@@ -22,6 +22,10 @@ code {
   min-height: 100vh;
 }
 
+.pointer:hover {
+  cursor: pointer;
+}
+
 .tab-min-height{
   min-height: 20vh
 }
