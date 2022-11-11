@@ -154,7 +154,7 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
-    address = post_author.ethereum_address.lower()
+    address = post_author.user.ethereum_address.lower()
 
     # create Post if author is the sender of the tx
     if tx_record.from_address == address:
@@ -198,7 +198,7 @@ def process_address_txs(address):
 
     # create a user/profile if they do not already exist
     user, _ = UserModel.objects.get_or_create(ethereum_address=address)
-    Profile.objects.get_or_create(user=user)
+    user, _ = Profile.objects.get_or_create(user=user)
 
     # create db records based on history
     for transaction in history:

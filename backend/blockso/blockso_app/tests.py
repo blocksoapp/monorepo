@@ -730,7 +730,7 @@ class PostTests(BaseTest):
         for i in range(25):
             created_time = created_time + timedelta(hours=1)
             Post.objects.create(
-                author=user,
+                author=user.profile,
                 created=created_time,
                 isQuote=False,
                 isShare=False
@@ -794,7 +794,9 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 204)
         self.assertEqual(
-            Post.objects.filter(author=self.test_signer.address).count(),
+            Post.objects.filter(
+                author=Profile.objects.get(user_id=self.test_signer.address)
+            ).count(),
             0
         )
 

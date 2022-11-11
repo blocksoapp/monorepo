@@ -123,7 +123,7 @@ class Post(models.Model):
 
 
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="posts"
     )

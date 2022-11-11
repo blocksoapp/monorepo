@@ -312,7 +312,7 @@ class PostCreateList(generics.ListCreateAPIView):
         """
         Return queryset.
         """
-        author = UserModel.objects.get(pk=self.kwargs["address"])
+        author = Profile.objects.get(user_id=self.kwargs["address"])
         queryset = Post.objects.filter(author=author)
         return queryset
 
@@ -347,7 +347,7 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         # return 403 if user does not own the Post
-        if instance.author != request.user:
+        if instance.author != request.user.profile:
             raise PermissionDenied("User does not own the Post.")
 
         return self.update(request, *args, **kwargs)
@@ -358,7 +358,7 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         # return 403 if user does not own the Post
-        if instance.author != request.user:
+        if instance.author != request.user.profile:
             raise PermissionDenied("User does not own the Post.")
 
         self.perform_destroy(instance)
@@ -410,10 +410,9 @@ class FeedList(generics.ListAPIView):
 
         # combine the two querysets
         profiles = profile_queryset | profiles_followed
-        users = UserModel.objects.filter(profile__in=profiles)
 
         # get all posts by those users
-        queryset = Post.objects.filter(author__in=users)
+        queryset = Post.objects.filter(author__in=profiles)
         queryset = queryset.order_by("-created")
 
         return queryset

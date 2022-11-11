@@ -225,7 +225,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_pfp(self, instance):
         """ Return the post author's pfp. """
 
-        return instance.author.profile.image
+        return instance.author.image
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
@@ -246,7 +246,7 @@ class PostSerializer(serializers.ModelSerializer):
         """ Creates a Post. """
 
         # get user from the session
-        author = self.context.get("request").user
+        author = self.context.get("request").user.profile
 
         # TODO validate business logic like ref_post and ref_tx
 
@@ -311,7 +311,7 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.save()
 
         # create a notification for the post author
-        notif = Notification.objects.create(user=post.author.profile)
+        notif = Notification.objects.create(user=post.author)
         CommentOnPostEvent.objects.create(
             notification=notif,
             comment=comment,
