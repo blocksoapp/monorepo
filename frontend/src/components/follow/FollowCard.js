@@ -4,12 +4,13 @@ import { json, useNavigate } from 'react-router-dom'
 import EnsAndAddress from '../EnsAndAddress'
 import Pfp from '../Pfp'
 import { getCookie, baseAPI } from '../../utils'
+import ClickableEnsAndAddress from '../ClickableEnsAndAddress'
 
 
 function FollowCard(props) {
 
     const navigate = useNavigate()
-    const [buttonMsg, setButtonMsg] = useState('')
+    const [buttonMsg, setButtonMsg] = useState('Following')
     const [profileData, setProfileData] = useState({})
     const [profileDataLoading, setProfileDataLoading] = useState(false)
     const [readMore, setReadMore] = useState(false)
@@ -76,33 +77,54 @@ function FollowCard(props) {
         navigate(`/${props.address}/profile`)
       }
 
+    // Hover On and Off Button Text Change
+    const handleHoverOn = () => {
+        if(buttonMsg === 'Follow') return
+        setButtonMsg('Unfollow')
+        const unfollowBtn = document.getElementById('unfollowBtn')
+        unfollowBtn.classList.add('btn-danger')
+    }
+    const handleHoverOff = () => {
+        if(buttonMsg === 'Follow') return
+        setButtonMsg('Following')
+    }
+
+    // Button Logic
+    const handleButtonDisplayed = () => {
+        if(profileData.followedByMe === true) {
+            return <Button 
+            className='outline-primary'
+            onClick={handleUnfollow}
+            onMouseEnter={handleHoverOn}
+            onMouseLeave={handleHoverOff}
+            id="unfollowBtn"
+            >{buttonMsg}</Button>
+        } else  {
+            return <Button onClick={handleFollow} className='btn-primary'>Follow</Button>
+        }
+    }
+
     // shorten bio
     const abbrBio = (bio) => {
         if(bio.length > 200) {
             if(readMore === false) {
                 return <div>
-                    {bio.substr(0,200) + '...'} 
-                    <span className="link-style" onClick={() => setReadMore(true)}> read more</span>
+                        {bio.substr(0,200) + '...'} 
+                        <span className="link-style" onClick={() => setReadMore(true)}> read more</span>
                     </div>
             } else if (readMore === true) {
                 return <div>
-                    {bio} 
-                    </div>
+                            {bio} 
+                        </div>
             }
         } else return bio
 }
 
-
-    // Fetch profile data / set button text
+    // Fetch profile data
     useEffect(() => {
+
         fetchProfile()
-
-        if(props.followedByMe === true) {
-            setButtonMsg('Following')
-        } else {
-            setButtonMsg('Follow')
-        }
-
+       
     }, [])
 
   return (
@@ -119,12 +141,11 @@ function FollowCard(props) {
                 <div className='flex-grow-1 p-2 align-items-center'>
                     <div className='d-flex justify-content-between'>
                         <div className='d-flex flex-column'>
-                            <EnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
+                            <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
                             <Badge className='text-dark bg-light text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center'>
-                            {buttonMsg === 'Following' ? <Button className="" variant="outline-dark" onClick={handleUnfollow} >{buttonMsg}</Button>
-                            : <Button className="btn-dark" onClick={handleFollow}>{buttonMsg}</Button> }
+                           {handleButtonDisplayed()}
                         </div>
                     </div>
                     <div>
@@ -137,3 +158,13 @@ function FollowCard(props) {
 }
 
 export default FollowCard
+
+/* {buttonMsg === 'Following' 
+? <Button 
+    variant="outline-primary" 
+    onClick={handleUnfollow} id="Followed" 
+    onMouseEnter={handleHoverOn}
+    onMouseLeave={handleHoverOff}
+    >
+    {buttonMsg}</Button>
+: <Button className="btn-primary" onClick={handleFollow} id="notFollowed" >{buttonMsg}</Button> } */

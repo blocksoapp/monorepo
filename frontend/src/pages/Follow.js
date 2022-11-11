@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Container } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 import LeftTabs from '../components/ui/LeftTabs'
-import Followers from './Followers'
-import Following from './Following'
+import Followers from '../components/follow/Followers'
+import Following from '../components/follow/Following'
 
 function Follow() {
 

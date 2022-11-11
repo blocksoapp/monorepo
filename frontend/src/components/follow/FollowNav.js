@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import EnsAndAddress from '../EnsAndAddress'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import ClickableEnsAndAddress from '../ClickableEnsAndAddress';
 
 function FollowNav(props) {
   const navigate = useNavigate()
@@ -12,25 +13,14 @@ function FollowNav(props) {
     navigate(`/${props.address}/profile`)
   }
 
-  useEffect(() => {
-    if(location.pathname.includes('followers')) {
-      const followersTab = document.getElementById('followersTab')
-      followersTab.classList.add('link-active')
-    } else if (location.pathname.includes('following')) {
-      const followingTab = document.getElementById('followingTab')
-      followingTab.classList.add('link-active')
-    } else return
-  }, [])
-  
-
   return (
         <>
-              <div className='d-flex py-3 px-sm-5'>
+              <div className='d-flex py-3 px-sm-5 border-bottom'>
                 <div className='px-4 align-self-center'>
                   <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg primary-color-hover pointer" />
                 </div>
                 <div className='flex-grow-1 px-4 align-self-center'>
-                  <span className='fs-3 primary-color-hover pointer'><EnsAndAddress address={props.address} onClick={navigateProfile}/></span> 
+                  <span><ClickableEnsAndAddress address={props.address} onClick={navigateProfile} className='pointer fs-4 primary-color-hover'/></span> 
                 </div>
               </div>
         </>

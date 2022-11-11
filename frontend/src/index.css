@@ -1,3 +1,4 @@
+
 body {
   margin: 0;
   font-family: Roboto, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
@@ -82,6 +83,17 @@ code {
 
 .btn-primary.custom-btn:hover {
   background-color: #007EA7;
+}
+
+.btn-secondary {
+  background-color: white;
+  color:#00A8E8;
+  border-color:#00A8E8
+}
+
+.btn-secondary:hover {
+  background-color: #00A8E8;
+  color: white;
 }
 
 /* Form PFP */

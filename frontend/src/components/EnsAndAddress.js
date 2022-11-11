@@ -18,7 +18,7 @@ function EnsAndAddress(props) {
 
     // ens name found
     if (data !== null) return (
-        <span className={props.className} onClick={props.onClick}>{data}
+        <span>{data}
             <span className="fs-6">
                 &nbsp;({getAbbrAddress(props.address)})
             </span>
@@ -27,7 +27,7 @@ function EnsAndAddress(props) {
 
     // no ens name
     else return (
-        <span className={props.className} onClick={props.onClick}>{getAbbrAddress(props.address)}</span>
+        <span>{getAbbrAddress(props.address)}</span>
     )
 }
 

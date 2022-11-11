@@ -10,7 +10,7 @@ function LeftTabs(props) {
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
-              <Nav.Link eventKey="first">Followers</Nav.Link>
+              <Nav.Link eventKey="first" className=''>Followers</Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="second">Following</Nav.Link>

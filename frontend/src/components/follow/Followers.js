@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
-import { baseAPI } from '../utils'
-import Loading from '../components/ui/Loading'
-import FollowNav from '../components/follow/FollowNav'
-import FollowCard from '../components/follow/FollowCard'
-import "../components/follow/follow-custom.css"
+import { baseAPI } from '../../utils'
+import Loading from '../ui/Loading'
+import FollowNav from './FollowNav'
+import FollowCard from './FollowCard'
+import "./follow-custom.css"
 
 
-function Followers() {
+function Followers(props) {
 
   const [followers, setFollowers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
