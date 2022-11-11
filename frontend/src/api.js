@@ -106,9 +106,9 @@ export const apiPostFollow = async (address) => {
 
 /* Returns the response for updating unfollow given an address  */
 export const apiPostUnfollow = async (address) => {
-    const url = `${baseAPI}/${address}/unfollow/`;
+    const url = `${baseAPI}/${address}/follow/`;
         const res = await fetch(url, {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
             'X-CSRFTOKEN': getCookie('csrftoken')
             },

@@ -5,8 +5,7 @@ import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
 import Post from '../../posts/Post.js'; 
-import { baseAPI, getCookie } from '../../../utils.js'
-import { apiGetPosts, apiGetProfile } from '../../../api';
+import { apiGetPosts, apiGetProfile, apiPostFollow, apiPostUnfollow } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
@@ -68,14 +67,7 @@ function Profile(props) {
     }
 
     const handleUnfollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
+        const res = await apiPostUnfollow(props.address)
         if (res.ok) {
             setProfileData({
                 ...profileData,
@@ -86,14 +78,7 @@ function Profile(props) {
     }
 
     const handleFollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
+        const res = await apiPostFollow(props.address)
         if (res.ok) {
             setProfileData({
                 ...profileData,
@@ -220,7 +205,7 @@ function Profile(props) {
                             <Row className="justify-content-center mt-3 mb-3">
                                 <Col className="col-auto">
                                     <h5>
-                                            <Badge bg="secondary" className="pointer" onClick={handleFollowerClick}>
+                                            <Badge bg="secondary" className="pointer light-hover " onClick={handleFollowerClick}>
                                             
                                                 {profileData["numFollowers"]}
                                                 {profileData["numFollowers"] === 1 ?

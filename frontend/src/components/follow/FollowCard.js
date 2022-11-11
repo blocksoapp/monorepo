@@ -35,6 +35,8 @@ function FollowCard(props) {
                 numFollowers: profileData["numFollowers"] - 1,
                 followedByMe: false
             });
+        } else if (!resp.ok) {
+            console.log('err: ', resp.error)
         }
     }
 
@@ -60,8 +62,6 @@ function FollowCard(props) {
     const handleHoverOn = () => {
         if(buttonMsg === 'Follow') return
         setButtonMsg('Unfollow')
-        const unfollowBtn = document.getElementById('unfollowBtn')
-        unfollowBtn.classList.add('btn-danger')
     }
     const handleHoverOff = () => {
         if(buttonMsg === 'Follow') return
@@ -76,7 +76,6 @@ function FollowCard(props) {
             onClick={handleUnfollow}
             onMouseEnter={handleHoverOn}
             onMouseLeave={handleHoverOff}
-            id="unfollowBtn"
             >{buttonMsg}</Button>
         } else  {
             return <Button onClick={handleFollow} className='btn-primary'>Follow</Button>
