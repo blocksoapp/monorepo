@@ -102,7 +102,7 @@ function NotificationsDropdown() {
 
         // clear interval when component unmounts
         return () => {
-            interval.clearInterval();
+            clearInterval(interval);
         }
     }, []);
 
