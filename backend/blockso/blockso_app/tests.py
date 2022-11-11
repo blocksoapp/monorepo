@@ -14,7 +14,8 @@ import eth_account
 import responses
 
 # our imports
-from .models import Follow, Post, Transaction, ERC20Transfer, ERC721Transfer
+from .models import Follow, Post, Profile, Transaction, \
+                    ERC20Transfer, ERC721Transfer
 from . import jobs
 
 
@@ -454,8 +455,8 @@ class FollowTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         follow = Follow.objects.get(
-            src_id=self.test_signer.address,
-            dest_id=self.test_signer_2.address
+            src_id=Profile.objects.get(user_id=self.test_signer.address),
+            dest_id=Profile.objects.get(user_id=self.test_signer_2.address)
         )
         self.assertIsNotNone(follow)
 
@@ -483,8 +484,8 @@ class FollowTests(BaseTest):
         self.assertEqual(resp.status_code, 204)
         with self.assertRaises(Follow.DoesNotExist):
             Follow.objects.get(
-                src_id=self.test_signer.address,
-                dest_id=self.test_signer_2.address
+                src=Profile.objects.get(user_id=self.test_signer.address),
+                dest=Profile.objects.get(user_id=self.test_signer_2.address)
             )
 
     def test_get_followers_following(self):

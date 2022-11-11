@@ -47,29 +47,29 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_num_followers(self, obj):
         """ Returns the profile's follower count. """
 
-        user = getattr(obj, "user")
-        followers = user.follow_dest.all()
+        followers = obj.follow_dest.all()
         return followers.count() 
 
     def get_num_following(self, obj):
         """ Returns the profile's following count. """
 
-        user = getattr(obj, "user")
-        following = user.follow_src.all()
+        following = obj.follow_src.all()
         return following.count() 
 
     def get_followed_by_me(self, obj):
         """ Returns whether the profile is being followed by the requestor. """
 
-        # get authed user
+        # handle using serializer outside of a request
         request = self.context.get("request")
         if request is None:
             return None
+
+        # get authed user
         authed_user = request.user
+        authed_user = getattr(authed_user, "profile", None)
 
         # check if authed user follows the profile
-        user = getattr(obj, "user")
-        return Follow.objects.filter(src=authed_user, dest=user).exists()
+        return Follow.objects.filter(src=authed_user, dest=obj).exists()
 
     def create(self, validated_data):
         """ Creates a Profile. """
@@ -134,11 +134,12 @@ class FollowSerializer(serializers.ModelSerializer):
 
         # get the signed in user
         user = self.context.get("request").user
+        user = user.profile
 
         # get address from the URL
         address = self.context.get("view").kwargs["address"]
         address = Web3.toChecksumAddress(address)
-        to_follow = UserModel.objects.get(ethereum_address=address)
+        to_follow = Profile.objects.get(user_id=address)
 
         # signed in user follows the address given in the url
         follow = Follow.objects.create(
@@ -147,33 +148,14 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
         # notify the user that was followed
-        notif = Notification.objects.create(user=to_follow.profile)
+        notif = Notification.objects.create(user=to_follow)
         FollowedEvent.objects.create(
             notification=notif,
             follow=follow,
-            followed_by=user.profile
+            followed_by=user
         )
 
         return follow
-
-    def destroy(self, validated_data):
-        """ Deletes a Follow. """
-
-        # get the signed in user
-        user = self.context.get("request").user
-
-        # get address from the URL
-        address = self.context.get("view").kwargs["address"]
-        address = Web3.toChecksumAddress(address)
-        
-        # signed in user unfollows the address given in the url
-        follow = Follow.objects.get(
-            src_id=user.ethereum_address,
-            dest_id=address
-        )
-        follow.delete()
-
-        return None 
 
 
 class ERC20TransferSerializer(serializers.ModelSerializer):
