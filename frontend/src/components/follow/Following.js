@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap';
-import { baseAPI } from '../../utils'
 import Loading from '../ui/Loading'
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
+import { apiGetFollowing } from '../../api'
 
 
-function Following(props) {
+function Following() {
   const [followingList, setFollowingList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -16,18 +16,12 @@ function Following(props) {
   
   const fetchFollowing = async () => {
       setIsLoading(true)
-      const url = `${baseAPI}/${urlInput}/following/`
-      const res = await fetch(url, {
-          method: 'GET',
-          credentials: 'include'
-      })
-      console.log("response: ", res)
-      if(res.ok) {
-        const json = await res.json()
-        console.log("json: ", json)
+      const resp = await apiGetFollowing(urlInput)
+      if(resp.ok) {
+        const json = await resp.json()
         setFollowingList(json.results)
         setIsLoading(false)
-      } else if (!res.ok) {
+      } else if (!resp.ok) {
         setIsLoading(false)
         setError(true)
         console.log('couldnt fetch followingList')

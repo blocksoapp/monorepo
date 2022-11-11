@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Badge } from 'react-bootstrap'
 import { json, useNavigate } from 'react-router-dom'
-import EnsAndAddress from '../EnsAndAddress'
 import Pfp from '../Pfp'
-import { getCookie, baseAPI } from '../../utils'
 import ClickableEnsAndAddress from '../ClickableEnsAndAddress'
+import { apiPostFollow, apiPostUnfollow, apiGetProfile } from '../../api'
 
 
 function FollowCard(props) {
@@ -16,16 +15,8 @@ function FollowCard(props) {
     const [readMore, setReadMore] = useState(false)
 
     const handleFollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
-        if (res.ok) {
-            console.log('follow success')
+        const resp = await apiPostFollow(props.address)
+        if (resp.ok) {
             setButtonMsg('Following')
             setProfileData({
                 ...profileData,
@@ -36,16 +27,8 @@ function FollowCard(props) {
     }
 
     const handleUnfollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
-        if (res.ok) {
-            console.log('unfollow success')
+        const resp = await apiPostUnfollow(props.address)
+        if (resp.ok) {
             setButtonMsg('Follow')
             setProfileData({
                 ...profileData,
@@ -56,19 +39,15 @@ function FollowCard(props) {
     }
 
     const fetchProfile = async () => {
-        const url = `${baseAPI}/${props.address}/profile/`;
         setProfileDataLoading(true);
-        const res = await fetch(url, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (res.ok) {
-            var data = await res.json();
+        const resp = await apiGetProfile(props.address)
+        if (resp.ok) {
+            var data = await resp.json();
             setProfileData(data);
             setProfileDataLoading(false);
         }
         else {
-            console.error(res);
+            console.error(resp);
             setProfileDataLoading(false);
         }
     }
@@ -158,13 +137,3 @@ function FollowCard(props) {
 }
 
 export default FollowCard
-
-/* {buttonMsg === 'Following' 
-? <Button 
-    variant="outline-primary" 
-    onClick={handleUnfollow} id="Followed" 
-    onMouseEnter={handleHoverOn}
-    onMouseLeave={handleHoverOff}
-    >
-    {buttonMsg}</Button>
-: <Button className="btn-primary" onClick={handleFollow} id="notFollowed" >{buttonMsg}</Button> } */

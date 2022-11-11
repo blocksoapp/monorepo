@@ -6,7 +6,7 @@ import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
 import Post from '../../posts/Post.js'; 
 import { baseAPI, getCookie } from '../../../utils.js'
-import { apiGetPosts } from '../../../api';
+import { apiGetPosts, apiGetProfile } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
@@ -50,12 +50,8 @@ function Profile(props) {
     }
 
     const fetchProfile = async () => {
-        const url = `${baseAPI}/${props.address}/profile/`;
+        const res = await apiGetProfile(props.address)
         setProfileDataLoading(true);
-        const res = await fetch(url, {
-            method: 'GET',
-            credentials: 'include'
-        });
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
-import { baseAPI } from '../../utils'
 import Loading from '../ui/Loading'
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
+import { apiGetFollowers } from '../../api'
 
 
-function Followers(props) {
+function Followers() {
 
   const [followers, setFollowers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -18,18 +18,12 @@ function Followers(props) {
   
   const fetchFollowers = async () => {
       setIsLoading(true)
-      const url = `${baseAPI}/${urlInput}/followers/`
-      const res = await fetch(url, {
-          method: 'GET',
-          credentials: 'include'
-      })
-      console.log("response: ", res)
-      if(res.ok) {
-        const json = await res.json()
-        console.log("json: ", json)
+      const resp = await apiGetFollowers(urlInput)
+      if(resp.ok) {
+        const json = await resp.json()
         setFollowers(json.results)
         setIsLoading(false)
-      } else if (!res.ok) {
+      } else if (!resp.ok) {
         setIsLoading(false)
         setError(true)
         console.log('couldnt fetch followers')
