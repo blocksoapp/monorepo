@@ -214,19 +214,14 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "pfp", "text", "imgUrl", "isShare", "isQuote",
+        fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created"]
-        read_only_fields = ["id", "pfp", "author", "refPost", "refTx", "numComments", "created"]
+        read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
 
     author = ProfileSerializer(required=False)
-    pfp = serializers.SerializerMethodField()
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
 
-    def get_pfp(self, instance):
-        """ Return the post author's pfp. """
-
-        return instance.author.image
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
@@ -295,8 +290,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ["id", "author", "pfp", "post", "text", "tagged_users", "created"]
-        read_only_fields = ["id", "author", "pfp", "created", "post"]
+        fields = ["id", "author", "post", "text", "tagged_users", "created"]
+        read_only_fields = ["id", "author", "created", "post"]
 
 
     author = ProfileSerializer(required=False)
@@ -304,12 +299,7 @@ class CommentSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Profile.objects.all()
     )
-    pfp = serializers.SerializerMethodField()
 
-    def get_pfp(self, instance):
-        """ Return the comment author's pfp. """
-
-        return instance.author.image
 
     def create(self, validated_data):
         """ Creates a Comment. """

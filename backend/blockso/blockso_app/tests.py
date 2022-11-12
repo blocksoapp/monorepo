@@ -875,7 +875,10 @@ class PostTests(BaseTest):
         resp = self.client.get(url)
 
         # make assertions
-        self.assertEqual(resp.data["pfp"], self.update_profile_data["image"])
+        self.assertEqual(
+            resp.data["author"]["image"],
+            self.update_profile_data["image"]
+        )
 
 
 class CommentsTests(BaseTest):
@@ -1031,7 +1034,7 @@ class CommentsTests(BaseTest):
 
         # make assertions
         self.assertEqual(
-            resp.data["results"][0]["pfp"],
+            resp.data["results"][0]["author"]["image"],
             self.update_profile_data["image"]
         )
 
