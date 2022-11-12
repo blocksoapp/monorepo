@@ -154,7 +154,7 @@ class Comment(models.Model):
 
     
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="comments"
     )
@@ -166,7 +166,7 @@ class Comment(models.Model):
     )
     text = models.TextField(blank=False)
     tagged_users = models.ManyToManyField(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         blank=True
     )
     created = models.DateTimeField(auto_now_add=True)

@@ -305,8 +305,6 @@ class PostCreateList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
     pagination_class = pagination.PostsPagination
-    lookup_url_kwarg = "address"
-    lookup_field = "author"
 
     def get_queryset(self):
         """

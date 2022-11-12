@@ -902,7 +902,10 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.data["post"], 1)
         self.assertEqual(resp.data["text"], text)
         self.assertEqual(resp.data["tagged_users"], [])
-        self.assertEqual(resp.data["author"], self.test_signer.address)
+        self.assertEqual(
+            resp.data["author"]["address"],
+            self.test_signer.address
+        )
 
     def test_create_comment_empty(self):
         """
@@ -941,7 +944,7 @@ class CommentsTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.data["text"], text)
-        self.assertEqual(resp.data["tagged_users"], tagged)
+        self.assertEqual(resp.data["tagged_users"][0]["address"], tagged[0])
 
     def test_list_comments(self):
         """
@@ -1078,10 +1081,8 @@ class FeedTests(BaseTest):
         """
         # set up test
         # login user 2, create a post
-        expected = []
         self._do_login(self.test_signer_2)
         resp = self._create_post(self.test_signer_2)
-        expected = expected + [resp.data]
 
         # logout user 2
         self._do_logout()
@@ -1089,7 +1090,6 @@ class FeedTests(BaseTest):
         # login user 1, create a post, and follow user 2
         self._do_login(self.test_signer)
         resp = self._create_post(self.test_signer)
-        expected = [resp.data] + expected
         url = f"/api/{self.test_signer_2.address}/follow/"
         self.client.post(url)
 
@@ -1100,8 +1100,14 @@ class FeedTests(BaseTest):
         # assert user 1 feed has the posts of user 1 and user 2
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp.data), 2)
-        self.assertDictEqual(resp.data[0], expected[0])
-        self.assertDictEqual(resp.data[1], expected[1])
+        self.assertEqual(
+            resp.data[0]["author"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(
+            resp.data[1]["author"]["address"],
+            self.test_signer_2.address
+        )
 
 
 class ExploreTests(BaseTest):

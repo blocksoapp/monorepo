@@ -216,8 +216,9 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["id", "author", "pfp", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created"]
-        read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
+        read_only_fields = ["id", "pfp", "author", "refPost", "refTx", "numComments", "created"]
 
+    author = ProfileSerializer(required=False)
     pfp = serializers.SerializerMethodField()
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
@@ -270,6 +271,25 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TaggedUsersField(serializers.RelatedField):
+    """
+    Serializes / de-serializes the tagged
+    users field that is used for comments/posts.
+    """
+
+    def to_internal_value(self, data):
+        """ Does deserialization, for writing. """
+
+        # return profile representing the tagged user
+        address = Web3.toChecksumAddress(data)
+        return Profile.objects.get(user_id=address)
+
+    def to_representation(self, value):
+        """ Does serialization, for reading. """
+
+        return ProfileSerializer(value).data
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """ Comment model serializer. """
 
@@ -279,18 +299,23 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "author", "pfp", "created", "post"]
 
 
+    author = ProfileSerializer(required=False)
+    tagged_users = TaggedUsersField(
+        many=True,
+        queryset=Profile.objects.all()
+    )
     pfp = serializers.SerializerMethodField()
 
     def get_pfp(self, instance):
         """ Return the comment author's pfp. """
 
-        return instance.author.profile.image
+        return instance.author.image
 
     def create(self, validated_data):
         """ Creates a Comment. """
 
         # get user from the session
-        author = self.context.get("request").user
+        author = self.context.get("request").user.profile
 
         # get post id from the url
         post = Post.objects.get(
@@ -316,17 +341,16 @@ class CommentSerializer(serializers.ModelSerializer):
             notification=notif,
             comment=comment,
             post=post,
-            commentor=author.profile
+            commentor=author
         )
 
         # create a notifications for the tagged users
-        for user in tagged_users:
-            profile = Profile.objects.get(user=user)
+        for profile in tagged_users:
             notif = Notification.objects.create(user=profile)
             MentionedInCommentEvent.objects.create(
                 notification=notif,
                 comment=comment,
-                mentioned_by=author.profile
+                mentioned_by=author
             )
 
         return comment
