@@ -137,13 +137,13 @@ function ViewPost(props) {
                                 bg="#fff0f0"
                                 key={post.id}
                                 id={post.id}
-                                author={post.author}
+                                author={post.author.address}
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
-                                pfp={post.pfp}
+                                pfp={post.author.image}
                             />
                 }
 
@@ -167,10 +167,10 @@ function ViewPost(props) {
                             : comments.map(comment => (
                                 <Comment
                                     key={comment.id}
-                                    author={comment.author}
+                                    author={comment.author.address}
                                     text={comment.text}
                                     created={comment.created}
-                                    pfp={comment.pfp}
+                                    pfp={comment.author.image}
                                 />
                 ))}
 

@@ -265,12 +265,12 @@ function Profile(props) {
                             <Post
                                 key={post.id}
                                 id={post.id}
-                                author={post.author}
+                                author={post.author.address}
                                 ensName={props.ensName}
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
-                                pfp={post.pfp}
+                                pfp={post.author.image}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
                                 profileAddress={props.address}
