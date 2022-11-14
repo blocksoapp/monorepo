@@ -25,31 +25,50 @@ erc721_transfer_sig = "Transfer(indexed address from, "\
                      "indexed address to, indexed uint256 tokenId)"
 
 
-def get_tx_history_url(address):
+def get_tx_history_url(address, page_size, page_number):
     """
     Return URL for getting tx history of given address.
     """
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number=0&page-size=20"
+          f"&no-logs=false&page-number={page_number}&page-size={page_size}"
 
     return url
 
 
-def get_user_tx_history(address):
+def get_user_tx_history(address, limit=None):
     """
-    Use the covalent API to get the previous 50
+    Use the covalent API to get the previous X
     transactions of the given address.
+    If limit is given, then that number
+    of transactions is returned. Otherwise all
+    transactions are returned.
     Returns a list of transactions data.
     """
-    url = get_tx_history_url(address)
-    resp = client.get(url) 
-    resp.raise_for_status()
-    data = resp.json()
-    txs = data["data"]["items"]
+    # TODO can this run out of memory if
+    # there are thousands of txs?
+    to_ret = []
+    page_size = 500 if limit is None else limit
 
-    return txs
+    # paginate through results
+    has_more = True
+    page_number = -1
+    while has_more is True:
+        # prepare url
+        page_number += 1
+        url = get_tx_history_url(address, page_size, page_number)
+
+        # make request for txs
+        resp = client.get(url)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # update results
+        to_ret += data["data"]["items"]
+        has_more = data["data"]["pagination"]["has_more"]
+
+    return to_ret
 
 
 def parse_and_create_tx(tx_data, address):

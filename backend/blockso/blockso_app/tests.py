@@ -589,7 +589,7 @@ class TransactionParsingTests(BaseTest):
         """
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(address),
+            jobs.get_tx_history_url(address, 500, 0),
             body=json_response
         )
 
@@ -601,7 +601,10 @@ class TransactionParsingTests(BaseTest):
         reflect their transaction history.
         """
         # set up test
-        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
+        self._mock_tx_history_response(
+            self.test_signer.address,
+            self.erc20_tx_resp_data
+        )
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -808,7 +811,7 @@ class PostTests(BaseTest):
         # create posts using the test covalent tx history API 
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address),
+            jobs.get_tx_history_url(self.test_signer.address, 500, 0),
             body=self.erc20_tx_resp_data
         )
         jobs.process_address_txs(self.test_signer.address)
