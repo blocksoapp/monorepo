@@ -7,7 +7,7 @@ function LeftTabs(props) {
   return (
     <Tab.Container id="left-tabs-example" defaultActiveKey={props.activeTab}>
       <Row>
-        <Col sm={3}>
+        <Col md={3}>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
               <Nav.Link eventKey="first" className=''>Followers</Nav.Link>
@@ -17,7 +17,7 @@ function LeftTabs(props) {
             </Nav.Item>
           </Nav>
         </Col>
-        <Col sm={9}>
+        <Col md={9}>
           <Tab.Content>
             <Tab.Pane eventKey="first">
               {props.firstTab}

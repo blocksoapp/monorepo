@@ -14,3 +14,24 @@
     border-color: #4285F4;
   }
   
+  .follow-body {
+    display: flex;
+    justify-content: space-between;
+  }
+
+
+  @media (max-width: 575px) {
+    .follow-body {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+    .follow-btn {
+      padding-top: 1rem;
+    }
+    .bio {
+      text-align: center;
+    }
+  }

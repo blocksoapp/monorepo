@@ -4,6 +4,7 @@ import { json, useNavigate } from 'react-router-dom'
 import Pfp from '../Pfp'
 import ClickableEnsAndAddress from '../ClickableEnsAndAddress'
 import { apiPostFollow, apiPostUnfollow, apiGetProfile } from '../../api'
+import './follow-custom.css'
 
 
 function FollowCard(props) {
@@ -106,7 +107,7 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div key={props.index} className="d-flex py-3 px-sm-5 light-hover">
+        <div key={props.index} className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
                 <Pfp
                 height="90px"
                 width="90px"
@@ -114,20 +115,20 @@ function FollowCard(props) {
                 address={props.address}
                 fontSize=".9rem"
                 onClick={navigateProfile}
-                className="pointer"
+                className="pointer d-flex justify-content-center"
                 />
-                <div className='flex-grow-1 p-2 align-items-center'>
-                    <div className='d-flex justify-content-between'>
+                <div className='flex-grow-1'>
+                    <div className='follow-body'>
                         <div className='d-flex flex-column'>
                             <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
-                            <Badge className='text-dark bg-light text-start align-self-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                            <Badge className='text-dark bg-light align-self-sm-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
-                        <div className='align-self-center'>
+                        <div className='align-self-center follow-btn'>
                            {handleButtonDisplayed()}
                         </div>
                     </div>
                     <div>
-                        {props.bio && <p className='fs-6 pt-1'>{abbrBio(props.bio)}</p>}
+                        {props.bio && <p className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</p>}
                     </div>
                 </div>
         </div>
