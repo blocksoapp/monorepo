@@ -1,5 +1,5 @@
 /* Module containing AJAX calls to the backend. */
-import { baseAPI } from './utils';
+import { baseAPI, getCookie } from './utils';
 
 
 /* Returns the response for the comments of a post. */
@@ -10,6 +10,16 @@ export const apiGetComments = async (postId) => {
         credentials: 'include'
     });
     return res;
+}
+
+/* Returns the response for profile data given an address */
+export const apiGetProfile = async (address) => {
+    const url = `${baseAPI}/${address}/profile/`;
+        const res = await fetch(url, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        return res
 }
 
 /* Returns the response for the profiles of explore page. */
@@ -60,3 +70,51 @@ export const apiGetUrl = async (url) => {
     });
     return res;
 }
+
+/* Returns the response for followers list given an address */
+export const apiGetFollowers = async (address) => {
+    const url = `${baseAPI}/${address}/followers/`
+      const res = await fetch(url, {
+          method: 'GET',
+          credentials: 'include'
+      });
+      return res
+}
+
+/* Returns the response for following list given an address */
+export const apiGetFollowing = async (address) => {
+    const url = `${baseAPI}/${address}/following/`
+      const res = await fetch(url, {
+          method: 'GET',
+          credentials: 'include'
+      });
+      return res
+}
+
+/* Returns the response for updating follow given an address  */
+export const apiPostFollow = async (address) => {
+    const url = `${baseAPI}/${address}/follow/`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+        return res
+}
+
+/* Returns the response for updating unfollow given an address  */
+export const apiPostUnfollow = async (address) => {
+    const url = `${baseAPI}/${address}/follow/`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+        return res
+}
+
+
