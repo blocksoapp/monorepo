@@ -42,7 +42,6 @@ function FormPfp({ pfp, address, removePfp, pfpPreview, isPfpRemoved, isConnecte
                 </span>:
                 <span></span>} 
         </Row>
-
              
     </Container>
   )

@@ -19,7 +19,7 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import Pfp from "./Pfp.js";
 
 
-function PfpResolver({address, imgUrl, height, width, fontSize}) {
+function PfpResolver({address, imgUrl, height, width, fontSize, className, onClick}) {
 
     // constants
     const ensAvatarHook = useEnsAvatar({addressOrName: address});
@@ -62,11 +62,13 @@ function PfpResolver({address, imgUrl, height, width, fontSize}) {
     // render
     return (
         <Pfp
+            className={className}
+            onClick={onClick}
+            height={height}
+            width={width}
             address={address}
             imgUrl={pfpImgUrl}
             ensName={pfpEnsName}
-            height={height}
-            width={width}
             fontSize={fontSize}
         />
     )
@@ -74,4 +76,4 @@ function PfpResolver({address, imgUrl, height, width, fontSize}) {
 }
 
 
-export default Pfp;
+export default PfpResolver;

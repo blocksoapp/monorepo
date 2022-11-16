@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Badge } from 'react-bootstrap'
 import { json, useNavigate } from 'react-router-dom'
-import Pfp from '../Pfp'
+import PfpResolver from '../PfpResolver'
 import ClickableEnsAndAddress from '../ClickableEnsAndAddress'
 import { apiPostFollow, apiPostUnfollow, apiGetProfile } from '../../api'
 import './follow-custom.css'
@@ -108,14 +108,14 @@ function FollowCard(props) {
 
   return (
         <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
-                <Pfp
-                height="90px"
-                width="90px"
-                imgUrl={props.imgUrl}
-                address={props.address}
-                fontSize=".9rem"
-                onClick={navigateProfile}
-                className="pointer d-flex justify-content-center"
+                <PfpResolver
+                    address={props.address}
+                    imgUrl={props.imgUrl}
+                    height="90px"
+                    width="90px"
+                    fontSize="0.9rem"
+                    onClick={navigateProfile}
+                    className="pointer d-flex justify-content-center"
                 />
                 <div className='flex-grow-1 ps-4'>
                     <div className='follow-body'>

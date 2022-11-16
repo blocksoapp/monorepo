@@ -12,12 +12,11 @@ import PostsNotFound from '../../posts/PostsNotFound';
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
-import Pfp from '../../Pfp';
+import PfpResolver from '../../PfpResolver';
 import { UserContext } from '../../../contexts/UserContext';
 
 function Profile(props) {
     // constants
-    const ensAvatar = useEnsAvatar({addressOrName: props.address});
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
 
@@ -27,7 +26,6 @@ function Profile(props) {
     const [postsLoading, setPostsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
-    const [pfpUrl, setPfpUrl] = useState(null);
     const [activeLeftTab, setActiveLeftTab] = useState('first')
  
     // functions
@@ -114,34 +112,12 @@ function Profile(props) {
         setPostsLoading(true);
         setPosts([]);
         setPostsError(false);
-        setPfpUrl(null);
 
         // load the new profile and its posts
         fetchProfile();
         fetchPosts();
 
     }, [props.address])
-
-
-    /*
-     * Set profile picture if user has uploaded one.
-     */
-    useEffect(() => {
-        if ("image" in profileData && profileData["image"] !== "") {
-            setPfpUrl(profileData["image"]);
-        }
-    }, [profileData])
-
-
-    /*
-     * Set pfp url to the ens avatar if the user does
-     * not have a profile pic and does have an ens avatar.
-     */
-    useEffect(() => {
-        if (!pfpUrl && !ensAvatar.isLoading && ensAvatar.data !== null) {
-            setPfpUrl(ensAvatar.data);
-        }
-    }, [ensAvatar])
 
 
     useEffect(() => {
@@ -172,12 +148,11 @@ function Profile(props) {
                         {/* Profile picture */}
                         <Row className="justify-content-center">
                             <Col className="col-auto">
-                                <Pfp
+                                <PfpResolver
+                                    address={props.address}
+                                    imgUrl={profileData["image"]}
                                     height="256px"
                                     width="256px"
-                                    imgUrl={pfpUrl}
-                                    address={props.address}
-                                    ensName={props.ensName}
                                     fontSize="1.75rem"
                                 />
                             </Col>

@@ -8,13 +8,11 @@ import ExplorePlaceholder from './ExplorePlaceholder';
 
 function FeaturedList() {
     const [profileData, setProfileData] = useState([])
-    const [pfpUrl, setPfpUrl] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
 
     // UseEffect Calling getFeaturedProfiles then map out each item
     useEffect(() => {
         getFeaturedProfiles()
-        console.log(profileData)
     }, [])
     
 
@@ -43,7 +41,7 @@ function FeaturedList() {
                             bio={item.bio}
                             numFollowers={item.numFollowers}
                             numFollowing={item.numFollowing}
-                            />
+                        />
                     </div>
                 )})
             }

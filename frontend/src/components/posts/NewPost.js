@@ -10,15 +10,13 @@ import {
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
 import { baseAPI, getCookie } from '../../utils'
-import Pfp from '../Pfp';
+import PfpResolver from '../PfpResolver';
 
 
 function NewPost({ profileData, submitPostCallback }) {
 
     // state
     const { address, image } = {...profileData.profile}
-    const ensAvatar = useEnsAvatar({addressOrName: address});
-    const [pfpUrl, setPfpUrl] = useState(image);
     const [postText, setPostText] = useState("");
 
     // functions
@@ -58,19 +56,6 @@ function NewPost({ profileData, submitPostCallback }) {
         }
     }
 
-    /*
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     */
-    useEffect(() => {
-        if (!pfpUrl) {
-            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfpUrl(ensAvatar.data);
-            }
-        }
-    }, [ensAvatar])
-
-
     return (
         <Container>
             <Row className="justify-content-center">
@@ -80,11 +65,11 @@ function NewPost({ profileData, submitPostCallback }) {
                         <Card.Body>
                             <Row>
                                 <Col className="col-auto">
-                                    <Pfp
+                                    <PfpResolver
+                                        address={address}
+                                        imgUrl={image}
                                         height="100px"
                                         width="100px"
-                                        imgUrl={pfpUrl}
-                                        address={address}
                                         fontSize="1rem"
                                     />
                                 </Col>
