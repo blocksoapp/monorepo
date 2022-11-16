@@ -12,15 +12,13 @@ import { useEnsAvatar } from "wagmi";
 import { MentionsInput, Mention } from "react-mentions";
 import { abbrAddress, baseAPI, getCookie } from '../../../utils'
 import { apiGetSuggestedUsers } from '../../../api';
-import Pfp from '../../Pfp';
+import PfpResolver from '../../PfpResolver';
 import "./mentions-custom.css";
 
 function NewComment({ authedUser, submitCommentCallback, postId }) {
 
     // state
     const { address, image } = {...authedUser.profile}
-    const ensAvatar = useEnsAvatar({addressOrName: address});
-    const [pfpUrl, setPfpUrl] = useState(image);
     const [commentText, setCommentText] = useState("");
 
     // functions
@@ -97,19 +95,6 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
         }
     }
 
-    /*
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     */
-    useEffect(() => {
-        if (!pfpUrl) {
-            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfpUrl(ensAvatar.data);
-            }
-        }
-    }, [ensAvatar])
-
-
     return (
         <Container>
             <Row className="justify-content-center">
@@ -119,11 +104,11 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                         <Card.Body>
                             <Row className="align-items-center">
                                 <Col className="col-auto">
-                                    <Pfp
+                                    <PfpResolver
+                                        address={address}
+                                        imgUrl={image}
                                         height="75px"
                                         width="75px"
-                                        imgUrl={pfpUrl}
-                                        address={address}
                                         fontSize="0.75rem"
                                     />
                                 </Col>
