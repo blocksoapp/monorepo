@@ -45,7 +45,7 @@ function Following() {
               : followingList.map( (following, index) => {
                 return (
                       <FollowCard
-                      index={index}
+                      key={index}
                       imgUrl={following.profile.image}
                       address={following.address}
                       bio={following.profile.bio}

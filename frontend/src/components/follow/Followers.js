@@ -46,7 +46,7 @@ function Followers() {
         : followers.map( (follower, index) => {
           return (
                 <FollowCard
-                index={index}
+                key={index}
                 imgUrl={follower.profile.image}
                 address={follower.address}
                 bio={follower.profile.bio}

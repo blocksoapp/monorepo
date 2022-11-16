@@ -37,7 +37,7 @@ function FollowCard(props) {
                 followedByMe: false
             });
         } else if (!resp.ok) {
-            console.log('err: ', resp.error)
+            console.error(resp.error)
         }
     }
 
@@ -107,7 +107,7 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div key={props.index} className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
+        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
                 <Pfp
                 height="90px"
                 width="90px"
@@ -117,7 +117,7 @@ function FollowCard(props) {
                 onClick={navigateProfile}
                 className="pointer d-flex justify-content-center"
                 />
-                <div className='flex-grow-1'>
+                <div className='flex-grow-1 ps-4'>
                     <div className='follow-body'>
                         <div className='d-flex flex-column'>
                             <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
