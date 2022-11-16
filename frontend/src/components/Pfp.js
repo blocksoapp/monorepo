@@ -14,7 +14,7 @@ function Pfp(props) {
 
     // render
     return (
-        <div>
+        <div className={props.className} onClick={props.onClick}>
         {/* Show grey placeholder image if address is null */}
         {!props.address
             ?   <Card

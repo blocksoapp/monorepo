@@ -24,6 +24,9 @@ erc20_transfer_sig = "Transfer(indexed address from, "\
 erc721_transfer_sig = "Transfer(indexed address from, "\
                      "indexed address to, indexed uint256 tokenId)"
 
+# other constants
+zero_address = "0x0000000000000000000000000000000000000000"
+
 
 def get_tx_history_url(address):
     """
@@ -32,7 +35,7 @@ def get_tx_history_url(address):
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number=0&page-size=20"
+          f"&no-logs=false&page-number=0&page-size=100"
 
     return url
 
@@ -85,6 +88,11 @@ def parse_and_create_tx(tx_data, address):
 
     # create transaction if it originated from the given address
     if object_kwargs["from_address"] == address:
+        # recipient in contract creation txs comes back as None,
+        # set it to zero address instead
+        if object_kwargs["to_address"] is None:
+            object_kwargs["to_address"] = zero_address
+
         tx = Transaction.objects.create(**object_kwargs)
 
     # create db records for the events we support
