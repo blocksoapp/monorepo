@@ -14,7 +14,8 @@ import eth_account
 import responses
 
 # our imports
-from .models import Follow, Post, Transaction, ERC20Transfer, ERC721Transfer
+from .models import Follow, Post, Profile, Transaction, \
+                    ERC20Transfer, ERC721Transfer
 from . import jobs
 
 
@@ -454,8 +455,8 @@ class FollowTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         follow = Follow.objects.get(
-            src_id=self.test_signer.address,
-            dest_id=self.test_signer_2.address
+            src_id=Profile.objects.get(user_id=self.test_signer.address),
+            dest_id=Profile.objects.get(user_id=self.test_signer_2.address)
         )
         self.assertIsNotNone(follow)
 
@@ -483,8 +484,8 @@ class FollowTests(BaseTest):
         self.assertEqual(resp.status_code, 204)
         with self.assertRaises(Follow.DoesNotExist):
             Follow.objects.get(
-                src_id=self.test_signer.address,
-                dest_id=self.test_signer_2.address
+                src=Profile.objects.get(user_id=self.test_signer.address),
+                dest=Profile.objects.get(user_id=self.test_signer_2.address)
             )
 
     def test_get_followers_following(self):
@@ -729,7 +730,7 @@ class PostTests(BaseTest):
         for i in range(25):
             created_time = created_time + timedelta(hours=1)
             Post.objects.create(
-                author=user,
+                author=user.profile,
                 created=created_time,
                 isQuote=False,
                 isShare=False
@@ -793,7 +794,9 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 204)
         self.assertEqual(
-            Post.objects.filter(author=self.test_signer.address).count(),
+            Post.objects.filter(
+                author=Profile.objects.get(user_id=self.test_signer.address)
+            ).count(),
             0
         )
 
@@ -872,7 +875,10 @@ class PostTests(BaseTest):
         resp = self.client.get(url)
 
         # make assertions
-        self.assertEqual(resp.data["pfp"], self.update_profile_data["image"])
+        self.assertEqual(
+            resp.data["author"]["image"],
+            self.update_profile_data["image"]
+        )
 
 
 class CommentsTests(BaseTest):
@@ -899,7 +905,10 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.data["post"], 1)
         self.assertEqual(resp.data["text"], text)
         self.assertEqual(resp.data["tagged_users"], [])
-        self.assertEqual(resp.data["author"], self.test_signer.address)
+        self.assertEqual(
+            resp.data["author"]["address"],
+            self.test_signer.address
+        )
 
     def test_create_comment_empty(self):
         """
@@ -938,7 +947,7 @@ class CommentsTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.data["text"], text)
-        self.assertEqual(resp.data["tagged_users"], tagged)
+        self.assertEqual(resp.data["tagged_users"][0]["address"], tagged[0])
 
     def test_list_comments(self):
         """
@@ -1025,7 +1034,7 @@ class CommentsTests(BaseTest):
 
         # make assertions
         self.assertEqual(
-            resp.data["results"][0]["pfp"],
+            resp.data["results"][0]["author"]["image"],
             self.update_profile_data["image"]
         )
 
@@ -1075,10 +1084,8 @@ class FeedTests(BaseTest):
         """
         # set up test
         # login user 2, create a post
-        expected = []
         self._do_login(self.test_signer_2)
         resp = self._create_post(self.test_signer_2)
-        expected = expected + [resp.data]
 
         # logout user 2
         self._do_logout()
@@ -1086,7 +1093,6 @@ class FeedTests(BaseTest):
         # login user 1, create a post, and follow user 2
         self._do_login(self.test_signer)
         resp = self._create_post(self.test_signer)
-        expected = [resp.data] + expected
         url = f"/api/{self.test_signer_2.address}/follow/"
         self.client.post(url)
 
@@ -1097,8 +1103,14 @@ class FeedTests(BaseTest):
         # assert user 1 feed has the posts of user 1 and user 2
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp.data), 2)
-        self.assertDictEqual(resp.data[0], expected[0])
-        self.assertDictEqual(resp.data[1], expected[1])
+        self.assertEqual(
+            resp.data[0]["author"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(
+            resp.data[1]["author"]["address"],
+            self.test_signer_2.address
+        )
 
 
 class ExploreTests(BaseTest):

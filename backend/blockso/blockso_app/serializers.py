@@ -47,29 +47,29 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_num_followers(self, obj):
         """ Returns the profile's follower count. """
 
-        user = getattr(obj, "user")
-        followers = user.follow_dest.all()
+        followers = obj.follow_dest.all()
         return followers.count() 
 
     def get_num_following(self, obj):
         """ Returns the profile's following count. """
 
-        user = getattr(obj, "user")
-        following = user.follow_src.all()
+        following = obj.follow_src.all()
         return following.count() 
 
     def get_followed_by_me(self, obj):
         """ Returns whether the profile is being followed by the requestor. """
 
-        # get authed user
+        # handle using serializer outside of a request
         request = self.context.get("request")
         if request is None:
             return None
+
+        # get authed user
         authed_user = request.user
+        authed_user = getattr(authed_user, "profile", None)
 
         # check if authed user follows the profile
-        user = getattr(obj, "user")
-        return Follow.objects.filter(src=authed_user, dest=user).exists()
+        return Follow.objects.filter(src=authed_user, dest=obj).exists()
 
     def create(self, validated_data):
         """ Creates a Profile. """
@@ -134,11 +134,12 @@ class FollowSerializer(serializers.ModelSerializer):
 
         # get the signed in user
         user = self.context.get("request").user
+        user = user.profile
 
         # get address from the URL
         address = self.context.get("view").kwargs["address"]
         address = Web3.toChecksumAddress(address)
-        to_follow = UserModel.objects.get(ethereum_address=address)
+        to_follow = Profile.objects.get(user_id=address)
 
         # signed in user follows the address given in the url
         follow = Follow.objects.create(
@@ -147,33 +148,14 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
         # notify the user that was followed
-        notif = Notification.objects.create(user=to_follow.profile)
+        notif = Notification.objects.create(user=to_follow)
         FollowedEvent.objects.create(
             notification=notif,
             follow=follow,
-            followed_by=user.profile
+            followed_by=user
         )
 
         return follow
-
-    def destroy(self, validated_data):
-        """ Deletes a Follow. """
-
-        # get the signed in user
-        user = self.context.get("request").user
-
-        # get address from the URL
-        address = self.context.get("view").kwargs["address"]
-        address = Web3.toChecksumAddress(address)
-        
-        # signed in user unfollows the address given in the url
-        follow = Follow.objects.get(
-            src_id=user.ethereum_address,
-            dest_id=address
-        )
-        follow.delete()
-
-        return None 
 
 
 class ERC20TransferSerializer(serializers.ModelSerializer):
@@ -232,18 +214,14 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "pfp", "text", "imgUrl", "isShare", "isQuote",
+        fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created"]
         read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
 
-    pfp = serializers.SerializerMethodField()
+    author = ProfileSerializer(required=False)
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
 
-    def get_pfp(self, instance):
-        """ Return the post author's pfp. """
-
-        return instance.author.profile.image
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
@@ -264,7 +242,7 @@ class PostSerializer(serializers.ModelSerializer):
         """ Creates a Post. """
 
         # get user from the session
-        author = self.context.get("request").user
+        author = self.context.get("request").user.profile
 
         # TODO validate business logic like ref_post and ref_tx
 
@@ -288,27 +266,46 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TaggedUsersField(serializers.RelatedField):
+    """
+    Serializes / de-serializes the tagged
+    users field that is used for comments/posts.
+    """
+
+    def to_internal_value(self, data):
+        """ Does deserialization, for writing. """
+
+        # return profile representing the tagged user
+        address = Web3.toChecksumAddress(data)
+        return Profile.objects.get(user_id=address)
+
+    def to_representation(self, value):
+        """ Does serialization, for reading. """
+
+        return ProfileSerializer(value).data
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """ Comment model serializer. """
 
     class Meta:
         model = Comment
-        fields = ["id", "author", "pfp", "post", "text", "tagged_users", "created"]
-        read_only_fields = ["id", "author", "pfp", "created", "post"]
+        fields = ["id", "author", "post", "text", "tagged_users", "created"]
+        read_only_fields = ["id", "author", "created", "post"]
 
 
-    pfp = serializers.SerializerMethodField()
+    author = ProfileSerializer(required=False)
+    tagged_users = TaggedUsersField(
+        many=True,
+        queryset=Profile.objects.all()
+    )
 
-    def get_pfp(self, instance):
-        """ Return the comment author's pfp. """
-
-        return instance.author.profile.image
 
     def create(self, validated_data):
         """ Creates a Comment. """
 
         # get user from the session
-        author = self.context.get("request").user
+        author = self.context.get("request").user.profile
 
         # get post id from the url
         post = Post.objects.get(
@@ -329,22 +326,21 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.save()
 
         # create a notification for the post author
-        notif = Notification.objects.create(user=post.author.profile)
+        notif = Notification.objects.create(user=post.author)
         CommentOnPostEvent.objects.create(
             notification=notif,
             comment=comment,
             post=post,
-            commentor=author.profile
+            commentor=author
         )
 
         # create a notifications for the tagged users
-        for user in tagged_users:
-            profile = Profile.objects.get(user=user)
+        for profile in tagged_users:
             notif = Notification.objects.create(user=profile)
             MentionedInCommentEvent.objects.create(
                 notification=notif,
                 comment=comment,
-                mentioned_by=author.profile
+                mentioned_by=author
             )
 
         return comment

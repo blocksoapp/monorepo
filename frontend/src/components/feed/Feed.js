@@ -70,9 +70,9 @@ function Feed({ profileData }) {
                         <Post
                             key={post.id}
                             id={post.id}
-                            author={post.author}
+                            author={post.author.address}
                             text={post.text}
-                            pfp={post.pfp}
+                            pfp={post.author.image}
                             imgUrl={post.imgUrl}
                             created={post.created}
                             refTx={post.refTx}

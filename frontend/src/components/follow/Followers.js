@@ -47,11 +47,11 @@ function Followers() {
           return (
                 <FollowCard
                 key={index}
-                imgUrl={follower.profile.image}
+                imgUrl={follower.image}
                 address={follower.address}
-                bio={follower.profile.bio}
-                followedByMe={follower.profile.followedByMe}
-                numFollowers={follower.profile.numFollowers}
+                bio={follower.bio}
+                followedByMe={follower.followedByMe}
+                numFollowers={follower.numFollowers}
                 />
           )})}
           </>}

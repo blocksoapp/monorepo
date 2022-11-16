@@ -40,12 +40,12 @@ class Follow(models.Model):
     """ Represents the follower-followed relationship between users. """
 
     src = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="follow_src"
     )
     dest = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="follow_dest"
     )
@@ -123,7 +123,7 @@ class Post(models.Model):
 
 
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="posts"
     )
@@ -154,7 +154,7 @@ class Comment(models.Model):
 
     
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="comments"
     )
@@ -166,7 +166,7 @@ class Comment(models.Model):
     )
     text = models.TextField(blank=False)
     tagged_users = models.ManyToManyField(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         blank=True
     )
     created = models.DateTimeField(auto_now_add=True)
