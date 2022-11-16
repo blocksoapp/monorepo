@@ -17,8 +17,7 @@ import { UserContext } from '../../contexts/UserContext'
 function ViewPost(props) {
     // constants
     const { postId } = useParams();
-    const { user } = useContext(UserContext)
-
+    const { user } = useContext(UserContext);
 
     // state
     const [postLoading, setPostLoading] = useState(true);
