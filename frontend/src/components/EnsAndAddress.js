@@ -1,15 +1,12 @@
-import { useEnsName } from 'wagmi'
+import { useEnsName } from "wagmi";
+import { abbrAddress } from "../utils.js";
+
 
 function EnsAndAddress(props) {
     // constants
     const { data, isError, isLoading } = useEnsName({
         address: props.address,
     })
-
-    // functions
-    const getAbbrAddress = function(address) {
-        return address.substr(2,5) + "..." + props.address.substr(37,5);
-    }
 
     // returns
     if (! "address" in props) return <span>Missing address</span>
@@ -21,14 +18,14 @@ function EnsAndAddress(props) {
         <span className=''>
             {data}
             <span className="fs-6">
-                &nbsp;({getAbbrAddress(props.address)})
+                &nbsp;({abbrAddress(props.address)})
             </span>
         </span>
     )
 
     // no ens name
     else return (
-        <span>{getAbbrAddress(props.address)}</span>
+        <span>{abbrAddress(props.address)}</span>
     )
 }
 

@@ -1,5 +1,7 @@
 """
 Module containing classes that define paginators.
+Note: keeping pagination classes explicit even though there
+is redundant code.
 """
 # std lib imports
 
@@ -15,6 +17,14 @@ class CommentPagination(PageNumberPagination):
     """
     page_size = 5
     max_page_size = 5 
+
+
+class NotificationPagination(PageNumberPagination):
+    """
+    Pagination for listing Notifications.
+    """
+    page_size = 20
+    max_page_size = 20 
 
 
 class PostsPagination(PageNumberPagination):

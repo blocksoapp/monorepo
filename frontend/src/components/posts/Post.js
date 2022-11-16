@@ -116,7 +116,7 @@ function Post(props) {
         if (erc20Transfers.length > 10 || erc721Transfers.length > 10) return
 
         return (
-            <Container className="mt-4">
+            <Container id={props.id} className="mt-4">
                 <Row className="justify-content-center mb-4">
                     <Col xs={12} lg={6}>
                         <Card>

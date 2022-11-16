@@ -90,7 +90,14 @@ function ViewPost(props) {
     }
 
     const submitCommentCallback = (newComment) => {
-        setComments([newComment].concat(comments));
+        // update the number of comments on the post
+        setPost({
+            ...post,
+            numComments: post["numComments"] + 1
+        });
+
+        // add the new comment to the list of comments
+        setComments([newComment].concat(comments));    
     }
 
 

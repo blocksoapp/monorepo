@@ -170,3 +170,80 @@ class Comment(models.Model):
         blank=True
     )
     created = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    """ Represents a Notification created for a user. """
+
+    class Meta:
+        ordering = ["-created"]
+
+    
+    user = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+
+
+class MentionedInCommentEvent(models.Model):
+    """ An event respresenting when a user is mentioned in a comment. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="mentioned_in_comment_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    mentioned_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class CommentOnPostEvent(models.Model):
+    """ An event respresenting when someone comments on a user's post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="comment_on_post_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    commentor = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class FollowedEvent(models.Model):
+    """ An event respresenting when a user is followed by another. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="followed_event",
+        on_delete=models.CASCADE
+    )
+    follow = models.ForeignKey(
+        to=Follow,
+        on_delete=models.CASCADE
+    )
+    followed_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)

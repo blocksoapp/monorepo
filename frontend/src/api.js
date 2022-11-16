@@ -32,6 +32,16 @@ export const apiGetExplore = async () => {
     return res;
 }
 
+/* Returns the response for the notifications of the authed user. */
+export const apiGetNotifications = async () => {
+    const url = `${baseAPI}/notifications/`;
+    const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return resp;
+}
+
 /* Returns the response for a specific post. */
 export const apiGetPost = async (postId) => {
     const url = `${baseAPI}/post/${postId}/`;
@@ -69,6 +79,22 @@ export const apiGetUrl = async (url) => {
         credentials: 'include'
     });
     return res;
+}
+
+/* Returns the response of marking the authed user's notifications as read. */
+export const apiMarkNotificationsRead = async (ids) => {
+    const url = `${baseAPI}/notifications/`;
+    const data = {"notifications": ids}
+    const resp = await fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
 }
 
 /* Returns the response for followers list given an address */
@@ -116,5 +142,3 @@ export const apiPostUnfollow = async (address) => {
         });
         return res
 }
-
-

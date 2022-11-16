@@ -19,8 +19,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, Follow, Post, Profile, Socials
-from .pagination import CommentPagination, PostsPagination
+from .models import Comment, Follow, Notification, Post, Profile, Socials
 from . import jobs, pagination, serializers
 
 
@@ -290,7 +289,7 @@ class PostCreateList(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
-    pagination_class = PostsPagination
+    pagination_class = pagination.PostsPagination
     lookup_url_kwarg = "address"
     lookup_field = "author"
 
@@ -404,13 +403,71 @@ class FeedList(generics.ListAPIView):
         return queryset
 
 
+class NotificationListUpdate(
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView):
+
+    """
+    View that supports listing the notifications of an authenticated user,
+    and marking a user's notifications as viewed.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.NotificationSerializer
+    pagination_class = pagination.NotificationPagination
+
+    def get_queryset(self):
+        """
+        Return Notifications of the authenticated user.
+        The queryset is sorted from newest to oldest in the model class.
+        """
+        # get user
+        user = self.request.user
+
+        # get all notifications for the user
+        queryset = Notification.objects.filter(user=user.profile)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        """ List the notifications of an authenticated user. """
+
+        return self.list(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """
+        Updates the notifications of an authed user to be marked as viewed.
+        User must own the notifications that are being updated.
+        Returns updated notifications.
+        """
+        notif_ids = request.data["notifications"]
+        user = request.user
+        updated = []
+
+        # mark all notifications as viewed
+        for notif_id in notif_ids:
+            notif = Notification.objects.get(id=notif_id)
+
+            # return 403 if trying to update somebody else's notification
+            if notif.user != user.profile:
+                raise PermissionDenied("User does not own the Notification.")
+
+            notif.viewed = True
+            notif.save()
+            updated.append(notif)
+
+        serializer = serializers.NotificationSerializer(updated, many=True)
+        return Response(serializer.data)
+
+
 class CommentCreateList(generics.ListCreateAPIView):
 
     """ View that supports creating and listing Comments of a post. """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
-    pagination_class = CommentPagination
+    pagination_class = pagination.CommentPagination
 
 
     def get_queryset(self):

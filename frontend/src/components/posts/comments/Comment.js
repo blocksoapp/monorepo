@@ -64,7 +64,7 @@ function Comment(props) {
         const dateObj = new Date(props.created);
 
         return (
-            <Container className="mt-3">
+            <Container id={props.id} className="mt-3">
                 <Row className="justify-content-center mb-2">
                     <Col xs={12} lg={6}>
                         <Card>

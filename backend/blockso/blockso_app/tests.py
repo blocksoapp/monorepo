@@ -1138,3 +1138,232 @@ class ExploreTests(BaseTest):
         # user 3 should have the least followers
         for i in range(8):
             self.assertEqual(resp.data[i]["address"], signers[9-i].address)
+
+
+class NotificationTests(BaseTest):
+    """
+    Test behavior around notifications.
+    """
+
+    def test_get_notifs(self):
+        """
+        Assert that a logged in user can get a list of notifications.
+        """
+        # set up test
+        # user 1 logs in
+        self._do_login(self.test_signer)
+
+        # make request for notifications
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["results"], [])
+
+    def test_get_notifs_unauthed(self):
+        """
+        Assert that a logged out user cannot get a list of notifications.
+        """
+        # set up test
+
+        # make request for notifications
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_comment_on_post_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user comments on their post.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._do_logout()
+
+        # user 2 comments on user 1's post
+        self._do_login(self.test_signer_2)
+        self._create_comment(post_id, text="hello")
+        self._do_logout()
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["commentOnPostEvent"]
+        self.assertEqual(event["post"], post_id)
+        self.assertEqual(
+            event["commentor"]["address"],
+            self.test_signer_2.address
+        )
+
+    def test_mentioned_in_comment_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user mentions them in a comment.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+        # user 1 creates a post and a comment
+        # where they mention user 2
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+        self._create_comment(
+            post_id,
+            text="hello user 2",
+            tagged_users=[self.test_signer_2.address]
+        )
+        self._do_logout()
+
+        # make request to get user 2's notifications
+        self._do_login(self.test_signer_2)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 2 has a notification for the comment mention
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["mentionedInCommentEvent"]
+        self.assertEqual(event["post"], post_id)
+        self.assertEqual(
+            event["mentionedBy"]["address"],
+            self.test_signer.address
+        )
+
+    def test_follow_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user follows them.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+        # user 2 follows user 1
+        self._follow_user(self.test_signer.address)
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 1 has a notification for the follow
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["followedEvent"]
+        self.assertEqual(
+            event["followedBy"]["address"],
+            self.test_signer_2.address
+        )
+
+    def test_mark_notifs_as_viewed(self):
+        """
+        Assert that a user can mark notification as viewed.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # user 2 comments on user 1's post twice
+        self._do_login(self.test_signer_2)
+        self._create_comment(post_id, text="hello")
+        self._create_comment(post_id, text="friend")
+        self._do_logout()
+
+        # get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif_ids = [notif['id'] for notif in resp.data["results"]]
+
+        # make request to mark notifications as viewed
+        url = "/api/notifications/"
+        data = {"notifications": notif_ids}
+        resp = self.client.put(url, data)
+
+        # assert that notifications are now viewed
+        self.assertEqual(resp.status_code, 200)
+        for notif in resp.data:
+            self.assertTrue(notif["viewed"])
+
+    def test_mark_notifs_as_viewed_unauthed(self):
+        """
+        Assert that an unauthenticated user
+        cannot mark notifications as viewed.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # user 2 comments on user 1's post
+        self._do_login(self.test_signer_2)
+        self._create_comment(post_id, text="hello")
+
+        # get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif_ids = [notif['id'] for notif in resp.data["results"]]
+
+        # make unauthenticated request to mark notifs as viewed
+        self._do_logout()
+        url = "/api/notifications/"
+        data = {"notifications": notif_ids}
+        resp = self.client.put(url, data)
+
+        # assert 403
+        self.assertEqual(resp.status_code, 403)
+
+    def test_mark_notifs_as_viewed_for_others(self):
+        """
+        Assert that a user cannot mark
+        another user's notifications as viewed.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # user 2 comments on user 1's post
+        self._do_login(self.test_signer_2)
+        self._create_comment(post_id, text="hello")
+        self._do_logout()
+
+        # get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif_ids = [notif['id'] for notif in resp.data["results"]]
+
+        # make request as user 2 to mark user 1's notifications as viewed
+        self._do_logout()
+        self._do_login(self.test_signer_2)
+        url = "/api/notifications/"
+        data = {"notifications": notif_ids}
+        resp = self.client.put(url, data)
+
+        # assert that user 2 gets a 403
+        self.assertEqual(resp.status_code, 403)
