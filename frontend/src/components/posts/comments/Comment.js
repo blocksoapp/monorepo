@@ -12,7 +12,7 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import MentionsOutput from './MentionsOutput';
-import Pfp from '../../Pfp';
+import PfpResolver from '../../PfpResolver';
 import TxAddress from "../../TxAddress";
 
 
@@ -29,35 +29,8 @@ function Comment(props) {
     };
 
     // state
-    const [pfpUrl, setPfpUrl] = useState(props.pfp)
-    const [ensName, setEnsName] = useState(props.ensName);
-    const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const ensNameHook = useEnsName({address: props.author});
 
     // functions
-
-    /* 
-     * Sets the user's ens name if it has not been passed in from props.
-     */
-    useEffect(() => {
-        if (!ensName) {
-            if (!ensNameHook.isLoading && ensNameHook.data !== null) {
-                setEnsName(ensNameHook.data);
-            }
-        }
-    }, [ensNameHook])
-
-    /* 
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     */
-    useEffect(() => {
-        if (!pfpUrl) {
-            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfpUrl(ensAvatar.data);
-            }
-        }
-    }, [ensAvatar])
 
 
     const render = function () {
@@ -72,11 +45,11 @@ function Comment(props) {
                             <Card.Header>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        <Pfp
+                                        <PfpResolver
+                                            address={props.author}
+                                            imgUrl={props.pfp}
                                             height="100px"
                                             width="100px"
-                                            imgUrl={pfpUrl}
-                                            address={props.author}
                                             fontSize="1rem"
                                         />
                                     </Col>

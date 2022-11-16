@@ -134,8 +134,8 @@ function NotificationsDropdown() {
                 ? <NotificationsPlaceholder />
                 : notifsError === true
                     ? <NotificationsError retryAction={fetchNotifications} />
-                    : notifs.map(notif => (
-                        <NotificationItem data={notif} />
+                    : notifs.map((notif, index) => (
+                        <NotificationItem key={index} data={notif} />
                     ))}
         </NavDropdown>
     )

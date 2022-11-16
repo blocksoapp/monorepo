@@ -1,3 +1,4 @@
+
 body {
   margin: 0;
   font-family: Roboto, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
@@ -18,12 +19,33 @@ code {
   color: #00A8E8
 }
 
+
 .fullheight-container {
   min-height: 100vh;
 }
 
+
+.pointer:hover {
+  cursor: pointer;
+}
+
 .tab-min-height{
   min-height: 20vh
+}
+
+.link-style {
+  color: black;
+}
+
+.link-style:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 15%;
+}
+
+.link-active {
+  text-decoration: underline;
+  text-decoration-color:#00A8E8;
+  text-decoration-thickness: 20%;
 }
 
 
@@ -65,6 +87,17 @@ code {
   background-color: #007EA7;
 }
 
+.btn-secondary {
+  background-color: white;
+  color:#00A8E8;
+  border-color:#00A8E8
+}
+
+.btn-secondary:hover {
+  background-color: #00A8E8;
+  color: white;
+}
+
 /* Form PFP */
 .delete-icon {
   font-size: 15px;
@@ -85,3 +118,17 @@ code {
 .green-border {
   border: green solid 2px;
 }
+
+.yellow-border {
+  border: yellow solid 2px;
+}
+
+.w-min-100 {
+  min-width: 100vw;
+}
+
+.h-min-100 {
+  min-height: 100vh;
+}
+
+
