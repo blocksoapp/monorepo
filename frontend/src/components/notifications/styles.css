@@ -3,7 +3,8 @@
 }
 
 .dropdown-menu {
-    height: 75vh;
+    height: auto;
+    max-height: 75vh;
     overflow: scroll;
 }
 

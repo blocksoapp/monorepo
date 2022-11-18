@@ -7,6 +7,7 @@ import {
     apiMarkNotificationsRead
 } from "../../api.js";
 import NotificationItem from "./NotificationItem.js";
+import NotificationsEmpty from "./NotificationsEmpty.js";
 import NotificationsError from "./NotificationsError.js";
 import NotificationsPlaceholder from "./NotificationsPlaceholder.js";
 import "./styles.css";
@@ -134,9 +135,11 @@ function NotificationsDropdown() {
                 ? <NotificationsPlaceholder />
                 : notifsError === true
                     ? <NotificationsError retryAction={fetchNotifications} />
-                    : notifs.map((notif, index) => (
-                        <NotificationItem key={index} data={notif} />
-                    ))}
+                    : notifs.length === 0
+                        ? <NotificationsEmpty />
+                        : notifs.map((notif, index) => (
+                            <NotificationItem key={index} data={notif} />
+                        ))}
         </NavDropdown>
     )
 }
