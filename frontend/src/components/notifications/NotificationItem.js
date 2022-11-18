@@ -65,7 +65,7 @@ function NotificationItem({data}) {
                 </Col>
 
                 {/* notification time */}
-                <Col xs={2}>
+                <Col xs={2} className="text-end">
                     <span className="text-muted">
                         {getTimeAgo(data.created)}
                     </span>
