@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Badge } from 'react-bootstrap'
+import { Container, Button, Badge, Card, Col, Row } from 'react-bootstrap'
 import { json, useNavigate } from 'react-router-dom'
 import PfpResolver from '../PfpResolver'
 import ClickableEnsAndAddress from '../ClickableEnsAndAddress'
@@ -7,7 +7,7 @@ import { apiPostFollow, apiPostUnfollow, apiGetProfile } from '../../api'
 import './follow-custom.css'
 
 
-function FollowCard(props) {
+function FollowCard2(props) {
 
     const navigate = useNavigate()
     const [buttonMsg, setButtonMsg] = useState('Following')
@@ -107,33 +107,49 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
-                <PfpResolver
-                    address={props.address}
-                    imgUrl={props.imgUrl}
-                    height="90px"
-                    width="90px"
-                    fontSize="0.9rem"
-                    onClick={navigateProfile}
-                    className="pointer d-flex justify-content-center mt-2"
-                />
-                <div className='flex-grow-1 ps-sm-4'>
-                    <div className='follow-body'>
-                        <div className='d-flex flex-column'>
-                            <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
-                            <Badge className='text-dark bg-light align-self-sm-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
-                        </div>
-                        <div className='align-self-center follow-btn'>
-                           {handleButtonDisplayed()}
-                        </div>
-                    </div>
-                    <div>
-                        {props.bio && <p className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</p>}
-                    </div>
-                </div>
-        </div>
+       <Container id={props.index} className="yellow-border">
+            <Row className="justify-content-center">
+                <Col xs={12} lg={8} className='red-border'>
+                    <Card className="">
+                            <Card.Header>
+                                <Row className='align-items-end'>
+                                    <Col className='blue-border col-auto'>
+                                        <PfpResolver
+                                            address={props.address}
+                                            imgUrl={props.imgUrl}
+                                            height="100px"
+                                            width="100px"
+                                            fontSize="1rem"
+                                            onClick={navigateProfile}
+                                            className="pointer d-flex justify-content-center"
+                                        />
+                                    </Col>
+                                    <Col className='col-auto border d-flex'>
+                                            <Card.Text>
+                                                    <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>                                
+                                                    <Badge className='text-dark bg-light '>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                                            </Card.Text>
+                                            {handleButtonDisplayed()}
+                                        {/* <Row className="green-border align-items-center">
+                                            <Col className="d-flex flex-column align-items-lg-start">
+                                                <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>  
+                                                <Badge className='text-dark bg-light '>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                                            </Col>
+                                            <Col className='d-flex justify-content-end'>
+                                                {handleButtonDisplayed()}
+                                            </Col>
+                                        </Row>
+                                        {props.bio && <p className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</p>} */}
+                                    </Col>
+                                    {props.bio && <Card.Text className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</Card.Text>} 
+                                </Row>
+                            </Card.Header>
+                    </Card>
+                </Col>
+            </Row>
+       </Container>
    
   )
 }
 
-export default FollowCard
+export default FollowCard2

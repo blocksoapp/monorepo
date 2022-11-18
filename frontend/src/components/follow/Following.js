@@ -6,6 +6,8 @@ import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
 import { apiGetFollowing } from '../../api'
+import FollowCard2 from './FollowCard2';
+import FollowPlaceholder from './FollowPlaceholder';
 
 
 function Following() {
@@ -38,7 +40,7 @@ function Following() {
   return (
     <Container className="border p-0">
          <FollowNav address={urlInput}/>
-            {isLoading ? <Loading/>
+            {isLoading ? <FollowPlaceholder/>
               :  <>
               {(followingList === undefined || followingList.length === 0)
               ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
