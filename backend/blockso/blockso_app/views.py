@@ -19,7 +19,8 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, Follow, Notification, Post, Profile, Socials
+from .models import Comment, Follow, Notification, Post, PostLike, Profile, \
+        Socials
 from . import jobs, pagination, serializers
 
 
@@ -361,6 +362,56 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PostLikeCreateListDestroy(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin):
+
+    """ View that supports creating, deleting, and listing Likes of a post. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.PostLikeSerializer
+    pagination_class = pagination.LikesPagination
+
+    def get_object(self):
+        """
+        Returns the object to be deleted.
+        """
+        # get the signed in user
+        user = self.request.user
+        user = user.profile
+
+        # get post id from the URL
+        post_id = self.kwargs["id"]
+
+        return PostLike.objects.get(post_id=post_id, liker=user)
+
+    def get_queryset(self):
+        """
+        Return the queryset of PostLike objects for the given post.
+        The queryset is sorted from newest to oldest in the model class.
+        """
+        post_id = self.kwargs["id"]
+        queryset = PostLike.objects.filter(post_id=post_id)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """ Signed in user likes a post. """
+
+        return self.create(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """ Signed in user unlikes a post. """
+
+        return self.destroy(request, *args, **kwargs)
 
 
 class ExploreList(generics.ListAPIView):

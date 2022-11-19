@@ -905,6 +905,37 @@ class PostTests(BaseTest):
             tagged[0]
         )
 
+    def test_like_unlike_post(self):
+        """
+        Assert that a user can like/unlike another user's post.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # make request by user 2 to like user 1 post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        resp = self.client.post(url)
+
+        # assert post was liked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+        # make request by user 2 to unlike user 1 post
+        resp = self.client.delete(url)
+
+        # assert post was unliked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 0)
+        self.assertEqual(resp.data["results"], [])
+
 
 class CommentsTests(BaseTest):
     """
@@ -1438,3 +1469,30 @@ class NotificationTests(BaseTest):
 
         # assert that user 2 gets a 403
         self.assertEqual(resp.status_code, 403)
+
+    def test_liked_your_post_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user likes their post.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post(self.test_signer)
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        self._do_login(self.test_signer_2)
+        url = f"/api/post/{post_id}/likes/"
+        self.client.post(url)
+
+        # assert that user 1 received a notification
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif = resp.data["results"][0]
+        event = notif["events"]["likedPostEvent"]
+        self.assertEqual(
+            event["likedBy"]["address"],
+            self.test_signer_2.address
+        )

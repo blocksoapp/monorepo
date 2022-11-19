@@ -150,6 +150,26 @@ class Post(models.Model):
     created = models.DateTimeField(blank=False)
 
 
+class PostLike(models.Model):
+    """ Represents a Like for a Post. """
+
+    class Meta:
+        ordering = ["-created"]
+
+
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE,
+        related_name="likes"
+    )
+    liker = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="post_likes"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class Comment(models.Model):
     """ Represents a Comment created by a user. """
 
@@ -266,6 +286,25 @@ class FollowedEvent(models.Model):
         on_delete=models.CASCADE
     )
     followed_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class LikedPostEvent(models.Model):
+    """ An event respresenting when a user likes another user's post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="liked_post_event",
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    liked_by = models.ForeignKey(
         to=Profile,
         on_delete=models.CASCADE
     )

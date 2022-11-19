@@ -8,8 +8,9 @@ from web3 import Web3
 
 # our imports
 from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
-        ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
-        MentionedInPostEvent, Notification, Post, Profile, Socials, Transaction
+        ERC721Transfer, Follow, FollowedEvent, LikedPostEvent, \
+        MentionedInCommentEvent, MentionedInPostEvent, Notification, \
+        Post, PostLike, Profile, Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -321,6 +322,44 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class PostLikeSerializer(serializers.ModelSerializer):
+    """ PostLike model serializer. """
+
+    class Meta:
+        model = PostLike
+        fields = ["liker", "post"]
+        read_only_fields = fields
+
+    liker = ProfileSerializer(required=False)
+
+    def create(self, validated_data):
+        """ Likes a post. """
+
+        # get the signed in user
+        user = self.context.get("request").user
+        user = user.profile
+
+        # get post id from the URL
+        post_id = self.context.get("view").kwargs["id"]
+        post = Post.objects.get(pk=post_id)
+
+        # create post like
+        like = PostLike.objects.create(
+            liker=user,
+            post=post
+        )
+
+        # notify the post author that the user liked their post
+        notif = Notification.objects.create(user=post.author)
+        LikedPostEvent.objects.create(
+            notification=notif,
+            post=post,
+            liked_by=user
+        )
+
+        return like
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """ Comment model serializer. """
 
@@ -449,6 +488,22 @@ class FollowedEventSerializer(serializers.ModelSerializer):
         return ProfileSerializer(obj.followed_by).data
 
 
+class LikedPostEventSerializer(serializers.ModelSerializer):
+    """ LikedPostEvent model serializer. """
+
+    class Meta:
+        model = LikedPostEvent
+        fields = ["post", "likedBy", "created"]
+        read_only_fields = fields
+
+    likedBy = serializers.SerializerMethodField("get_liked_by")
+
+    def get_liked_by(self, obj):
+        """ Returns the user that did the liking. """
+
+        return ProfileSerializer(obj.liked_by).data
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     """ Notification model serializer. """
 
@@ -470,6 +525,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             get_mentioned_in_comment_event(obj)
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
         events["followedEvent"] = self.get_followed_event(obj)
+        events["likedPostEvent"] = self.get_liked_post_event(obj)
 
         return events
 
@@ -523,4 +579,17 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return FollowedEventSerializer(
             obj.followed_event
+        ).data
+
+    def get_liked_post_event(self, obj):
+        """
+        Returns the LikedPostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "liked_post_event"):
+            return None
+
+        return LikedPostEventSerializer(
+            obj.liked_post_event
         ).data
