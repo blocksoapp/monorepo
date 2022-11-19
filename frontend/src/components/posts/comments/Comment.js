@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import MentionsOutput from '../MentionsOutput';
 import PfpResolver from '../../PfpResolver';
+import AuthorAddress from "../AuthorAddress";
 import TxAddress from "../../TxAddress";
 
 
@@ -55,10 +56,7 @@ function Comment(props) {
                                     </Col>
                                     <Col className="col-auto">
                                         <h5>
-                                            <TxAddress
-                                                address={props.author}
-                                                profileAddress={props.profileAddress}
-                                            />
+                                            <AuthorAddress address={props.author} />
                                         </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}

@@ -240,7 +240,6 @@ function Profile(props) {
                                 pfp={post.author.image}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
-                                profileAddress={props.address}
                             />
             ))}
         </>

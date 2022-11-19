@@ -14,6 +14,7 @@ import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-
 import { utils } from "ethers";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
+import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
 
 
@@ -72,7 +73,9 @@ function Post(props) {
      * Formats token amount with decimal places.
      */
     const formatTokenAmount = function(amount, decimals) {
-        return utils.formatUnits(amount, decimals);
+        var formatted = utils.formatUnits(amount, decimals);
+        formatted = (+formatted).toFixed(4);  // truncate after 4 places
+        return formatted;
     }
 
     /* 
@@ -108,10 +111,7 @@ function Post(props) {
                                     </Col>
                                     <Col className="col-auto">
                                         <h5>
-                                            <TxAddress
-                                                address={props.author}
-                                                profileAddress={props.profileAddress}
-                                            />
+                                            <AuthorAddress address={props.author} />
                                         </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}
@@ -157,11 +157,7 @@ function Post(props) {
                                         {/* transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text className="text-wrap">
-                                                <TxAddress
-                                                    address={transfer.from_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
-                                                &nbsp;sent&nbsp;
+                                                Sent&nbsp;
                                                 <a
                                                     className="text-success"
                                                     href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
@@ -172,10 +168,7 @@ function Post(props) {
                                                     {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress
-                                                    address={transfer.to_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
+                                                <TxAddress address={transfer.to_address} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -193,11 +186,7 @@ function Post(props) {
                                         {/* nft transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text>
-                                                <TxAddress
-                                                    address={transfer.from_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
-                                                &nbsp;sent&nbsp;
+                                                Sent&nbsp;
                                                 <a
                                                     className="text-success"
                                                     href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
@@ -208,10 +197,7 @@ function Post(props) {
                                                     {transfer.contract_ticker} #{transfer.token_id}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress
-                                                    address={transfer.to_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
+                                                <TxAddress address={transfer.to_address} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -225,11 +211,7 @@ function Post(props) {
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
-                                            <TxAddress
-                                                address={props.refTx["from_address"]}
-                                                profileAddress={props.profileAddress}
-                                            />
-                                            &nbsp;sent a&nbsp;
+                                            Sent a&nbsp;
                                             <a
                                                 className="text-success"
                                                 href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
@@ -241,10 +223,7 @@ function Post(props) {
                                             </a>
                                             {props.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(props.refTx.value, 18)} ETH</span>}
                                             &nbsp;to&nbsp; 
-                                            <TxAddress
-                                                address={props.refTx["to_address"]}
-                                                profileAddress={props.profileAddress}
-                                            />
+                                            <TxAddress address={props.refTx["to_address"]} />
                                         </Card.Text>
                                     </Col>
                                 </Row>
