@@ -1,6 +1,7 @@
-import CommentOnPostEvent from "./CommentOnPostEvent";
-import FollowedEvent from "./FollowedEvent";
-import MentionedInCommentEvent from "./MentionedInCommentEvent";
+import CommentOnPostEvent from "./events/CommentOnPostEvent";
+import FollowedEvent from "./events/FollowedEvent";
+import MentionedInCommentEvent from "./events/MentionedInCommentEvent";
+import MentionedInPostEvent from "./events/MentionedInPostEvent";
 
 
 function EventResolver({data, setHref}) {
@@ -19,6 +20,14 @@ function EventResolver({data, setHref}) {
             {data['mentionedInCommentEvent'] &&
                 <MentionedInCommentEvent
                     data={data['mentionedInCommentEvent']}
+                    setHref={setHref}
+                />
+            }
+
+            {/* user mentioned you in a post */}
+            {data['mentionedInPostEvent'] &&
+                <MentionedInPostEvent
+                    data={data['mentionedInPostEvent']}
                     setHref={setHref}
                 />
             }

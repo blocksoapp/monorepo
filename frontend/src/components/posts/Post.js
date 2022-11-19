@@ -12,6 +12,7 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
+import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import TxAddress from "../TxAddress";
 
@@ -126,7 +127,9 @@ function Post(props) {
                                     <Col className="col-auto">
                                         {props.imgUrl !== "" && <Card.Img src={props.imgUrl} />}
                                         <Card.Text>
-                                            {props.text}
+                                            <MentionsOutput
+                                                text={props.text}
+                                            />
                                         </Card.Text>
                                     </Col>
                                 </Row>

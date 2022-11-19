@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import EnsAndAddress from "../EnsAndAddress.js";
-import PfpResolver from "../PfpResolver";
+import EnsAndAddress from "../../EnsAndAddress.js";
+import PfpResolver from "../../PfpResolver";
 
 
-function CommentOnPostEvent({data, setHref}) {
+function MentionedInPostEvent({data, setHref}) {
 
     // constants
-    const href = `/posts/${data.post}#${data.comment}`;
+    const href = `/posts/${data.post}`;
 
     // effects
     useEffect(() => {
@@ -20,8 +20,8 @@ function CommentOnPostEvent({data, setHref}) {
                 {/* avatar */}
                 <Col xs={2}>
                     <PfpResolver
-                        address={data.commentor.address}
-                        imgUrl={data.commentor.image}
+                        address={data.mentionedBy.address}
+                        imgUrl={data.mentionedBy.image}
                         height="40px"
                         width="40px"
                         fontSize="0.5rem"
@@ -31,8 +31,8 @@ function CommentOnPostEvent({data, setHref}) {
                 {/* event description */}
                 <Col xs={10} className="ps-3">
                     <span>
-                        <EnsAndAddress address={data.commentor.address} />
-                        &nbsp;commented on your post!
+                        <EnsAndAddress address={data.mentionedBy.address} />
+                        &nbsp; mentioned you in a post!
                     </span>
                 </Col>
             </Row>
@@ -41,4 +41,4 @@ function CommentOnPostEvent({data, setHref}) {
 }
 
 
-export default CommentOnPostEvent;
+export default MentionedInPostEvent;

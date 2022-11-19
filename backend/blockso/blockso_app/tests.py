@@ -54,6 +54,7 @@ class BaseTest(APITestCase):
         # common data for creating posts
         cls.create_post_data = { 
             "text": "My first post!",
+            "tagged_users": [],
             "imgUrl": "https://fakeimage.com/img.png",
             "isShare": False,
             "isQuote": False,
@@ -189,12 +190,13 @@ class BaseTest(APITestCase):
         resp = self.client.put(url, self.update_profile_data)
         return resp
 
-    def _create_post(self, signer):
+    def _create_post(self, signer, tagged_users=[]):
         """
         Utility function to create a post.
         Returns the response of creating a post.
         """
         url = f"/api/posts/{signer.address}/"
+        self.create_post_data["tagged_users"] = tagged_users
         resp = self.client.post(url, self.create_post_data)
         return resp
 
@@ -767,6 +769,7 @@ class PostTests(BaseTest):
         # change some post info
         update_data = self.create_post_data
         update_data["text"] = new_text 
+        update_data["tagged_users"] = [self.test_signer.address]
 
         # make PUT request
         url = f"/api/post/{post_id}/"
@@ -880,6 +883,28 @@ class PostTests(BaseTest):
             self.update_profile_data["image"]
         )
 
+    def test_tag_users_in_post(self):
+        """
+        Assert that a user can tag other users in a post.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+
+        # make request
+        tagged = [self.test_signer.address]
+        resp = self._create_post(
+            self.test_signer_2,
+            tagged_users=tagged
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(
+            resp.data["tagged_users"][0]["address"],
+            tagged[0]
+        )
+
 
 class CommentsTests(BaseTest):
     """
@@ -926,7 +951,7 @@ class CommentsTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 400)
 
-    def test_tag_users(self):
+    def test_tag_users_in_comment(self):
         """
         Assert that a user can tag other users in a comment.
         """
@@ -1217,6 +1242,40 @@ class NotificationTests(BaseTest):
         self.assertEqual(event["post"], post_id)
         self.assertEqual(
             event["commentor"]["address"],
+            self.test_signer_2.address
+        )
+
+    def test_mentioned_in_post_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user mentions them in a post.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+        # user 2 tags user 1 in a post
+        tagged = [self.test_signer.address]
+        resp = self._create_post(
+            self.test_signer_2,
+            tagged
+        )
+        post_id = resp.data["id"]
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 1 has a notification for post mention
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        self.assertEqual(notification["viewed"], False)
+        event = notification["events"]["mentionedInPostEvent"]
+        self.assertEqual(event["post"], post_id)
+        self.assertEqual(
+            event["mentionedBy"]["address"],
             self.test_signer_2.address
         )
 

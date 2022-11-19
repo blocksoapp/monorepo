@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
-import MentionsOutput from './MentionsOutput';
+import MentionsOutput from '../MentionsOutput';
 import PfpResolver from '../../PfpResolver';
 import TxAddress from "../../TxAddress";
 
