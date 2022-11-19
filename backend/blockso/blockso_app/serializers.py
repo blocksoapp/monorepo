@@ -9,7 +9,7 @@ from web3 import Web3
 # our imports
 from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
         ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
-        Notification, Post, Profile, Socials, Transaction
+        MentionedInPostEvent, Notification, Post, Profile, Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -209,19 +209,41 @@ class TransactionSerializer(serializers.ModelSerializer):
         return ERC721TransferSerializer(transfers, many=True).data
 
 
+class TaggedUsersField(serializers.RelatedField):
+    """
+    Serializes / de-serializes the tagged
+    users field that is used for comments/posts.
+    """
+
+    def to_internal_value(self, data):
+        """ Does deserialization, for writing. """
+
+        # return profile representing the tagged user
+        address = Web3.toChecksumAddress(data)
+        return Profile.objects.get(user_id=address)
+
+    def to_representation(self, value):
+        """ Does serialization, for reading. """
+
+        return ProfileSerializer(value).data
+
+
 class PostSerializer(serializers.ModelSerializer):
     """ Post model serializer. """
 
     class Meta:
         model = Post
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
-                  "refPost", "refTx", "numComments", "created"]
+                  "refPost", "refTx", "numComments", "created", "tagged_users"]
         read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
 
     author = ProfileSerializer(required=False)
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
-
+    tagged_users = TaggedUsersField(
+        many=True,
+        queryset=Profile.objects.all()
+    )
 
     def get_refTx(self, instance):
         """ Return serialized transaction that the post refers to. """
@@ -244,45 +266,59 @@ class PostSerializer(serializers.ModelSerializer):
         # get user from the session
         author = self.context.get("request").user.profile
 
+        # extract any tagged users
+        tagged_users = validated_data.pop("tagged_users")
+
         # TODO validate business logic like ref_post and ref_tx
 
         # create Post
         created = datetime.now(timezone.utc)
-        return Post.objects.create(
+        post = Post.objects.create(
             author=author,
             created=created,
             **validated_data
         )
 
+        # set tagged users
+        post.tagged_users.set(tagged_users)
+        post.save()
+
+        # create a notifications for the tagged users
+        for profile in tagged_users:
+            notif = Notification.objects.create(user=profile)
+            MentionedInPostEvent.objects.create(
+                notification=notif,
+                post=post,
+                mentioned_by=author
+            )
+
+        return post
+
     def update(self, instance, validated_data):
         """ Updates a Post. """
+
+        # extract any tagged users
+        tagged_users = validated_data.pop("tagged_users")
 
         # update other attributes
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        # set tagged users
+        instance.tagged_users.set(tagged_users)
+
+        # create a notifications for the tagged users
+        for profile in tagged_users:
+            notif = Notification.objects.create(user=profile)
+            MentionedInPostEvent.objects.create(
+                notification=notif,
+                post=instance,
+                mentioned_by=instance.author
+            )
+
         # save the changes and return them
         instance.save()
         return instance
-
-
-class TaggedUsersField(serializers.RelatedField):
-    """
-    Serializes / de-serializes the tagged
-    users field that is used for comments/posts.
-    """
-
-    def to_internal_value(self, data):
-        """ Does deserialization, for writing. """
-
-        # return profile representing the tagged user
-        address = Web3.toChecksumAddress(data)
-        return Profile.objects.get(user_id=address)
-
-    def to_representation(self, value):
-        """ Does serialization, for reading. """
-
-        return ProfileSerializer(value).data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -344,6 +380,22 @@ class CommentSerializer(serializers.ModelSerializer):
             )
 
         return comment
+
+
+class MentionedInPostEventSerializer(serializers.ModelSerializer):
+    """ MentionedInPostEvent model serializer. """
+
+    class Meta:
+        model = MentionedInPostEvent
+        fields = ["post", "created", "mentionedBy"]
+        read_only_fields = fields
+
+    mentionedBy = serializers.SerializerMethodField("get_mentioned_by")
+
+    def get_mentioned_by(self, obj):
+        """ Returns the user that did the mentioning. """
+
+        return ProfileSerializer(obj.mentioned_by).data
 
 
 class MentionedInCommentEventSerializer(serializers.ModelSerializer):
@@ -412,6 +464,8 @@ class NotificationSerializer(serializers.ModelSerializer):
         """ Returns the events associated with the notification. """
 
         events = {}
+        events["mentionedInPostEvent"] = self.\
+            get_mentioned_in_post_event(obj)
         events["mentionedInCommentEvent"] = self.\
             get_mentioned_in_comment_event(obj)
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
@@ -430,6 +484,19 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return CommentOnPostEventSerializer(
             obj.comment_on_post_event
+        ).data
+
+    def get_mentioned_in_post_event(self, obj):
+        """
+        Returns the MentionedInPostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "mentioned_in_post_event"):
+            return None
+
+        return MentionedInPostEventSerializer(
+            obj.mentioned_in_post_event
         ).data
 
     def get_mentioned_in_comment_event(self, obj):

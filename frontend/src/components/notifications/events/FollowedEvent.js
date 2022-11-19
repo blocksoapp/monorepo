@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import EnsAndAddress from "../EnsAndAddress.js";
-import PfpResolver from "../PfpResolver";
+import EnsAndAddress from "../../EnsAndAddress.js";
+import PfpResolver from "../../PfpResolver";
 
 
 function FollowedEvent({data, setHref}) {

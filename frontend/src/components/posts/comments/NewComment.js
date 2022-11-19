@@ -9,45 +9,22 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { MentionsInput, Mention } from "react-mentions";
-import { abbrAddress, baseAPI, getCookie } from '../../../utils'
-import { apiGetSuggestedUsers } from '../../../api';
+import { baseAPI, getCookie } from '../../../utils'
 import PfpResolver from '../../PfpResolver';
-import "./mentions-custom.css";
+import MentionsInput from '../MentionsInput';
 
 function NewComment({ authedUser, submitCommentCallback, postId }) {
 
     // state
     const { address, image } = {...authedUser.profile}
     const [commentText, setCommentText] = useState("");
+    const [taggedUsers, setTaggedUsers] = useState([]);
 
     // functions
-
-    /*
-     * Parses user addresses from the given text.
-     * Returns an array of user addresses.
-     */
-    const parseTaggedUsers = (commentText) => {
-        // look for mentions pattern and capture the address
-        // mentions pattern: @[__display__](__0xaddress__)
-        const regexp = /@\[[\w\.]*\]\((0x\w{40})\)/gmi;
-        const matches = [...commentText.matchAll(regexp)];
-
-        // create array of mentioned user addresses
-        var addresses = [];
-        for (const match of matches) {
-            addresses.push(match[1]);
-        }
-
-        return addresses; 
-    }
 
     const handleSubmit = async (event) => {
         // prevent default action
         event.preventDefault();
-
-        // extract the tagged users
-        const taggedUsers = parseTaggedUsers(commentText); 
 
         // post data to api
         const url = `${baseAPI}/posts/${postId}/comments/`;
@@ -69,6 +46,7 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
         if (resp.status === 201) {
             // clear form
             setCommentText("");
+            setTaggedUsers([]);
 
             // add comment to post
             const commentData = await resp.json();
@@ -76,24 +54,6 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
         }
     }
 
-    /*
-     * Requests a list of users that start with the given query.
-     * Calls callback with the results of the response.
-     */
-    const fetchSuggestedUsers = async (query, callback) => {
-        if (!query) return
-        const resp = await apiGetSuggestedUsers(query);
-        if (resp.ok) {
-            const results = await resp.json();
-            const formatted = results.map(
-                user => ({
-                    display: `0x${abbrAddress(user.address)}`,
-                    id: user.address
-                })
-            );
-            return callback(formatted);
-        }
-    }
 
     return (
         <Container>
@@ -118,21 +78,15 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
                                             <Col>
                                                 <InputGroup> 
                                                     <MentionsInput
-                                                        className="form-control"
-                                                        value={commentText}
-                                                        onChange={(event) => setCommentText(event.target.value)}
                                                         placeholder="What's on your mind?"
-                                                    >
-                                                        <Mention
-                                                            trigger="@"
-                                                            data={fetchSuggestedUsers}
-                                                            appendSpaceOnAdd={true}
-                                                        />
-                                                    </MentionsInput>
+                                                        text={commentText}
+                                                        setText={setCommentText}
+                                                        setTaggedUsers={setTaggedUsers}
+                                                    />
                                                 </InputGroup>
                                             </Col>
-                                            <Col className="col-auto">
-                                                <Button className="float-end" variant="primary" type="submit">
+                                            <Col className="col-auto align-self-center">
+                                                <Button variant="primary" type="submit">
                                                     Submit
                                                 </Button>
                                             </Col>

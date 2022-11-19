@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import TxAddress from "../../TxAddress";
+import TxAddress from "../TxAddress";
 
 
 function MentionsOutput({text}) {

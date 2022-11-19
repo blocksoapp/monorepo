@@ -128,6 +128,10 @@ class Post(models.Model):
         related_name="posts"
     )
     text = models.TextField(blank=True)
+    tagged_users = models.ManyToManyField(
+        to=Profile,
+        blank=True
+    )
     imgUrl = models.URLField(blank=True)
     isShare = models.BooleanField(blank=False)
     isQuote = models.BooleanField(blank=False)
@@ -186,6 +190,25 @@ class Notification(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     viewed = models.BooleanField(default=False)
+
+
+class MentionedInPostEvent(models.Model):
+    """ An event respresenting when a user is mentioned in a post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="mentioned_in_post_event",
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    mentioned_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
 
 
 class MentionedInCommentEvent(models.Model):
