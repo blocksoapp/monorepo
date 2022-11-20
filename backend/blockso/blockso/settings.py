@@ -164,7 +164,6 @@ SECURE_PROXY_SSL_HEADER = config(
     "SECURE_PROXY_SSL_HEADER",
     cast=lambda value: None if value == "None" else tuple(value.split(','))
 )
-SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
 
 # django-rest-framework config
 REST_FRAMEWORK = {
