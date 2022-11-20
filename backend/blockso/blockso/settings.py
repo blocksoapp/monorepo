@@ -156,15 +156,6 @@ CSRF_COOKIE_DOMAIN = config("CSRF_COOKIE_DOMAIN", cast=str)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 
-# secure proxy ssl header
-# SECURITY WARNING: this should always be set to "None" unless you're sure
-# there is a proxy and the proxy is doing what its supposed to correctly
-# see https://docs.djangoproject.com/en/4.1/ref/settings/#secure-proxy-ssl-header
-SECURE_PROXY_SSL_HEADER = config(
-    "SECURE_PROXY_SSL_HEADER",
-    cast=lambda value: None if value == "None" else tuple(value.split(','))
-)
-
 # django-rest-framework config
 REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
