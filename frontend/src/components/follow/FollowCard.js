@@ -121,14 +121,14 @@ function FollowCard(props) {
                     <div className='follow-body'>
                         <div className='d-flex flex-column'>
                             <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
-                            <Badge className='text-dark bg-light align-self-sm-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                            <Badge className='text-dark bg-light align-self-sm-start align-self-center'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center follow-btn'>
                            {handleButtonDisplayed()}
                         </div>
                     </div>
-                    <div>
-                        {props.bio && <p className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</p>}
+                    <div className=''>
+                        {props.bio && <p className='fs-6 pt-1 px-sm-0 px-3 bio'>{abbrBio(props.bio)}</p>}
                     </div>
                 </div>
         </div>

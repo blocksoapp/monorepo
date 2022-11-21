@@ -6,7 +6,6 @@ import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
 import { apiGetFollowing } from '../../api'
-import FollowCard2 from './FollowCard2';
 import FollowPlaceholder from './FollowPlaceholder';
 
 
