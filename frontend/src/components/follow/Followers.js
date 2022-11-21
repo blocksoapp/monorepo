@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
-import Loading from '../ui/Loading'
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
 import { apiGetFollowers } from '../../api'
 import FollowPlaceholder from './FollowPlaceholder'
+import FollowError from './FollowError'
 
 
 function Followers() {
@@ -14,7 +14,7 @@ function Followers() {
   const [followers, setFollowers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [active, setActive] = useState(true)
-  const [error, setError] = useState(false)
+  const [followError, setFollowError] = useState(false)
   const { urlInput } = useParams();
   
   const fetchFollowers = async () => {
@@ -26,7 +26,7 @@ function Followers() {
         setIsLoading(false)
       } else if (!resp.ok) {
         setIsLoading(false)
-        setError(true)
+        setFollowError(true)
         console.log('couldnt fetch followers')
       }
   } 
@@ -40,24 +40,28 @@ function Followers() {
   return (
     <Container className="border p-0">
         <FollowNav address={urlInput} active={active}/>
-       {isLoading ? <FollowPlaceholder/>
-        :  <>
-        {(followers === undefined || followers.length === 0)
-        ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
-        : followers.map( (follower, index) => {
-          return (
-                <FollowCard
-                key={index}
-                imgUrl={follower.image}
-                address={follower.address}
-                bio={follower.bio}
-                followedByMe={follower.followedByMe}
-                numFollowers={follower.numFollowers}
-                />
-          )})}
-          </>}
+        {isLoading 
+          ? <FollowPlaceholder/>
+          : followError 
+            ? <FollowError retryAction={fetchFollowers} />
+            : <>
+              {(followers === undefined || followers.length === 0)
+                ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
+                : followers.map( (follower, index) => {
+                  return (
+                    <FollowCard
+                      key={index}
+                      imgUrl={follower.image}
+                      address={follower.address}
+                      bio={follower.bio}
+                      followedByMe={follower.followedByMe}
+                      numFollowers={follower.numFollowers}
+                    />
+              )}) }
+            </> }
     </Container>
   )
 }
 
 export default Followers
+

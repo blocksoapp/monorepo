@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Container } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 import LeftTabs from '../components/ui/LeftTabs'
@@ -9,7 +9,6 @@ function Follow() {
 
     const {state} = useLocation();
     const { activeLeftTab } = state; // Read values passed on state
-
 
   return (
     <Container>
