@@ -6,7 +6,7 @@ import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
 import PostsPlaceholder from '../posts/PostsPlaceholder';
-import MorePosts from '../posts/MorePosts';
+import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
 
 
@@ -16,54 +16,54 @@ function Feed({ profileData }) {
     const routerLocation = useLocation();
 
     // state
-    const [loadingFeed, setLoadingFeed] = useState(true);
-    const [feedError, setFeedError] = useState(false);
-    const [feedNextPage, setFeedNextPage] = useState(null);
-    const [posts, setPosts] = useState(null);
-    const [morePostsLoading, setMorePostsLoading] = useState(false);
-    const [morePostsError, setMorePostsError] = useState(false);
+    const [loadingFeedItems, setLoadingFeedItems] = useState(true);
+    const [feedItemsError, setFeedItemsError] = useState(false);
+    const [feedItemsNextPage, setFeedItemsNextPage] = useState(null);
+    const [feedItems, setFeedItems] = useState(null);
+    const [moreFeedItemsLoading, setMoreFeedItemsLoading] = useState(false);
+    const [moreFeedItemsError, setMorePostsError] = useState(false);
 
     // functions
     const submitPostCallback = (newPost) => {
-        setPosts([newPost].concat(posts));
+        setFeedItems([newPost].concat(feedItems));
     }
 
     const fetchFeed = async () => {
-        setLoadingFeed(true);
+        setLoadingFeedItems(true);
         const res = await apiGetFeed();
 
         // success handling
         if (res.status === 200) {
             var data = await res.json();
-            setPosts(data["results"]);
-            setFeedError(false);
-            setLoadingFeed(false);
-            setFeedNextPage(data["next"]);
+            setFeedItems(data["results"]);
+            setFeedItemsError(false);
+            setLoadingFeedItems(false);
+            setFeedItemsNextPage(data["next"]);
         }
         // error handling
         else {
-            setFeedError(true);
-            setLoadingFeed(false);
+            setFeedItemsError(true);
+            setLoadingFeedItems(false);
             console.error(res);
         }
     }
 
     const fetchMoreFeedItems = async () => {
-        setMorePostsLoading(true);
-        const resp = await apiGetUrl(feedNextPage);
+        setMoreFeedItemsLoading(true);
+        const resp = await apiGetUrl(feedItemsNextPage);
 
         // success
         if (resp.status === 200) {
             var data = await resp.json();
-            setPosts(posts.concat(data["results"]));
+            setFeedItems(feedItems.concat(data["results"]));
             setMorePostsError(false);
-            setMorePostsLoading(false);
-            setFeedNextPage(data["next"]);
+            setMoreFeedItemsLoading(false);
+            setFeedItemsNextPage(data["next"]);
         }
         // error
         else {
             setMorePostsError(true);
-            setMorePostsLoading(false);
+            setMoreFeedItemsLoading(false);
             console.error(resp);
         }
     }
@@ -74,12 +74,12 @@ function Feed({ profileData }) {
      */
     useEffect(() => {
         // reset the current profile state
-        setLoadingFeed(true);
-        setPosts([]);
-        setFeedError(false);
+        setLoadingFeedItems(true);
+        setFeedItems([]);
+        setFeedItemsError(false);
         setMorePostsError(false);
-        setMorePostsLoading(false);
-        setFeedNextPage(null);
+        setMoreFeedItemsLoading(false);
+        setFeedItemsNextPage(null);
 
         // load the new feed items
         fetchFeed();
@@ -97,12 +97,12 @@ function Feed({ profileData }) {
             />
 
             {/* Feed or Placeholder */}
-            {loadingFeed === true
+            {loadingFeedItems === true
             ? <PostsPlaceholder />
-            : feedError === true
+            : feedItemsError === true
                 ? <FeedError retryAction={fetchFeed} />
                 : <Container>
-                    {posts && posts.map(post => (
+                    {feedItems && feedItems.map(post => (
                         <Post
                             key={post.id}
                             id={post.id}
@@ -120,13 +120,13 @@ function Feed({ profileData }) {
             }
 
             {/* More Feed Items Link (pagination) */}
-            {feedNextPage === null
+            {feedItemsNextPage === null
                 ? <></>
-                : morePostsLoading === true
+                : moreFeedItemsLoading === true
                     ? <PostsPlaceholder />
-                    : morePostsError === true
+                    : moreFeedItemsError === true
                         ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <MorePosts action={fetchMoreFeedItems} />
+                        : <MoreFeedItems action={fetchMoreFeedItems} />
             }
 
         </Container>
