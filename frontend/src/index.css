@@ -38,6 +38,7 @@ code {
 }
 
 .link-style:hover {
+  color:#4285F4;
   text-decoration: underline;
   text-decoration-thickness: 15%;
 }
