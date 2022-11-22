@@ -10,6 +10,7 @@ import {
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
+import ShowWalletOptions from './ShowWalletOptions.js'
 
 
 function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
@@ -21,9 +22,7 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
     const navigate = useNavigate()
 
     // Dependencies from wagmi
-    const { connect } = useConnect({
-        connector: new InjectedConnector()
-    });
+    const { connect, connector} = useConnect()
     const { address, isConnected } = useAccount()
     const { chain: activeChain } = useNetwork()
     const { signMessageAsync } = useSignMessage()
@@ -186,7 +185,7 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
             ? <Button variant="light" onClick={signOut}>Sign out</Button>
             : isConnected
                 ? <Button id="signInButton" disabled={isLoading} onClick={signIn}> Sign In</Button>
-                : <Button onClick={connect}>Connect</Button>
+                : <ShowWalletOptions/>
         }
     </div>
   );
