@@ -11,7 +11,7 @@ function Follow() {
     const { activeLeftTab } = state; // Read values passed on state
 
   return (
-    <Container>
+    <Container className='pb-5'>
         <LeftTabs
         firstTab={<Followers/>}
         secondTab={<Following/>}

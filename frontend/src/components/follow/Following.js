@@ -4,15 +4,19 @@ import { Container } from 'react-bootstrap';
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
-import { apiGetFollowing } from '../../api'
+import { apiGetFollowing, apiGetUrl } from '../../api'
 import FollowPlaceholder from './FollowPlaceholder';
 import FollowError from './FollowError';
+import MoreFollow from './MoreFollow';
 
 
 function Following() {
   const [followingList, setFollowingList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [followingError, setFollowingError] = useState(false)
+  const [followingNextPage, setFollowingNextPage] = useState(null)
+  const [moreFollowingLoading, setMoreFollowingLoading] = useState(false)
+  const [moreFollowingError, setMoreFollowingError] = useState(false)
   const { urlInput } = useParams();
   
   const fetchFollowing = async () => {
@@ -21,6 +25,7 @@ function Following() {
       if(resp.ok) {
         const json = await resp.json()
         setFollowingList(json.results)
+        setFollowingNextPage(json["next"])
         setIsLoading(false)
       } else if (!resp.ok) {
         setIsLoading(false)
@@ -28,6 +33,24 @@ function Following() {
         console.log('couldnt fetch followingList')
       }
   } 
+
+  const fetchMoreFollowing = async () => {
+    setMoreFollowingLoading(true)
+    const resp = await apiGetUrl(followingNextPage)
+
+    if(resp.ok) {
+      var data = await resp.json()
+      setFollowingList(followingList.concat(data["results"]))
+      setMoreFollowingError(false)
+      setMoreFollowingLoading(false)
+      setFollowingNextPage(data["next"])
+    }
+    else {
+      setMoreFollowingError(true)
+      setMoreFollowingLoading(false)
+      console.error(resp)
+    }
+  }
 
   useEffect(() => {
     fetchFollowing()
@@ -58,6 +81,16 @@ function Following() {
                             />
                       )}) }
                     </> }
+
+               {/* More Following (pagination) */}
+               {followingNextPage === null
+                    ? <></>
+                    : moreFollowingLoading === true
+                        ? <FollowPlaceholder />
+                        : moreFollowingError === true
+                            ? <FollowError retryAction={fetchFollowing} />
+                            : <MoreFollow action={fetchMoreFollowing}/>
+                }
     </Container>
   )
 }

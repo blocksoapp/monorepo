@@ -4,9 +4,10 @@ import { Container } from 'react-bootstrap'
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
-import { apiGetFollowers } from '../../api'
+import { apiGetFollowers, apiGetUrl } from '../../api'
 import FollowPlaceholder from './FollowPlaceholder'
 import FollowError from './FollowError'
+import MoreFollow from './MoreFollow'
 
 
 function Followers() {
@@ -15,6 +16,9 @@ function Followers() {
   const [isLoading, setIsLoading] = useState(false)
   const [active, setActive] = useState(true)
   const [followError, setFollowError] = useState(false)
+  const [followersNextPage, setFollowersNextPage] = useState(null)
+  const [moreFollowersLoading, setMoreFollowersLoading] = useState(false)
+  const [moreFollowersError, setMoreFollowersError] = useState(false)
   const { urlInput } = useParams();
   
   const fetchFollowers = async () => {
@@ -23,6 +27,7 @@ function Followers() {
       if(resp.ok) {
         const json = await resp.json()
         setFollowers(json.results)
+        setFollowersNextPage(json["next"])
         setIsLoading(false)
       } else if (!resp.ok) {
         setIsLoading(false)
@@ -30,6 +35,24 @@ function Followers() {
         console.log('couldnt fetch followers')
       }
   } 
+
+  const fetchMoreFollowers = async () => {
+    setMoreFollowersLoading(true)
+    const resp = await apiGetUrl(followersNextPage)
+
+    if(resp.ok) {
+      var data = await resp.json()
+      setFollowers(followers.concat(data["results"]))
+      setMoreFollowersError(false)
+      setMoreFollowersLoading(false)
+      setFollowersNextPage(data["next"])
+    }
+    else {
+      setMoreFollowersError(true)
+      setMoreFollowersLoading(false)
+      console.error(resp)
+    }
+  }
 
   useEffect(() => {
     fetchFollowers()
@@ -59,6 +82,16 @@ function Followers() {
                     />
               )}) }
             </> }
+
+            {/* More Following (pagination) */}
+            {followersNextPage === null
+                    ? <></>
+                    : moreFollowersLoading === true
+                        ? <FollowPlaceholder />
+                        : moreFollowersError === true
+                            ? <FollowError retryAction={fetchFollowers} />
+                            : <MoreFollow action={fetchMoreFollowers}/>
+                }
     </Container>
   )
 }

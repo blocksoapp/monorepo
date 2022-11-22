@@ -107,7 +107,7 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
+        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-sm-2 px-lg-5 light-hover">
                 <PfpResolver
                     address={props.address}
                     imgUrl={props.imgUrl}
