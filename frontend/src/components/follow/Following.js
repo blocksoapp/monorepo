@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap';
-import Loading from '../ui/Loading'
 import FollowNav from './FollowNav'
 import FollowCard from './FollowCard'
 import "./follow-custom.css"
 import { apiGetFollowing } from '../../api'
 import FollowPlaceholder from './FollowPlaceholder';
+import FollowError from './FollowError';
 
 
 function Following() {
   const [followingList, setFollowingList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(false)
+  const [followingError, setFollowingError] = useState(false)
   const { urlInput } = useParams();
   
   const fetchFollowing = async () => {
@@ -24,7 +24,7 @@ function Following() {
         setIsLoading(false)
       } else if (!resp.ok) {
         setIsLoading(false)
-        setError(true)
+        setFollowingError(true)
         console.log('couldnt fetch followingList')
       }
   } 
@@ -39,22 +39,25 @@ function Following() {
   return (
     <Container className="border p-0">
          <FollowNav address={urlInput}/>
-            {isLoading ? <FollowPlaceholder/>
-              :  <>
-              {(followingList === undefined || followingList.length === 0)
-              ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
-              : followingList.map( (following, index) => {
-                return (
-                      <FollowCard
-                      key={index}
-                      imgUrl={following.image}
-                      address={following.address}
-                      bio={following.bio}
-                      followedByMe={following.followedByMe}
-                      numFollowers={following.numFollowers}
-                      />
-                )}) }
-              </>}
+            {isLoading 
+              ? <FollowPlaceholder/>
+              : followingError 
+                ? <FollowError retryAction={fetchFollowing} />
+                : <>
+                  {(followingList === undefined || followingList.length === 0)
+                    ? <p className="fs-2 text-center align-item-center p-2">No results.</p>
+                    : followingList.map( (following, index) => {
+                      return (
+                            <FollowCard
+                            key={index}
+                            imgUrl={following.image}
+                            address={following.address}
+                            bio={following.bio}
+                            followedByMe={following.followedByMe}
+                            numFollowers={following.numFollowers}
+                            />
+                      )}) }
+                    </> }
     </Container>
   )
 }
