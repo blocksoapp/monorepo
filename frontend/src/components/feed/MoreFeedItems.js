@@ -12,7 +12,7 @@ function MoreFeedItems(props) {
                         <Button
                             size="sm"
                             variant="outline-primary"
-                            className="float-end"
+                            className="float-md-end mt-3 mt-md-0"
                             onClick={props.action}
                         >
                             Load More
