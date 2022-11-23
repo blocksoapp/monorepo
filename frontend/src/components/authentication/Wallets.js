@@ -1,35 +1,38 @@
 import React from 'react'
 import { useConnect } from 'wagmi'
-import { Row, Col, Button } from 'react-bootstrap'
+import { Button, Alert } from 'react-bootstrap'
 
-function WalletOptions() {
+function Wallets() {
     const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect()
  
     return (
-        <Row className='red-border'>
+        <div className=''>
             {connectors.map((connector) => (
-                <div className='d-flex flex-column p-0'>
-                    <button
+                <div className='d-flex flex-column py-1'>
+                    <Button
+                    className='p-2'
+                    
                     disabled={!connector.ready}
                     key={connector.id}
                     onClick={() => connect({ connector })}
                     >
-                    {connector.name}
-                    {!connector.ready && ' (unsupported)'}
-                    {isLoading &&
-                        connector.id === pendingConnector?.id &&
-                        ' (connecting)'}
-                    </button>
+                        <span className='fw-bold'>
+                            {connector.name}
+                            {!connector.ready && ' (unsupported)'}
+                            {isLoading &&
+                                connector.id === pendingConnector?.id &&
+                                ' (connecting)'}
+                        </span>
+                    </Button>
                 </div>
             ))}
-    
-            {error && <div>{error.message}</div>}
-        </Row>
+            {error && <Alert variant='danger' className='mt-4'>{error.message}</Alert>}
+        </div>
     )
 }
 
-export default WalletOptions
+export default Wallets
 
 
  
