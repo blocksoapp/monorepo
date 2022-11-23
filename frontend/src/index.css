@@ -49,6 +49,10 @@ code {
   text-decoration-thickness: 20%;
 }
 
+.popover {
+  border-radius: 1rem;
+}
+
 
 /* EXPLORE PAGE */
 

@@ -120,7 +120,14 @@ function FollowCard(props) {
                 <div className='flex-grow-1 ps-sm-4'>
                     <div className='follow-body'>
                         <div className='d-flex flex-column'>
-                            <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
+                            <ClickableEnsAndAddress 
+                            address={props.address} 
+                            bio={props.bio} 
+                            numFollowers={props.numFollowers}
+                            numFollowing={props.numFollowing}
+                            abbrBio={abbrBio}
+                            className='fs-5 primary-color-hover pointer' 
+                            onClick={navigateProfile}/>
                             <Badge className='text-dark bg-light align-self-sm-start align-self-center'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center follow-btn'>
