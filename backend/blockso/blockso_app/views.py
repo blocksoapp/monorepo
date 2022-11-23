@@ -390,6 +390,7 @@ class FeedList(generics.ListAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PostSerializer
+    pagination_class = pagination.FeedPagination
     queryset = Post.objects.all()
 
     def get_queryset(self):

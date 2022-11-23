@@ -1082,7 +1082,7 @@ class FeedTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.data, [])
+        self.assertEqual(resp.data["count"], 0)
 
     def test_get_feed_does_not_follow_others(self):
         """
@@ -1100,7 +1100,7 @@ class FeedTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.data, expected_posts)
+        self.assertEqual(resp.data["results"], expected_posts)
 
     def test_get_feed_follows_others(self):
         """
@@ -1127,13 +1127,13 @@ class FeedTests(BaseTest):
 
         # assert user 1 feed has the posts of user 1 and user 2
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(resp.data["count"], 2)
         self.assertEqual(
-            resp.data[0]["author"]["address"],
+            resp.data["results"][0]["author"]["address"],
             self.test_signer.address
         )
         self.assertEqual(
-            resp.data[1]["author"]["address"],
+            resp.data["results"][1]["author"]["address"],
             self.test_signer_2.address
         )
 

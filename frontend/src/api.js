@@ -32,6 +32,16 @@ export const apiGetExplore = async () => {
     return res;
 }
 
+/* Returns the response for the getting the feed items of the authed user. */
+export const apiGetFeed = async () => {
+    const url = `${baseAPI}/feed/`;
+    const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return res;
+}
+
 /* Returns the response for the notifications of the authed user. */
 export const apiGetNotifications = async () => {
     const url = `${baseAPI}/notifications/`;
