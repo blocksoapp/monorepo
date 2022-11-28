@@ -51,6 +51,8 @@ code {
 
 .popover {
   border-radius: 1rem;
+  min-width: 300px;
+  
 }
 
 
