@@ -11,6 +11,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected'
 import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
 import ShowWalletOptions from './ShowWalletOptions.js'
+import { ConnectKitButton } from "connectkit"
 
 
 function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
@@ -185,7 +186,7 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
             ? <Button variant="light" onClick={signOut}>Sign out</Button>
             : isConnected
                 ? <Button id="signInButton" disabled={isLoading} onClick={signIn}> Sign In</Button>
-                : <ShowWalletOptions/>
+                : <ConnectKitButton/>
         }
     </div>
   );

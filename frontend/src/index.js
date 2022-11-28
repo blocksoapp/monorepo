@@ -8,6 +8,7 @@ import {
     createClient,
     defaultChains
 } from 'wagmi'
+import { ConnectKitProvider } from "connectkit"
 import { infuraProvider } from 'wagmi/providers/infura'
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { InjectedConnector } from 'wagmi/connectors/injected'
@@ -30,6 +31,7 @@ const client = createClient({
       chains,
       options: {
         appName: 'wagmi',
+        headlessMode: true
       },
     }),
     new WalletConnectConnector({
@@ -59,7 +61,18 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <>
       <WagmiConfig client={client}> 
-      <App />
+        <ConnectKitProvider
+        theme="soft"
+         customTheme={{
+          "--ck-connectbutton-color": "#ffffff",
+          "--ck-connectbutton-background": "#0d6efd",
+          "--ck-connectbutton-hover-background": "#0b5ed7",
+          "--ck-connectbutton-font-size": "1rem",
+          "--ck-connectbutton-border-radius": ".375rem"
+        }}
+        >
+          <App />
+        </ConnectKitProvider>
       </WagmiConfig>
     </>
 );
