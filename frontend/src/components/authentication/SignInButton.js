@@ -7,10 +7,8 @@ import {
     useNetwork,
     useSignMessage
 } from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
 import { SiweMessage } from 'siwe'
 import { baseAPI, getCookie } from '../../utils.js'
-import ShowWalletOptions from './ShowWalletOptions.js'
 import { ConnectKitButton } from "connectkit"
 
 
