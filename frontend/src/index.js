@@ -41,7 +41,7 @@ const client = createClient({
     new InjectedConnector({
       chains,
       options: {
-        name: 'Injected',
+        name: 'All Others',
         shimDisconnect: true,
       },
     }),
