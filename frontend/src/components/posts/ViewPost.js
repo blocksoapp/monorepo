@@ -135,7 +135,7 @@ function ViewPost(props) {
             <Container className="mt-4">
 
                 <div className="d-flex justify-content-center align-items-center">
-                    <FontAwesomeIcon onClick={navigateHome} icon={faArrowLeft} className="fa-lg arrow pointer" />
+                    <FontAwesomeIcon onClick={()=> navigate(-1)} icon={faArrowLeft} className="fa-lg arrow pointer" />
                     <p className="fw-bold fs-4 ps-3 m-0">Thread</p>
                 </div>
 
