@@ -2,6 +2,7 @@ import CommentOnPostEvent from "./events/CommentOnPostEvent";
 import FollowedEvent from "./events/FollowedEvent";
 import MentionedInCommentEvent from "./events/MentionedInCommentEvent";
 import MentionedInPostEvent from "./events/MentionedInPostEvent";
+import RepostEvent from "./events/RepostEvent";
 
 
 function EventResolver({data, setHref}) {
@@ -36,6 +37,14 @@ function EventResolver({data, setHref}) {
             {data['followedEvent'] &&
                 <FollowedEvent
                     data={data['followedEvent']}
+                    setHref={setHref}
+                />
+            }
+
+            {/* user reposted your item */}
+            {data['repostEvent'] &&
+                <RepostEvent
+                    data={data['repostEvent']}
                     setHref={setHref}
                 />
             }

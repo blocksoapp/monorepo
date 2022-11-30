@@ -9,7 +9,8 @@ from web3 import Web3
 # our imports
 from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
         ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
-        MentionedInPostEvent, Notification, Post, Profile, Socials, Transaction
+        MentionedInPostEvent, Notification, Post, Profile, RepostEvent, \
+        Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -334,7 +335,13 @@ class PostSerializer(serializers.ModelSerializer):
             refTx=None
         )
 
-        # TODO handle notification that someone reposted your post
+        # notify the original post author about the repost
+        notif = Notification.objects.create(user=ref_post.author)
+        RepostEvent.objects.create(
+            notification=notif,
+            repost=post,
+            reposted_by=author
+        )
 
         return post
 
@@ -545,6 +552,22 @@ class FollowedEventSerializer(serializers.ModelSerializer):
         return ProfileSerializer(obj.followed_by).data
 
 
+class RepostEventSerializer(serializers.ModelSerializer):
+    """ RepostEvent model serializer. """
+
+    class Meta:
+        model = RepostEvent
+        fields = ["repostedBy", "repost", "created"]
+        read_only_fields = fields
+
+    repostedBy = serializers.SerializerMethodField("get_reposted_by")
+
+    def get_reposted_by(self, obj):
+        """ Returns the user that did the reposting. """
+
+        return ProfileSerializer(obj.reposted_by).data
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     """ Notification model serializer. """
 
@@ -566,6 +589,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             get_mentioned_in_comment_event(obj)
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
         events["followedEvent"] = self.get_followed_event(obj)
+        events["repostEvent"] = self.get_repost_event(obj)
 
         return events
 
@@ -619,4 +643,17 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return FollowedEventSerializer(
             obj.followed_event
+        ).data
+
+    def get_repost_event(self, obj):
+        """
+        Returns the RepostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "repost_event"):
+            return None
+
+        return RepostEventSerializer(
+            obj.repost_event
         ).data

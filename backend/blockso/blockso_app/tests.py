@@ -1604,3 +1604,35 @@ class NotificationTests(BaseTest):
 
         # assert that user 2 gets a 403
         self.assertEqual(resp.status_code, 403)
+
+    def test_repost_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user reposts their post.
+        """
+        # set up test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost user1's post by user2
+        self._do_login(self.test_signer_2)
+        resp = self._repost(post_id)
+        repost_id = resp.data["id"]
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 1 has a notification for the repost
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        event = notification["events"]["repostEvent"]
+        self.assertEqual(event["repost"], repost_id)
+        self.assertEqual(
+            event["repostedBy"]["address"],
+            self.test_signer_2.address
+        )

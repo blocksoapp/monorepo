@@ -270,3 +270,22 @@ class FollowedEvent(models.Model):
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)
+
+
+class RepostEvent(models.Model):
+    """ An event respresenting when a user's post is reposted. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="repost_event",
+        on_delete=models.CASCADE
+    )
+    repost = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    reposted_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
