@@ -7,7 +7,6 @@ import ClickableEnsAndAddress from '../ClickableEnsAndAddress';
 
 function FollowNav(props) {
   const navigate = useNavigate()
-  const location = useLocation()
 
   const navigateProfile = () => {
     navigate(`/${props.address}/profile`)
@@ -17,7 +16,7 @@ function FollowNav(props) {
         <>
               <div className='d-flex py-3 px-sm-5 border-bottom justify-content-center align-items-center'>
                 <div className='px-2'>
-                  <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg primary-color-hover pointer" />
+                  <FontAwesomeIcon icon={faArrowLeft} onClick={navigateProfile} className="fa-lg arrow pointer" />
                 </div>
                 <div className='px-1'>
                   <span><ClickableEnsAndAddress address={props.address} onClick={navigateProfile} className='pointer fs-4 primary-color-hover'/></span> 
