@@ -209,7 +209,7 @@ function Post({data, bgColor}) {
                                     <Col className="col-auto">
                                         <PfpResolver
                                             address={postData.author.address}
-                                            imgUrl={postData.author.pfp}
+                                            imgUrl={postData.author.image}
                                             height="100px"
                                             width="100px"
                                             fontSize="1rem"
