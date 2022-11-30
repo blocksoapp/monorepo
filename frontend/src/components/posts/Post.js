@@ -1,24 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { 
+    Badge,
     Button,
     Container,
     Card,
     Col,
     Image,
+    OverlayTrigger,
+    Popover,
     Row 
 } from "react-bootstrap"
 import { useNavigate } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
+import {
+    faComment,
+    faRetweet,
+} from '@fortawesome/free-solid-svg-icons';
 import { utils } from "ethers";
+import { apiDeleteRepost, apiPostPost } from "../../api";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
 
 
-function Post(props) {
+function Post({data, bgColor}) {
     // constants
     const datetimeOpts = {
         weekday: 'short',
@@ -37,29 +44,42 @@ function Post(props) {
     }
 
     // state
-    const refTx = props.refTx;
     const navigate = useNavigate();
+    const [postData, setPostData] = useState(data);
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
+    const repostRef = useRef(null);
 
     // functions
 
+    const determinePostType = function() {
+        // do nothing if the post is not a repost
+        if (!data.refPost) return
+
+        // if the post is a repost, then set its properties
+        // to mimic those of the post it is referencing
+        setPostData({
+            repostedBy: data.author,
+            ...data.refPost,
+        });
+    }
+    
     // TODO this will be adjusted in the future to deal
     // with more complex transactions
     const determineTxType = function() {
         // return if there is no ref tx
-        if (refTx === null) return
+        if (!postData.refTx) return
 
         // ERC20 transfer
-        if (refTx.erc20_transfers.length > 0) {
-            setErc20Transfers(refTx.erc20_transfers);
+        if (postData.refTx.erc20_transfers.length > 0) {
+            setErc20Transfers(postData.refTx.erc20_transfers);
             setTxType(txTypes.ERC20Transfer);
         }
 
         // ERC721 transfer
-        else if (refTx.erc721_transfers.length > 0) {
-            setErc721Transfers(refTx.erc721_transfers);
+        else if (postData.refTx.erc721_transfers.length > 0) {
+            setErc721Transfers(postData.refTx.erc721_transfers);
             setTxType(txTypes.ERC721Transfer);
         }
 
@@ -78,32 +98,118 @@ function Post(props) {
         return formatted;
     }
 
+    /*
+     * Handles user clicking the repost button.
+     * Reposts the item if the user has not already reposted it.
+     * Deletes the user's repost if the user has already reposted the item.
+     */
+    const handleRepostClick = async function() {
+        if (postData.repostedByMe === true) {
+            return deleteRepost();
+        }
+        else {
+            return doRepost();
+        }
+    }
+
+    /*
+     * Reposts the current post as the authenticated user.
+     */
+    const doRepost = async function() {
+        // prepare the request
+        const requestData = {
+            refPost: postData.id,
+            isShare: true
+        }
+        const resp = await apiPostPost(requestData);
+
+        // success handling
+        if (resp.status === 201) {
+            //var data = await resp.json();
+            setPostData({
+                ...postData,
+                numReposts: postData["numReposts"] + 1,
+                repostedByMe: true
+            });
+            repostRef.current.click();
+        }
+        // error handling
+        else {
+            console.error(resp);
+        }        
+    }
+
+    /*
+     * Deletes the user's repost.
+     */
+    const deleteRepost = async function() {
+        const resp = await apiDeleteRepost(postData["id"]);
+
+        // success handling
+        if (resp.status === 204) {
+            setPostData({
+                ...postData,
+                numReposts: postData["numReposts"] - 1,
+                repostedByMe: false
+            });
+        }
+        // error handling
+        else {
+            console.error(resp);
+        }        
+    }
+
     /* 
-     * Determines tx type on component mount.
+     * Determines post type on props change.
+     */
+    useEffect(() => {
+        determinePostType();
+    }, [data])
+
+    /* 
+     * Determines tx type on postData change.
+     * E.g. erc20 tx, erc721 tx
      */
     useEffect(() => {
         determineTxType();
-    }, [])
+    }, [postData])
 
 
     const render = function () {
-        const dateObj = new Date(props.created);
+        const dateObj = new Date(postData.created);
 
         // do not render spammy txs
+        // TODO improve hacky way of skipping spam
         if (erc20Transfers.length > 10 || erc721Transfers.length > 10) return
 
         return (
-            <Container id={props.id} className="mt-4">
+            <Container id={postData.id} className="mt-4">
                 <Row className="justify-content-center mb-4">
                     <Col xs={12} lg={6}>
                         <Card>
                             {/* Card header that includes pfp, address, created time. */}
-                            <Card.Header style={{ backgroundColor: props.bg}}>
+                            <Card.Header style={{ backgroundColor: bgColor}}>
+
+                                {/* Reposted By badge */}
+                                {postData["repostedBy"] &&
+                                 <Row>
+                                    <p className="fs-6 text-end">
+                                        <Badge bg="info">
+                                            Reposted by &nbsp;
+                                            <AuthorAddress
+                                                address={postData["repostedBy"]["address"]}
+                                            />
+                                        </Badge>
+                                    </p>
+                                 </Row>
+                                }
+
+                                {/* post author pfp, address, created time. */}
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
                                         <PfpResolver
-                                            address={props.author}
-                                            imgUrl={props.pfp}
+                                            address={postData.author.address}
+                                            imgUrl={postData.author.pfp}
                                             height="100px"
                                             width="100px"
                                             fontSize="1rem"
@@ -111,7 +217,7 @@ function Post(props) {
                                     </Col>
                                     <Col className="col-auto">
                                         <h5>
-                                            <AuthorAddress address={props.author} />
+                                            <AuthorAddress address={postData.author.address} />
                                         </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}
@@ -121,14 +227,14 @@ function Post(props) {
                             </Card.Header>
 
                             {/* Card body that includes the post details. */}
-                            {(props.text !== "" || props.imgUrl !== "" ) && 
+                            {(postData.text !== "" || postData.imgUrl !== "" ) && 
                             <Card.Body>
                                 <Row>
                                     <Col className="col-auto">
-                                        {props.imgUrl !== "" && <Card.Img src={props.imgUrl} />}
+                                        {postData.imgUrl !== "" && <Card.Img src={postData.imgUrl} />}
                                         <Card.Text>
                                             <MentionsOutput
-                                                text={props.text}
+                                                text={postData.text}
                                             />
                                         </Card.Text>
                                     </Col>
@@ -141,7 +247,6 @@ function Post(props) {
                             {txType === txTypes.ERC20Transfer &&
                             <Card.Body>
                                 {/* show all transfers of a transaction */}
-                                {/* TODO improve hacky way of skipping spam which is currently checking if there are more than 10 transfers */}
                                 {erc20Transfers.map(transfer => (
                                     <Row className="align-items-end">
                                         {/* token image */}
@@ -160,7 +265,7 @@ function Post(props) {
                                                 Sent&nbsp;
                                                 <a
                                                     className="text-success"
-                                                    href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
+                                                    href={`https://etherscan.io/tx/${postData.refTx.tx_hash}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     style={{ fontStyle: 'italic', color: 'black' }}
@@ -214,16 +319,16 @@ function Post(props) {
                                             Sent a&nbsp;
                                             <a
                                                 className="text-success"
-                                                href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
+                                                href={`https://etherscan.io/tx/${postData.refTx.tx_hash}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ fontStyle: 'italic', color: 'black' }}
                                             >
                                                 transaction
                                             </a>
-                                            {props.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(props.refTx.value, 18)} ETH</span>}
+                                            {postData.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(postData.refTx.value, 18)} ETH</span>}
                                             &nbsp;to&nbsp; 
-                                            <TxAddress address={props.refTx["to_address"]} />
+                                            <TxAddress address={postData.refTx["to_address"]} />
                                         </Card.Text>
                                     </Col>
                                 </Row>
@@ -233,27 +338,54 @@ function Post(props) {
                             {/* Card footer that includes the action buttons. */}
                             <Card.Footer>
                                 <Row className="justify-content-around align-items-center">
-                                    <Col className="col-auto border-end border-3">
-                                        <span className="text-muted">Coming Soon</span>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faHeart} /></Button>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faRetweet} /></Button>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        <Button size="sm" variant="light"><FontAwesomeIcon icon={faQuoteRight} /></Button>
-                                    </Col>
+
+                                    {/* Comment button */}
                                     <Col className="col-auto">
                                         <Button
                                             size="sm"
                                             variant="light"
-                                            onClick={() => {navigate(`/posts/${props.id}`)}}
+                                            onClick={() => {navigate(`/posts/${postData.id}`)}}
                                         >
-                                            {props.numComments}&nbsp;&nbsp;
+                                            {postData.numComments}&nbsp;&nbsp;
                                             <FontAwesomeIcon icon={faComment} />
                                         </Button>
+                                    </Col>
+
+                                    {/* Repost button and Confirmation */}
+                                    <Col className="col-auto">
+                                        {/* confirmation popover */}
+                                        <OverlayTrigger
+                                            trigger="click"
+                                            rootClose={true}
+                                            placement="right"
+                                            overlay={
+                                                <Popover>
+                                                    <Popover.Body>
+                                                        {/* Confirm button */}
+                                                        <Button
+                                                            variant="success"
+                                                            onClick={() => handleRepostClick()}
+                                                        >
+                                                            Confirm
+                                                        </Button>
+                                                    </Popover.Body>
+                                                </Popover>
+                                            }
+                                        >
+                                            {/* Repost button */}
+                                            <Button
+                                                size="sm"
+                                                variant={
+                                                    postData["repostedByMe"] === true
+                                                        ? "secondary"
+                                                        : "light"
+                                                }
+                                                ref={repostRef}
+                                            >
+                                                {postData.numReposts}&nbsp;&nbsp;
+                                                <FontAwesomeIcon icon={faRetweet} />
+                                            </Button>
+                                        </OverlayTrigger>
                                     </Col>
 
                                 </Row>
