@@ -33,6 +33,7 @@ function Feed({ profileData }) {
         // success handling
         if (res.status === 200) {
             var data = await res.json();
+            console.log("data: ", data)
             setPosts(data);
             setFeedError(false);
             setLoadingFeed(false);
@@ -71,13 +72,15 @@ function Feed({ profileData }) {
                             key={post.id}
                             id={post.id}
                             author={post.author.address}
+                            bio={post.author.bio}
                             text={post.text}
                             pfp={post.author.image}
                             imgUrl={post.imgUrl}
                             created={post.created}
                             refTx={post.refTx}
                             numComments={post.numComments}
-                            profileAddress={profileData['address']}
+                            numFollowers={post.author.numFollowers}
+                            numFollowing={post.author.numFollowing}
                         />
                     ))}
                 </Container>

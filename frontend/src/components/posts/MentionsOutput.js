@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import TxAddress from "../TxAddress";
 
 
-function MentionsOutput({text}) {
+function MentionsOutput({text, bio, numFollowers, numFollowing}) {
 
     // constants
     const addrRegex = /\(0x\w{40}\)/gmi;
@@ -30,7 +30,12 @@ function MentionsOutput({text}) {
              parts.map((part, index) => {
                  var match = part.match(addrRegex);
                  if (match) {
-                     return <TxAddress key={index} address={match[0].substr(1,42)} />
+                     return <TxAddress 
+                     key={index} 
+                     address={match[0].substr(1,42)}
+                     bio={bio}
+                     numFollowers={numFollowers}
+                     numFollowing={numFollowing} />
                  }
                  else {
                      return <span key={index}>{part}</span>;

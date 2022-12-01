@@ -129,6 +129,9 @@ function Post(props) {
                                         <Card.Text>
                                             <MentionsOutput
                                                 text={props.text}
+                                                bio={props.bio}
+                                                numFollowers={props.numFollowers}
+                                                numFollowing={props.numFollowing}
                                             />
                                         </Card.Text>
                                     </Col>
@@ -168,7 +171,11 @@ function Post(props) {
                                                     {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress address={transfer.to_address} />
+                                                <TxAddress
+                                                address={transfer.to_address}
+                                                bio={props.bio}
+                                                numFollowers={props.numFollowers}
+                                                numFollowing={props.numFollowing} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -197,7 +204,11 @@ function Post(props) {
                                                     {transfer.contract_ticker} #{transfer.token_id}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress address={transfer.to_address} />
+                                                <TxAddress 
+                                                address={transfer.to_address}
+                                                bio={props.bio}
+                                                numFollowers={props.numFollowers}
+                                                numFollowing={props.numFollowing} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -223,7 +234,11 @@ function Post(props) {
                                             </a>
                                             {props.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(props.refTx.value, 18)} ETH</span>}
                                             &nbsp;to&nbsp; 
-                                            <TxAddress address={props.refTx["to_address"]} />
+                                            <TxAddress 
+                                            address={props.refTx["to_address"]}
+                                            bio={props.bio}
+                                            numFollowers={props.numFollowers}
+                                            numFollowing={props.numFollowing} />
                                         </Card.Text>
                                     </Col>
                                 </Row>
