@@ -52,11 +52,6 @@ const client = createClient({
   webSocketProvider,
 })
 
-/* const client = createClient({
-  autoConnect: true,
-  provider: provider,
-}) */
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <>
