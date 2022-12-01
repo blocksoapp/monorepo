@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 # third party imports
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from web3 import Web3
@@ -301,6 +302,10 @@ class PostSerializer(serializers.ModelSerializer):
         # handle using serializer outside of a request
         request = self.context.get("request")
         if request is None:
+            return False
+
+        # handle anonymous users, i.e. not signed in
+        if isinstance(request.user, AnonymousUser):
             return False
 
         return Post.objects.filter(

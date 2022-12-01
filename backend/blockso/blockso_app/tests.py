@@ -992,6 +992,25 @@ class PostTests(BaseTest):
         # assert that numReposts is equal to 1
         self.assertEqual(resp.data["results"][0]["refPost"]["numReposts"], 1)
 
+    def test_get_reposted_by_me_unauthed(self):
+        """
+        Assert that 'respostedByMe' is False if the
+        current user is not authenticated.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request to get original post as unauthed user
+        self._do_logout()
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # assert that repostedByMe is False
+        self.assertFalse(resp.data["repostedByMe"])
+
     def test_cannot_repost_own_post(self):
         """
         Assert that a user cannot repost their own post.
