@@ -6,11 +6,11 @@ import PfpResolver from '../../PfpResolver'
 function ProfilePreview(props) {
 
   return (
-    <Container className=''>
+    <div>
          {
           props.previewLoading ? <p>Loading...</p>
             : props.previewData 
-              ? <>
+              ? <div>
                   <PfpResolver
                   address={props.address}
                   imgUrl={props.imgUrl}
@@ -19,19 +19,19 @@ function ProfilePreview(props) {
                   fontSize="0.8rem"
                   className="pointer d-flex justify-content-center mt-2"
                   />
-                  <div>
+                  <div className='text-center'>
                     <EnsAndAddress address={props.address}/>
-                    <div className='d-flex'>
+                    <div className='d-flex justify-content-center'>
                         <Badge className='text-dark bg-light align-self-sm-start align-self-center'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         <Badge className='text-dark bg-light align-self-sm-start align-self-center'>{props.numFollowing} following </Badge>
                     </div>
                     <p>{props.bio}</p>
                   </div>
-                </>
-                : <Alert className="align-self-middle" variant="danger">No profile to preview.</Alert>
+                </div>
+                : <Alert className="text-center mb-0 fs-6" variant="danger">No profile to preview.</Alert>
          }
             
-    </Container>
+    </div>
   )
 }
 
