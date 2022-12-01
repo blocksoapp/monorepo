@@ -12,7 +12,9 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { utils } from "ethers";
-import Pfp from '../Pfp';
+import MentionsOutput from './MentionsOutput';
+import PfpResolver from '../PfpResolver';
+import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
 
 
@@ -37,13 +39,9 @@ function Post(props) {
     // state
     const refTx = props.refTx;
     const navigate = useNavigate();
-    const ensAvatar = useEnsAvatar({addressOrName: props.author});
-    const ensNameHook = useEnsName({address: props.author});
     const [erc20Transfers, setErc20Transfers] = useState([]);
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
-    const [ensName, setEnsName] = useState(props.ensName);
-    const [pfp, setPfp] = useState(props.pfp);
 
     // functions
 
@@ -75,7 +73,9 @@ function Post(props) {
      * Formats token amount with decimal places.
      */
     const formatTokenAmount = function(amount, decimals) {
-        return utils.formatUnits(amount, decimals);
+        var formatted = utils.formatUnits(amount, decimals);
+        formatted = (+formatted).toFixed(4);  // truncate after 4 places
+        return formatted;
     }
 
     /* 
@@ -85,29 +85,6 @@ function Post(props) {
         determineTxType();
     }, [])
 
-    /* 
-     * Sets the user's ens name if it has not been passed in from props.
-     */
-    useEffect(() => {
-        if (!ensName) {
-            if (!ensNameHook.isLoading && ensNameHook.data !== null) {
-                setEnsName(ensNameHook.data);
-            }
-        }
-    }, [ensNameHook])
-
-    /* 
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     */
-    useEffect(() => {
-        if (!pfp) {
-            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfp(ensAvatar.data);
-            }
-        }
-    }, [ensAvatar])
-
 
     const render = function () {
         const dateObj = new Date(props.created);
@@ -116,7 +93,7 @@ function Post(props) {
         if (erc20Transfers.length > 10 || erc721Transfers.length > 10) return
 
         return (
-            <Container className="mt-4">
+            <Container id={props.id} className="mt-4">
                 <Row className="justify-content-center mb-4">
                     <Col xs={12} lg={6}>
                         <Card>
@@ -124,21 +101,17 @@ function Post(props) {
                             <Card.Header style={{ backgroundColor: props.bg}}>
                                 <Row className="align-items-end">
                                     <Col className="col-auto">
-                                        <Pfp
+                                        <PfpResolver
+                                            address={props.author}
+                                            imgUrl={props.pfp}
                                             height="100px"
                                             width="100px"
-                                            imgUrl={pfp}
-                                            address={props.author}
-                                            ensName={ensName}
                                             fontSize="1rem"
                                         />
                                     </Col>
                                     <Col className="col-auto">
                                         <h5>
-                                            <TxAddress
-                                                address={props.author}
-                                                profileAddress={props.profileAddress}
-                                            />
+                                            <AuthorAddress address={props.author} />
                                         </h5>
                                         <p>
                                             {dateObj.toLocaleDateString("en-US", datetimeOpts)}
@@ -154,7 +127,9 @@ function Post(props) {
                                     <Col className="col-auto">
                                         {props.imgUrl !== "" && <Card.Img src={props.imgUrl} />}
                                         <Card.Text>
-                                            {props.text}
+                                            <MentionsOutput
+                                                text={props.text}
+                                            />
                                         </Card.Text>
                                     </Col>
                                 </Row>
@@ -182,11 +157,7 @@ function Post(props) {
                                         {/* transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text className="text-wrap">
-                                                <TxAddress
-                                                    address={transfer.from_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
-                                                &nbsp;sent&nbsp;
+                                                Sent&nbsp;
                                                 <a
                                                     className="text-success"
                                                     href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
@@ -197,10 +168,7 @@ function Post(props) {
                                                     {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress
-                                                    address={transfer.to_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
+                                                <TxAddress address={transfer.to_address} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -218,11 +186,7 @@ function Post(props) {
                                         {/* nft transfer details */}
                                         <Col className="col-auto">
                                             <Card.Text>
-                                                <TxAddress
-                                                    address={transfer.from_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
-                                                &nbsp;sent&nbsp;
+                                                Sent&nbsp;
                                                 <a
                                                     className="text-success"
                                                     href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
@@ -233,10 +197,7 @@ function Post(props) {
                                                     {transfer.contract_ticker} #{transfer.token_id}
                                                 </a>
                                                 &nbsp;to&nbsp;
-                                                <TxAddress
-                                                    address={transfer.to_address}
-                                                    profileAddress={props.profileAddress}
-                                                />
+                                                <TxAddress address={transfer.to_address} />
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -250,11 +211,7 @@ function Post(props) {
                                 <Row>
                                     <Col className="col-auto">
                                         <Card.Text>
-                                            <TxAddress
-                                                address={props.refTx["from_address"]}
-                                                profileAddress={props.profileAddress}
-                                            />
-                                            &nbsp;sent a&nbsp;
+                                            Sent a&nbsp;
                                             <a
                                                 className="text-success"
                                                 href={`https://etherscan.io/tx/${props.refTx.tx_hash}`}
@@ -266,10 +223,7 @@ function Post(props) {
                                             </a>
                                             {props.refTx.value !== "0" && <span>&nbsp;worth {formatTokenAmount(props.refTx.value, 18)} ETH</span>}
                                             &nbsp;to&nbsp; 
-                                            <TxAddress
-                                                address={props.refTx["to_address"]}
-                                                profileAddress={props.profileAddress}
-                                            />
+                                            <TxAddress address={props.refTx["to_address"]} />
                                         </Card.Text>
                                     </Col>
                                 </Row>

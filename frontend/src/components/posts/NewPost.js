@@ -9,17 +9,17 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { baseAPI, getCookie } from '../../utils'
-import Pfp from '../Pfp';
+import { baseAPI, getCookie } from '../../utils';
+import MentionsInput from "./MentionsInput";
+import PfpResolver from '../PfpResolver';
 
 
 function NewPost({ profileData, submitPostCallback }) {
 
     // state
     const { address, image } = {...profileData.profile}
-    const ensAvatar = useEnsAvatar({addressOrName: address});
-    const [pfpUrl, setPfpUrl] = useState(image);
     const [postText, setPostText] = useState("");
+    const [taggedUsers, setTaggedUsers] = useState([]);
 
     // functions
 
@@ -31,6 +31,7 @@ function NewPost({ profileData, submitPostCallback }) {
         const url = `${baseAPI}/posts/${address}/`;
         const data = {
             text: postText,
+            tagged_users: taggedUsers,
             imgUrl: "",
             isShare: false,
             isQuote: false,
@@ -51,24 +52,13 @@ function NewPost({ profileData, submitPostCallback }) {
         if (resp.status === 201) {
             // clear form
             setPostText("");
+            setTaggedUsers([]);
 
             // add post to feed
             const postData = await resp.json();
             submitPostCallback(postData);
         }
     }
-
-    /*
-     * Sets the user's pfp to their ens avatar,
-     * if the user has not uploaded a profile pic.
-     */
-    useEffect(() => {
-        if (!pfpUrl) {
-            if (!ensAvatar.isLoading && ensAvatar.data !== null) {
-                setPfpUrl(ensAvatar.data);
-            }
-        }
-    }, [ensAvatar])
 
 
     return (
@@ -78,13 +68,13 @@ function NewPost({ profileData, submitPostCallback }) {
                     <Card style={{ backgroundColor: "#fffff0" }}>
                         {/* Card body that includes the post form details. */}
                         <Card.Body>
-                            <Row>
+                            <Row className="align-items-center">
                                 <Col className="col-auto">
-                                    <Pfp
+                                    <PfpResolver
+                                        address={address}
+                                        imgUrl={image}
                                         height="100px"
                                         width="100px"
-                                        imgUrl={pfpUrl}
-                                        address={address}
                                         fontSize="1rem"
                                     />
                                 </Col>
@@ -93,19 +83,16 @@ function NewPost({ profileData, submitPostCallback }) {
                                         <Row>
                                             <Col>
                                                 <InputGroup>
-                                                    <Form.Control
-                                                        as="textarea"
-                                                        aria-label="With textarea"
-                                                        placeholder="What kinda cool stuff are we gonna post today!?"
-                                                        type="text"
-                                                        size="lg"
-                                                        value={postText}
-                                                        onChange={(event) => setPostText(event.target.value)}
+                                                    <MentionsInput
+                                                        placeholder="What's on your mind?"
+                                                        text={postText}
+                                                        setText={setPostText}
+                                                        setTaggedUsers={setTaggedUsers}
                                                     />
                                                 </InputGroup>
                                             </Col>
-                                            <Col className="col-auto">
-                                                <Button className="mt-3 float-end" variant="primary" type="submit">
+                                            <Col className="col-auto align-self-center">
+                                                <Button variant="primary" type="submit">
                                                     Submit
                                                 </Button>
                                             </Col>

@@ -24,6 +24,9 @@ erc20_transfer_sig = "Transfer(indexed address from, "\
 erc721_transfer_sig = "Transfer(indexed address from, "\
                      "indexed address to, indexed uint256 tokenId)"
 
+# other constants
+zero_address = "0x0000000000000000000000000000000000000000"
+
 
 def get_tx_history_url(address, page_size, page_number):
     """
@@ -104,6 +107,11 @@ def parse_and_create_tx(tx_data, address):
 
     # create transaction if it originated from the given address
     if object_kwargs["from_address"] == address:
+        # recipient in contract creation txs comes back as None,
+        # set it to zero address instead
+        if object_kwargs["to_address"] is None:
+            object_kwargs["to_address"] = zero_address
+
         tx = Transaction.objects.create(**object_kwargs)
 
     # create db records for the events we support
@@ -173,7 +181,7 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
-    address = post_author.ethereum_address.lower()
+    address = post_author.user.ethereum_address.lower()
 
     # create Post if author is the sender of the tx
     if tx_record.from_address == address:
@@ -217,7 +225,7 @@ def process_address_txs(address):
 
     # create a user/profile if they do not already exist
     user, _ = UserModel.objects.get_or_create(ethereum_address=address)
-    Profile.objects.get_or_create(user=user)
+    user, _ = Profile.objects.get_or_create(user=user)
 
     # create db records based on history
     for transaction in history:

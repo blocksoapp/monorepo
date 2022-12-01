@@ -1,25 +1,27 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { useNavigate, Link } from 'react-router-dom';
 import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
+import {
+    apiGetPosts, apiGetProfile, apiPostFollow, apiPostUnfollow, apiGetUrl
+} from '../../../api';
+import { UserContext } from '../../../contexts/UserContext';
 import Post from '../../posts/Post.js'; 
-import { baseAPI, getCookie } from '../../../utils.js'
-import { apiGetPosts } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
+import MorePosts from "../../posts/MorePosts";
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
-import Pfp from '../../Pfp';
-import { UserContext } from '../../../contexts/UserContext'
-
+import PfpResolver from '../../PfpResolver';
 
 function Profile(props) {
     // constants
-    const ensAvatar = useEnsAvatar({addressOrName: props.address});
     const { user } = useContext(UserContext)
+    const navigate = useNavigate()
 
     // state
     const [profileDataLoading, setProfileDataLoading] = useState(true);
@@ -27,10 +29,12 @@ function Profile(props) {
     const [postsLoading, setPostsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
-    const [pfpUrl, setPfpUrl] = useState(null);
+    const [activeLeftTab, setActiveLeftTab] = useState('first')
+    const [postsNextPage, setPostsNextPage] = useState(null);
+    const [morePostsLoading, setMorePostsLoading] = useState(false);
+    const [morePostsError, setMorePostsError] = useState(false);
  
     // functions
-
     const fetchPosts = async () => {
         setPostsLoading(true);
         const res = await apiGetPosts(props.address);
@@ -40,6 +44,7 @@ function Profile(props) {
             setPosts(data["results"]);
             setPostsError(false);
             setPostsLoading(false);
+            setPostsNextPage(data["next"]);
         }
         else {
             setPostsError(true);
@@ -48,13 +53,29 @@ function Profile(props) {
         }
     }
 
+    const fetchMorePosts = async () => {
+        setMorePostsLoading(true);
+        const resp = await apiGetUrl(postsNextPage);
+
+        // success
+        if (resp.status === 200) {
+            var data = await resp.json();
+            setPosts(posts.concat(data["results"]));
+            setMorePostsError(false);
+            setMorePostsLoading(false);
+            setPostsNextPage(data["next"]);
+        }
+        // error
+        else {
+            setMorePostsError(true);
+            setMorePostsLoading(false);
+            console.error(resp);
+        }
+    }
+
     const fetchProfile = async () => {
-        const url = `${baseAPI}/${props.address}/profile/`;
+        const res = await apiGetProfile(props.address)
         setProfileDataLoading(true);
-        const res = await fetch(url, {
-            method: 'GET',
-            credentials: 'include'
-        });
         if (res.status === 200) {
             var data = await res.json();
             setProfileData(data);
@@ -71,14 +92,7 @@ function Profile(props) {
     }
 
     const handleUnfollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
+        const res = await apiPostUnfollow(props.address)
         if (res.ok) {
             setProfileData({
                 ...profileData,
@@ -89,14 +103,7 @@ function Profile(props) {
     }
 
     const handleFollow = async () => {
-        const url = `${baseAPI}/${props.address}/follow/`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
+        const res = await apiPostFollow(props.address)
         if (res.ok) {
             setProfileData({
                 ...profileData,
@@ -105,6 +112,15 @@ function Profile(props) {
             });
         }
     }
+    
+        // Navigate to user's followers
+        const handleFollowerClick = () => {
+            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'first' } })
+        }
+
+        const handleFollowingClick = () => {
+            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'second' } })
+        }
 
     // effects
 
@@ -123,34 +139,15 @@ function Profile(props) {
         setPostsLoading(true);
         setPosts([]);
         setPostsError(false);
-        setPfpUrl(null);
+        setMorePostsError(false);
+        setMorePostsLoading(false);
+        setPostsNextPage(null);
 
         // load the new profile and its posts
         fetchProfile();
         fetchPosts();
 
     }, [props.address])
-
-
-    /*
-     * Set profile picture if user has uploaded one.
-     */
-    useEffect(() => {
-        if ("image" in profileData && profileData["image"] !== "") {
-            setPfpUrl(profileData["image"]);
-        }
-    }, [profileData])
-
-
-    /*
-     * Set pfp url to the ens avatar if the user does
-     * not have a profile pic and does have an ens avatar.
-     */
-    useEffect(() => {
-        if (!pfpUrl && !ensAvatar.isLoading && ensAvatar.data !== null) {
-            setPfpUrl(ensAvatar.data);
-        }
-    }, [ensAvatar])
 
 
     useEffect(() => {
@@ -181,12 +178,11 @@ function Profile(props) {
                         {/* Profile picture */}
                         <Row className="justify-content-center">
                             <Col className="col-auto">
-                                <Pfp
+                                <PfpResolver
+                                    address={props.address}
+                                    imgUrl={profileData["image"]}
                                     height="256px"
                                     width="256px"
-                                    imgUrl={pfpUrl}
-                                    address={props.address}
-                                    ensName={props.ensName}
                                     fontSize="1.75rem"
                                 />
                             </Col>
@@ -211,44 +207,45 @@ function Profile(props) {
                         </Row>
 
                         {/* Follower/Following counts and Follow button */}
-                        <Row className="justify-content-center mt-3 mb-3">
-                            <Col className="col-auto">
-                                <h5>
-                                    <Badge bg="secondary">
-                                        {profileData["numFollowers"]}
-                                        {profileData["numFollowers"] === 1 ?
-                                            " Follower" : " Followers"}
-                                    </Badge> 
-                                </h5>
-                            </Col>
-                            <Col className="col-auto">
-                                <h5>
-                                    <Badge bg="secondary">
-                                        {profileData["numFollowing"]} Following
-                                    </Badge> 
-                                </h5>
-                            </Col>
-                            <Col className="col-auto">
-                                {user !== null && profileData["followedByMe"] === true
-                                    ? <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={handleUnfollow}
-                                        disabled={user !== null && user["address"] === props.address ? true : false}
-                                      >
-                                        Unfollow
-                                      </Button> 
-                                    : <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={handleFollow}
-                                        disabled={user !== null && user["address"] === props.address ? true : false}
-                                      >
-                                        Follow
-                                      </Button>
-                                }
-                            </Col>
-                        </Row>
+                            <Row className="justify-content-center mt-3 mb-3">
+                                <Col className="col-auto">
+                                    <h5>
+                                            <Badge bg="secondary" className="pointer light-hover " onClick={handleFollowerClick}>
+                                            
+                                                {profileData["numFollowers"]}
+                                                {profileData["numFollowers"] === 1 ?
+                                                    " Follower" : " Followers"}
+                                            </Badge> 
+                                    </h5>
+                                </Col>
+                                <Col className="col-auto">
+                                    <h5>   
+                                            <Badge bg="secondary" className="pointer" onClick={handleFollowingClick}>
+                                                {profileData["numFollowing"]} Following
+                                            </Badge> 
+                                    </h5>
+                                </Col>
+                                <Col className="col-auto">
+                                    {user !== null && profileData["followedByMe"] === true
+                                        ? <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={handleUnfollow}
+                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                        >
+                                            Unfollow
+                                        </Button> 
+                                        : <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={handleFollow}
+                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                        >
+                                            Follow
+                                        </Button>
+                                    }
+                                </Col>
+                            </Row>
 
                     </Container>
                 </Container>
@@ -265,17 +262,27 @@ function Profile(props) {
                             <Post
                                 key={post.id}
                                 id={post.id}
-                                author={post.author}
+                                author={post.author.address}
                                 ensName={props.ensName}
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
-                                pfp={post.pfp}
+                                pfp={post.author.image}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
-                                profileAddress={props.address}
                             />
             ))}
+
+            {/* More Posts Link (pagination) */}
+            {postsNextPage === null
+                ? <></>
+                : morePostsLoading === true
+                    ? <PostsPlaceholder />
+                    : morePostsError === true
+                        ? <PostsError retryAction={fetchMorePosts} />
+                        : <MorePosts action={fetchMorePosts} />
+            }
+
         </>
     )
 }

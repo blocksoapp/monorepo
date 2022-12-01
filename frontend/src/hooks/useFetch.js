@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * Returns null if no data.
  */
 
-export function useFetch(url) {
+export function UseFetch(url) {
     const [data, setData] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)

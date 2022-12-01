@@ -40,12 +40,12 @@ class Follow(models.Model):
     """ Represents the follower-followed relationship between users. """
 
     src = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="follow_src"
     )
     dest = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="follow_dest"
     )
@@ -123,11 +123,15 @@ class Post(models.Model):
 
 
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="posts"
     )
     text = models.TextField(blank=True)
+    tagged_users = models.ManyToManyField(
+        to=Profile,
+        blank=True
+    )
     imgUrl = models.URLField(blank=True)
     isShare = models.BooleanField(blank=False)
     isQuote = models.BooleanField(blank=False)
@@ -154,7 +158,7 @@ class Comment(models.Model):
 
     
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         on_delete=models.CASCADE,
         related_name="comments"
     )
@@ -166,7 +170,103 @@ class Comment(models.Model):
     )
     text = models.TextField(blank=False)
     tagged_users = models.ManyToManyField(
-        to=settings.AUTH_USER_MODEL,
+        to=Profile,
         blank=True
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    """ Represents a Notification created for a user. """
+
+    class Meta:
+        ordering = ["-created"]
+
+    
+    user = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+
+
+class MentionedInPostEvent(models.Model):
+    """ An event respresenting when a user is mentioned in a post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="mentioned_in_post_event",
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    mentioned_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class MentionedInCommentEvent(models.Model):
+    """ An event respresenting when a user is mentioned in a comment. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="mentioned_in_comment_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    mentioned_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class CommentOnPostEvent(models.Model):
+    """ An event respresenting when someone comments on a user's post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="comment_on_post_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    commentor = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class FollowedEvent(models.Model):
+    """ An event respresenting when a user is followed by another. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="followed_event",
+        on_delete=models.CASCADE
+    )
+    follow = models.ForeignKey(
+        to=Follow,
+        on_delete=models.CASCADE
+    )
+    followed_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)

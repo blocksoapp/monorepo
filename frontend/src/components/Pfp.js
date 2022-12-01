@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Card, Image } from "react-bootstrap";
-import { useEnsAvatar, useEnsName } from "wagmi";
 import { abbrAddress } from "../utils";
 
 
@@ -16,7 +14,7 @@ function Pfp(props) {
 
     // render
     return (
-        <div>
+        <div className={props.className} onClick={props.onClick}>
         {/* Show grey placeholder image if address is null */}
         {!props.address
             ?   <Card

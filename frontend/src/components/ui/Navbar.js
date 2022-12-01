@@ -3,6 +3,7 @@ import { Button, Container, Col, Form, Nav, Navbar, NavDropdown, NavItem } from 
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAccount } from 'wagmi';
 import SignInButton from '../authentication/SignInButton';
+import NotificationsDropdown from '../notifications/NotificationsDropdown';
 import { UserContext } from '../../contexts/UserContext'
 
 function NavbarComponent() {
@@ -53,11 +54,16 @@ function NavbarComponent() {
             </Col>
           </Nav>
         </Navbar.Collapse>
-          <SignInButton 
+
+        {/* Notifications */}
+        {user !== null && <NotificationsDropdown />}
+
+        {/* Sign In/Out */}
+        <SignInButton 
           setUser={setUser} 
           isAuthenticated={isAuthenticated}
           setIsAuthenticated={setIsAuthenticated}
-          />
+        />
       </Container>
     </Navbar>
   );

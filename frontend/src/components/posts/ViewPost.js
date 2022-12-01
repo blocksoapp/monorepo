@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetComments, apiGetPost, apiGetUrl } from "../../api.js";
 import Comment from "./comments/Comment";
@@ -12,13 +12,15 @@ import MoreComments from "./comments/MoreComments";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
 import { UserContext } from '../../contexts/UserContext'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 function ViewPost(props) {
     // constants
     const { postId } = useParams();
-    const { user } = useContext(UserContext)
-
+    const { user } = useContext(UserContext);
+    const navigate = useNavigate()
 
     // state
     const [postLoading, setPostLoading] = useState(true);
@@ -90,8 +92,19 @@ function ViewPost(props) {
     }
 
     const submitCommentCallback = (newComment) => {
-        setComments([newComment].concat(comments));
+        // update the number of comments on the post
+        setPost({
+            ...post,
+            numComments: post["numComments"] + 1
+        });
+
+        // add the new comment to the list of comments
+        setComments([newComment].concat(comments));    
     }
+
+    const navigateHome = () => {
+        navigate(`/home`)
+      }
 
 
     // effects
@@ -121,6 +134,11 @@ function ViewPost(props) {
         return (
             <Container className="mt-4">
 
+                <div className="d-flex justify-content-center align-items-center">
+                    <FontAwesomeIcon onClick={()=> navigate(-1)} icon={faArrowLeft} className="fa-lg arrow pointer" />
+                    <p className="fw-bold fs-4 ps-3 m-0">Thread</p>
+                </div>
+
                 {/* Post Section -- show placeholder or post */}
                 {postLoading === true
                     ? <PostPlaceholder />
@@ -130,13 +148,13 @@ function ViewPost(props) {
                                 bg="#fff0f0"
                                 key={post.id}
                                 id={post.id}
-                                author={post.author}
+                                author={post.author.address}
                                 text={post.text}
                                 imgUrl={post.imgUrl}
                                 created={post.created}
                                 refTx={post.refTx}
                                 numComments={post.numComments}
-                                pfp={post.pfp}
+                                pfp={post.author.image}
                             />
                 }
 
@@ -160,10 +178,10 @@ function ViewPost(props) {
                             : comments.map(comment => (
                                 <Comment
                                     key={comment.id}
-                                    author={comment.author}
+                                    author={comment.author.address}
                                     text={comment.text}
                                     created={comment.created}
-                                    pfp={comment.pfp}
+                                    pfp={comment.author.image}
                                 />
                 ))}
 

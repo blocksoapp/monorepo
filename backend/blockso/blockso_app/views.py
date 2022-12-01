@@ -19,8 +19,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, Follow, Post, Profile, Socials
-from .pagination import CommentPagination, PostsPagination
+from .models import Comment, Follow, Notification, Post, Profile, Socials
 from . import jobs, pagination, serializers
 
 
@@ -104,9 +103,24 @@ class FollowCreateDestroy(
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.FollowSerializer
-    queryset = Follow.objects.all()
-    lookup_url_kwarg = "address"
-    lookup_field = "dest"
+
+    def get_object(self):
+        """
+        Returns the object to be deleted.
+        """
+        # get the signed in user
+        user = self.request.user
+        user = user.profile
+
+        # get address from the URL
+        address = self.kwargs["address"]
+        address = Web3.toChecksumAddress(address)
+        target = Profile.objects.get(user_id=address)
+
+        return Follow.objects.get(
+            src=user,
+            dest=target
+        )
 
     def post(self, request, *args, **kwargs):
         """ Signed in user follows the given address. """
@@ -126,17 +140,17 @@ class FollowersList(
     """ View that supports listing the followers of a user. """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.ProfileSerializer
     pagination_class = pagination.UserPagination
 
     def get_queryset(self):
         """
-        Return Users that follow the address specified in the url.
+        Return Profiles that follow the address specified in the url.
         """
-        # get users that follow the given address
-        user = UserModel.objects.get(pk=self.kwargs["address"])
+        # get profiles that follow the given address
+        user = Profile.objects.get(user_id=self.kwargs["address"])
         follow_src = Follow.objects.filter(dest=user)
-        followers = UserModel.objects.filter(follow_src__in=follow_src)
+        followers = Profile.objects.filter(follow_src__in=follow_src)
         followers = followers.order_by("-follow_src")
 
         return followers
@@ -154,17 +168,17 @@ class FollowingList(
     """ View that supports listing the users that a user follows. """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.ProfileSerializer
     pagination_class = pagination.UserPagination
 
     def get_queryset(self):
         """
-        Return Users that are followed by the address specified in the url.
+        Return Profiles that are followed by the address specified in the url.
         """
         # get users that are followed by the given address
-        user = UserModel.objects.get(pk=self.kwargs["address"])
+        user = Profile.objects.get(user_id=self.kwargs["address"])
         follow_dest = Follow.objects.filter(src=user)
-        following = UserModel.objects.filter(follow_dest__in=follow_dest)
+        following = Profile.objects.filter(follow_dest__in=follow_dest)
         following = following.order_by("-follow_dest")
 
         return following
@@ -290,15 +304,13 @@ class PostCreateList(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.PostSerializer
-    pagination_class = PostsPagination
-    lookup_url_kwarg = "address"
-    lookup_field = "author"
+    pagination_class = pagination.PostsPagination
 
     def get_queryset(self):
         """
         Return queryset.
         """
-        author = UserModel.objects.get(pk=self.kwargs["address"])
+        author = Profile.objects.get(user_id=self.kwargs["address"])
         queryset = Post.objects.filter(author=author)
         return queryset
 
@@ -333,7 +345,7 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         # return 403 if user does not own the Post
-        if instance.author != request.user:
+        if instance.author != request.user.profile:
             raise PermissionDenied("User does not own the Post.")
 
         return self.update(request, *args, **kwargs)
@@ -344,7 +356,7 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         # return 403 if user does not own the Post
-        if instance.author != request.user:
+        if instance.author != request.user.profile:
             raise PermissionDenied("User does not own the Post.")
 
         self.perform_destroy(instance)
@@ -365,7 +377,7 @@ class ExploreList(generics.ListAPIView):
         The current implementation returns the top 8 profiles sorted
         from most followers to least followers.
         """
-        queryset = Profile.objects.annotate(num_followers=Count('user__follow_dest'))
+        queryset = Profile.objects.annotate(num_followers=Count('follow_dest'))
         queryset = queryset.order_by("-num_followers")
         queryset = queryset[:8]
 
@@ -378,6 +390,7 @@ class FeedList(generics.ListAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PostSerializer
+    pagination_class = pagination.FeedPagination
     queryset = Post.objects.all()
 
     def get_queryset(self):
@@ -387,21 +400,79 @@ class FeedList(generics.ListAPIView):
         """
         # get user
         user = self.request.user
-        user_queryset = UserModel.objects.filter(
-            pk=user.ethereum_address
+        profile_queryset = Profile.objects.filter(
+            user=user
         )
         # get users they follow
-        follow_src = Follow.objects.filter(src=user)
-        users_followed = UserModel.objects.filter(follow_dest__in=follow_src)
+        follow_src = Follow.objects.filter(src=user.profile)
+        profiles_followed = Profile.objects.filter(follow_dest__in=follow_src)
 
         # combine the two querysets
-        users = user_queryset | users_followed
+        profiles = profile_queryset | profiles_followed
 
         # get all posts by those users
-        queryset = Post.objects.filter(author__in=users)
+        queryset = Post.objects.filter(author__in=profiles)
         queryset = queryset.order_by("-created")
 
         return queryset
+
+
+class NotificationListUpdate(
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView):
+
+    """
+    View that supports listing the notifications of an authenticated user,
+    and marking a user's notifications as viewed.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.NotificationSerializer
+    pagination_class = pagination.NotificationPagination
+
+    def get_queryset(self):
+        """
+        Return Notifications of the authenticated user.
+        The queryset is sorted from newest to oldest in the model class.
+        """
+        # get user
+        user = self.request.user
+
+        # get all notifications for the user
+        queryset = Notification.objects.filter(user=user.profile)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        """ List the notifications of an authenticated user. """
+
+        return self.list(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """
+        Updates the notifications of an authed user to be marked as viewed.
+        User must own the notifications that are being updated.
+        Returns updated notifications.
+        """
+        notif_ids = request.data["notifications"]
+        user = request.user
+        updated = []
+
+        # mark all notifications as viewed
+        for notif_id in notif_ids:
+            notif = Notification.objects.get(id=notif_id)
+
+            # return 403 if trying to update somebody else's notification
+            if notif.user != user.profile:
+                raise PermissionDenied("User does not own the Notification.")
+
+            notif.viewed = True
+            notif.save()
+            updated.append(notif)
+
+        serializer = serializers.NotificationSerializer(updated, many=True)
+        return Response(serializer.data)
 
 
 class CommentCreateList(generics.ListCreateAPIView):
@@ -410,7 +481,7 @@ class CommentCreateList(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
-    pagination_class = CommentPagination
+    pagination_class = pagination.CommentPagination
 
 
     def get_queryset(self):
