@@ -1,11 +1,14 @@
 # std lib imports
+import datetime
 import json
 
 # third party imports
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from web3 import Web3
+import redis
 import requests
+import rq
 
 # our imports
 from .models import ERC20Transfer, ERC721Transfer, Post, Profile, Transaction 
@@ -26,16 +29,74 @@ erc721_transfer_sig = "Transfer(indexed address from, "\
 
 # other constants
 zero_address = "0x0000000000000000000000000000000000000000"
+scheduled_job_name = "queue_tx_history_job_for_all_users"
 
 
-def get_tx_history_url(address, page_size, page_number):
+def _get_redis_queue():
+    """
+    Return an rq queue connected to a redis backend.
+    This creates a new connection every time it's called,
+    so be careful calling it.
+    DO NOT call this method from outside this module.
+    If you need to do that, then figure out a way to
+    create / use a singleton for uses outside this module.
+    """
+    redis_client = redis.from_url(settings.REDIS_URL)
+    return rq.Queue(connection=redis_client)
+
+
+def enqueue_all_users_tx_history():
+    """
+    Enqueues a job for each user in the system,
+    to fetch their tx history and update the db.
+    """
+    # redis client and queue for scheduling jobs
+    redis_queue = _get_redis_queue()
+    scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
+
+    users = UserModel.objects.all()
+    for user in users:
+        redis_queue.enqueue(
+            process_address_txs,
+            user.ethereum_address
+        )
+
+def _handle_scheduling_all_users_job(next_update):
+    """
+    Schedules the job that's responsible for queueing
+    individual jobs for getting all users' tx history.
+    Schedules the job to run at the 'next_update_at' date.
+    Does nothing if the job is already scheduled.
+    """
+    # redis client and queue for scheduling jobs
+    redis_queue = _get_redis_queue()
+    scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
+
+    # do nothing if the job is already scheduled
+    if scheduled_job_name in scheduled_jobs:
+        return
+
+    # transform data from covalent to a datetime
+    next_update = datetime.datetime.fromisoformat(
+        next_update[0:-4] + "+00:00"
+    )
+
+    # schedule the job
+    result = redis_queue.enqueue_at(
+        next_update,
+        enqueue_all_users_tx_history,
+        job_id=scheduled_job_name
+    )
+
+
+def get_tx_history_url(address, page_number):
     """
     Return URL for getting tx history of given address.
     """
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number={page_number}&page-size={page_size}"
+          f"&no-logs=false&page-number={page_number}&page-size=100"
 
     return url
 
@@ -52,7 +113,11 @@ def get_user_tx_history(address, limit=None):
     # TODO can this run out of memory if
     # there are thousands of txs?
     to_ret = []
-    page_size = 500 if limit is None else limit
+
+    # limit should be a multiple of 100
+    # which is the current page size when fetching
+    if limit is not None and limit % 100 != 0:
+        raise Exception("limit should be a multiple of 100")
 
     # paginate through results
     has_more = True
@@ -60,7 +125,7 @@ def get_user_tx_history(address, limit=None):
     while has_more is True:
         # prepare url
         page_number += 1
-        url = get_tx_history_url(address, page_size, page_number)
+        url = get_tx_history_url(address, page_number)
 
         # make request for txs
         resp = client.get(url)
@@ -70,6 +135,15 @@ def get_user_tx_history(address, limit=None):
         # update results
         to_ret += data["data"]["items"]
         has_more = data["data"]["pagination"]["has_more"]
+
+        # schedule a job to update tx history of all users
+        # when covalent next updates its data
+        next_update = data["data"]["next_update_at"]
+        _handle_scheduling_all_users_job(next_update)
+
+        # stop looping if limit has been reached
+        if limit is not None and len(to_ret) >= limit:
+            break
 
     return to_ret
 

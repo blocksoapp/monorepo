@@ -182,3 +182,7 @@ AUTH_NONCE_AGE = config("AUTH_NONCE_AGE", cast=int)
 
 # covalent api config
 COVALENT_API_KEY = config("COVALENT_API_KEY", cast=str)
+
+
+# redis and rq config
+REDIS_URL = config("REDIS_URL", cast=str)
