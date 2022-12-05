@@ -145,16 +145,9 @@ function ViewPost(props) {
                     : postError === true
                         ?   <PostsError retryAction={fetchPost} />
                         :   <Post
-                                bg="#fff0f0"
                                 key={post.id}
-                                id={post.id}
-                                author={post.author.address}
-                                text={post.text}
-                                imgUrl={post.imgUrl}
-                                created={post.created}
-                                refTx={post.refTx}
-                                numComments={post.numComments}
-                                pfp={post.author.image}
+                                bgColor="#fff0f0"
+                                data={post}
                             />
                 }
 

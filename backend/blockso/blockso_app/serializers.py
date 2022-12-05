@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 # third party imports
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from web3 import Web3
@@ -9,7 +10,8 @@ from web3 import Web3
 # our imports
 from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
         ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
-        MentionedInPostEvent, Notification, Post, Profile, Socials, Transaction
+        MentionedInPostEvent, Notification, Post, Profile, RepostEvent, \
+        Socials, Transaction
 
 
 UserModel = get_user_model()
@@ -228,18 +230,47 @@ class TaggedUsersField(serializers.RelatedField):
         return ProfileSerializer(value).data
 
 
+class RefPostField(serializers.RelatedField):
+    """
+    Serializes / de-serializes the ref post
+    field that is used for reposts / quote posts.
+    """
+
+    def to_internal_value(self, data):
+        """ Does deserialization, for writing. """
+
+        # return the referenced post
+        return Post.objects.get(pk=data)
+
+    def to_representation(self, value):
+        """ Does serialization, for reading. """
+
+        # pass context through to nested serializer
+        serializer_context = {'request': self.context.get('request')}
+
+        return PostSerializer(value, context=serializer_context).data
+
+
 class PostSerializer(serializers.ModelSerializer):
     """ Post model serializer. """
 
     class Meta:
         model = Post
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
-                  "refPost", "refTx", "numComments", "created", "tagged_users"]
-        read_only_fields = ["id", "author", "refPost", "refTx", "numComments", "created"]
+                  "refPost", "refTx", "numComments", "created", "tagged_users",
+                  "numReposts", "repostedByMe"]
+        read_only_fields = ["id", "author", "refTx", "numComments", "created",
+                            "numReposts", "repostedByMe"]
 
     author = ProfileSerializer(required=False)
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
+    numReposts = serializers.SerializerMethodField()
+    repostedByMe = serializers.SerializerMethodField()
+    refPost = RefPostField(
+        allow_null=True,
+        queryset=Post.objects.all()
+    )
     tagged_users = TaggedUsersField(
         many=True,
         queryset=Profile.objects.all()
@@ -260,19 +291,89 @@ class PostSerializer(serializers.ModelSerializer):
 
         return instance.comments.count()
 
+    def get_numReposts(self, instance):
+        """ Returns number of reposts for the post. """
+
+        return Post.objects.filter(refPost=instance).count()
+
+    def get_repostedByMe(self, instance):
+        """ Returns whether the post has been reposted by the authed user. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return False
+
+        # handle anonymous users, i.e. not signed in
+        if isinstance(request.user, AnonymousUser):
+            return False
+
+        return Post.objects.filter(
+            refPost_id=instance.id,
+            isShare=True,
+            author=request.user.profile
+        ).exists()
+
+    def _handle_repost(self, author, created, ref_post):
+        """
+        Creates a repost and notifies the appropriate parties.
+        Returns the created repost.
+        """
+        # do not allow user to repost their own post
+        if Post.objects.filter(pk=ref_post.id, author=author).exists():
+            raise serializers.ValidationError("Cannot repost own post.")
+
+        # do not allow user to repost an item twice
+        if Post.objects.filter(refPost=ref_post, author=author).exists():
+            raise serializers.ValidationError("Cannot repost an item twice.")
+
+        # do not allow user to repost a repost
+        if ref_post.refPost is not None and ref_post.isQuote is False:
+            raise serializers.ValidationError("Cannot repost a repost.")
+
+        post = Post.objects.create(
+            author=author,
+            created=created,
+            refPost=ref_post,
+            isShare=True,
+            isQuote=False,
+            refTx=None
+        )
+
+        # notify the original post author about the repost
+        notif = Notification.objects.create(user=ref_post.author)
+        RepostEvent.objects.create(
+            notification=notif,
+            repost=post,
+            reposted_by=author
+        )
+
+        return post
+
     def create(self, validated_data):
         """ Creates a Post. """
 
         # get user from the session
         author = self.context.get("request").user.profile
+        created = datetime.now(timezone.utc)
+        ref_post = validated_data.pop("refPost")
+
+        # handle reposts
+        if ref_post is not None and \
+            validated_data["isShare"] is True:
+
+            return self._handle_repost(
+                author,
+                created,
+                ref_post
+            )
+
+        # TODO validate business logic like isQuote and refTx
 
         # extract any tagged users
         tagged_users = validated_data.pop("tagged_users")
 
-        # TODO validate business logic like ref_post and ref_tx
-
         # create Post
-        created = datetime.now(timezone.utc)
         post = Post.objects.create(
             author=author,
             created=created,
@@ -319,6 +420,13 @@ class PostSerializer(serializers.ModelSerializer):
         # save the changes and return them
         instance.save()
         return instance
+
+
+class RepostSerializer(serializers.ModelSerializer):
+    """ Repost model serializer. """
+
+    class Meta:
+        model = Post
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -449,6 +557,22 @@ class FollowedEventSerializer(serializers.ModelSerializer):
         return ProfileSerializer(obj.followed_by).data
 
 
+class RepostEventSerializer(serializers.ModelSerializer):
+    """ RepostEvent model serializer. """
+
+    class Meta:
+        model = RepostEvent
+        fields = ["repostedBy", "repost", "created"]
+        read_only_fields = fields
+
+    repostedBy = serializers.SerializerMethodField("get_reposted_by")
+
+    def get_reposted_by(self, obj):
+        """ Returns the user that did the reposting. """
+
+        return ProfileSerializer(obj.reposted_by).data
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     """ Notification model serializer. """
 
@@ -470,6 +594,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             get_mentioned_in_comment_event(obj)
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
         events["followedEvent"] = self.get_followed_event(obj)
+        events["repostEvent"] = self.get_repost_event(obj)
 
         return events
 
@@ -523,4 +648,17 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return FollowedEventSerializer(
             obj.followed_event
+        ).data
+
+    def get_repost_event(self, obj):
+        """
+        Returns the RepostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "repost_event"):
+            return None
+
+        return RepostEventSerializer(
+            obj.repost_event
         ).data
