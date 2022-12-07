@@ -324,7 +324,7 @@ class PostCreateList(generics.ListCreateAPIView):
         # TODO this should create a job instead of
         # doing the actual work in the GET request
         # fetch and store the tx history of the person being searched
-        jobs.process_address_txs(self.kwargs["address"])
+        jobs.process_address_txs(self.kwargs["address"], 100)
 
         return self.list(request, *args, **kwargs)
 

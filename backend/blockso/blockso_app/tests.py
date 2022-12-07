@@ -721,6 +721,41 @@ class TransactionParsingTests(BaseTest):
         post_count = Post.objects.all().count()
         self.assertEqual(post_count, 6)
 
+    def test_process_address_tx_no_limit(self):
+        """
+        Assert that the entire tx history of a user is paginated
+        through when the 'limit' argument is None and covalent
+        says there are more pages with results.
+        """
+        # set up test
+        # mock first covalent response to indicate there are more results
+        has_more_results = self.erc20_tx_resp_data.replace(
+            '"has_more": false',
+            '"has_more": true'
+        )
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 0),
+            body=has_more_results
+        )
+
+        # mock second covalent response to indicate there are no more results
+        # note that the url being mocked has page number 1 which means
+        # we are expecting the code to paginate through the results
+        no_more_results = self.erc721_tx_resp_data
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 1),
+            body=no_more_results
+        )
+
+        # run the job
+        jobs.process_address_txs(self.test_signer.address, limit=None)
+
+        # assert that all of the users' tx history was parsed
+        self.assertEqual(ERC721Transfer.objects.all().count(), 1)
+        self.assertEqual(ERC20Transfer.objects.all().count(), 2)
+
 
 class BackgroundJobTests(BaseTest):
     """

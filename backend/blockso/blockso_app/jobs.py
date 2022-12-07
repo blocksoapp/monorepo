@@ -58,7 +58,9 @@ def enqueue_all_users_tx_history():
     for user in users:
         redis_queue.enqueue(
             process_address_txs,
-            user.ethereum_address
+            user.ethereum_address,
+            1000,
+            job_id=user.ethereum_address
         )
 
 def _handle_scheduling_all_users_job(next_update):
@@ -101,13 +103,12 @@ def get_tx_history_url(address, page_number):
     return url
 
 
-def get_user_tx_history(address, limit=None):
+def get_user_tx_history(address, limit):
     """
     Use the covalent API to get the previous X
     transactions of the given address.
-    If limit is given, then that number
-    of transactions is returned. Otherwise all
-    transactions are returned.
+    If 'limit' is None then all transactions are returned,
+    otherwise only 'limit' number of txs are returned.
     Returns a list of transactions data.
     """
     # TODO can this run out of memory if
@@ -144,6 +145,11 @@ def get_user_tx_history(address, limit=None):
         # stop looping if limit has been reached
         if limit is not None and len(to_ret) >= limit:
             break
+
+        # TODO remove this when a more robust tx indexing system is created
+        # for now break after 10 pages, to avoid overwhelming covalent
+        # and our job system
+        if page_number == 10: break
 
     return to_ret
 
@@ -201,8 +207,10 @@ def parse_and_create_tx(tx_data, address):
         if event_sig == erc20_transfer_sig and \
             event["decoded"]["params"][0]["value"] == address:
 
+            # do not create db entries for txs that did not originate
+            # from the address that is being searched; helps avoid spam
             if tx is None:
-                tx, _ = Transaction.objects.get_or_create(**object_kwargs)
+                return
 
             ERC20Transfer.objects.create(
                 tx=tx,
@@ -288,14 +296,15 @@ def create_post(tx_record, post_author):
 
     return None
 
-def process_address_txs(address):
+def process_address_txs(address, limit=None):
     """
     Populates the database with the address' transaction history.
     Creates Posts based on the tx history.
-    Exits once it starts processing existing txs.
+    Processes all txs if 'limit' is None, otherwise processes
+    'limit' number of transactions.
     """
     # get tx history
-    history = get_user_tx_history(address)
+    history = get_user_tx_history(address, limit)
 
     # create a user/profile if they do not already exist
     user, _ = UserModel.objects.get_or_create(ethereum_address=address)
