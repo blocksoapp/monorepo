@@ -1,5 +1,5 @@
 # std lib imports
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest import mock
 import json
 import pytz
@@ -11,7 +11,9 @@ from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 import eth_account
+import fakeredis
 import responses
+import rq
 
 # our imports
 from .models import Follow, Post, Profile, Transaction, \
@@ -37,18 +39,28 @@ class BaseTest(APITestCase):
         cls.test_signer_2 = eth_account.Account.create()
 
         # sample tx history json for erc20 transactions
+        next_update = datetime.now(timezone.utc) + timedelta(minutes=5)
+        next_update = next_update.isoformat().replace("+00:00", "000Z")
+        cls.covalent_next_update = next_update
         with open(
             "./blockso_app/covalent-tx-history-sample.json",
             "r",
             encoding="utf-8"
         ) as fobj:
-            cls.erc20_tx_resp_data = fobj.read() 
+            content = fobj.read() 
             # replace all occurrences of the address in the tx history sample
             # with the address of our test signer
-            cls.erc20_tx_resp_data = cls.erc20_tx_resp_data.replace(
+            content = content.replace(
                 "0xa79e63e78eec28741e711f89a672a4c40876ebf3",
                 cls.test_signer.address.lower()
             )
+
+            # replace the next_update_at field with a time 5 min in the future
+            content = content.replace(
+                "REPLACEME_NEXT_UPDATE_AT",
+                cls.covalent_next_update
+            )
+            cls.erc20_tx_resp_data = content
 
         # sample tx history json for erc721 transactions
         with open(
@@ -56,18 +68,42 @@ class BaseTest(APITestCase):
             "r",
             encoding="utf-8"
         ) as fobj:
-            cls.erc721_tx_resp_data = fobj.read() 
+            content = fobj.read() 
             # replace all occurrences of the address in the tx sample
             # with the address of our test signer
-            cls.erc721_tx_resp_data = cls.erc721_tx_resp_data.replace(
+            content = content.replace(
                 "0xc9eb983357b88921a89844d7047589a37b563108",
                 cls.test_signer.address.lower()
             )
+
+            # replace the next_update_at field with a time 5 min in the future
+            content = content.replace(
+                "REPLACEME_NEXT_UPDATE_AT",
+                cls.covalent_next_update
+            )
+            cls.erc721_tx_resp_data = content
 
     def setUp(self):
         """ Runs before each test. """
 
         super().setUp()
+
+        # mock redis backend for use in tests 
+        self.redis_backend = fakeredis.FakeRedis()
+        redis_patcher = mock.patch(
+            "redis.from_url",
+            return_value=self.redis_backend
+        )
+        redis_patcher.start()
+
+        # create redis queue and scheduled jobs registry for use in tests
+        self.redis_queue = rq.Queue(
+            connection=self.redis_backend,
+            is_async=False
+        )
+        self.scheduled_job_registry = rq.registry.ScheduledJobRegistry(
+            queue=self.redis_queue
+        )
 
         # fake requests/responses
         self.mock_responses = responses.RequestsMock()
@@ -107,6 +143,9 @@ class BaseTest(APITestCase):
 
         super().tearDown()
 
+        # clean up fake redis backend
+        self.redis_backend.flushall()
+
         # clean up fake requests/responses
         self.mock_responses.stop()
         self.mock_responses.reset()
@@ -121,7 +160,7 @@ class BaseTest(APITestCase):
             "chain_id": "1",
             "uri": "http://127.0.0.1/api/auth/login",
             "nonce": "",
-            "issued_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            "issued_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         }
 
     def _do_login(self, signer):
@@ -615,7 +654,7 @@ class TransactionParsingTests(BaseTest):
         """
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(address),
+            jobs.get_tx_history_url(address, 0),
             body=json_response
         )
 
@@ -627,7 +666,10 @@ class TransactionParsingTests(BaseTest):
         reflect their transaction history.
         """
         # set up test
-        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
+        self._mock_tx_history_response(
+            self.test_signer.address,
+            self.erc20_tx_resp_data
+        )
 
         # call function
         jobs.process_address_txs(self.test_signer.address)
@@ -655,26 +697,7 @@ class TransactionParsingTests(BaseTest):
         transfer_count = ERC20Transfer.objects.all().count()
         self.assertEqual(transfer_count, 2)
 
-    def test_posts_originate_from_address(self):
-        """
-        Assert that posts are only created for
-        transactions or transfers that originate
-        from the given address.
-        This is meant to reduce spam and provide more
-        quality posts.
-        """
-        # set up test
-        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
-
-        # call function
-        jobs.process_address_txs(self.test_signer.address)
-
-        # make assertions
-        # assert that the correct number of Posts has been created
-        post_count = Post.objects.all().count()
-        self.assertEqual(post_count, 6)
-
-    def test_erc721_txs(self):
+    def test_process_erc721_transfers(self):
         """
         Assert that a user's history with erc721 txs
         is parsed and stored correctly.
@@ -701,6 +724,140 @@ class TransactionParsingTests(BaseTest):
         # assert that the correct number of ERC721Transfers has been created
         erc721_transfer_count = ERC721Transfer.objects.all().count()
         self.assertEqual(erc721_transfer_count, 1)
+
+    def test_posts_originate_from_address(self):
+        """
+        Assert that posts are only created for
+        transactions or transfers that originate
+        from the given address.
+        This is meant to reduce spam and provide more
+        quality posts.
+        """
+        # set up test
+        self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
+
+        # call function
+        jobs.process_address_txs(self.test_signer.address)
+
+        # make assertions
+        # assert that the correct number of Posts has been created
+        post_count = Post.objects.all().count()
+        self.assertEqual(post_count, 6)
+
+    def test_process_address_tx_no_limit(self):
+        """
+        Assert that the entire tx history of a user is paginated
+        through when the 'limit' argument is None and covalent
+        says there are more pages with results.
+        """
+        # set up test
+        # mock first covalent response to indicate there are more results
+        has_more_results = self.erc20_tx_resp_data.replace(
+            '"has_more": false',
+            '"has_more": true'
+        )
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 0),
+            body=has_more_results
+        )
+
+        # mock second covalent response to indicate there are no more results
+        # note that the url being mocked has page number 1 which means
+        # we are expecting the code to paginate through the results
+        no_more_results = self.erc721_tx_resp_data
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 1),
+            body=no_more_results
+        )
+
+        # run the job
+        jobs.process_address_txs(self.test_signer.address, limit=None)
+
+        # assert that all of the users' tx history was parsed
+        self.assertEqual(ERC721Transfer.objects.all().count(), 1)
+        self.assertEqual(ERC20Transfer.objects.all().count(), 2)
+
+
+class BackgroundJobTests(BaseTest):
+    """
+    Test the background job system.
+    """
+
+    def test_schedule_all_users_tx_history_job(self):
+        """
+        Assert that a job to fetch all users' tx histories
+        is scheduled during the job that fetches one user's
+        tx history.
+        Assert that the job is scheduled to run on the
+        'next_update_at' time given by covalent.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        # mock out the request for getting the user's tx history
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 0),
+            body=self.erc20_tx_resp_data
+        )
+
+        # make request to process one user's tx history
+        # which should trigger the scheduling of a job to
+        # process all users' tx history
+        jobs.process_address_txs(self.test_signer.address)
+
+        # assert that a new job is scheduled to process all users' tx history
+        self.assertTrue(
+            jobs.scheduled_job_name in self.scheduled_job_registry
+        )
+
+    def test_schedule_all_users_tx_history_job_already_exists(self):
+        """
+        Assert that a second job isn't scheduled if one
+        is already scheduled.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        # mock out the request for getting the user's tx history
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 0),
+            body=self.erc20_tx_resp_data
+        )
+        self.mock_responses.add(
+            responses.GET,
+            jobs.get_tx_history_url(self.test_signer.address, 0),
+            body=self.erc20_tx_resp_data
+        )
+
+        # make two requests to process one user's tx history
+        # the first should schedule a job
+        # the second should not schedule a job
+        jobs.process_address_txs(self.test_signer.address)
+        jobs.process_address_txs(self.test_signer.address)
+
+        # assert that only one job is scheduled
+        self.assertEqual(self.scheduled_job_registry.count, 1)
+
+    def test_enqueue_all_users_tx_history(self):
+        """
+        Assert that the job creates a job for every user in the system.
+        """
+        # set up test
+        # create users 1 and 2
+        self._do_login(self.test_signer)
+        self._do_login(self.test_signer_2)
+
+        # run the job
+        jobs.enqueue_all_users_tx_history()
+
+        # assert that it added as many jobs as there are users
+        # to the queue, where each job gets the tx history of that user
+        self.assertEqual(
+            self.redis_queue.count,
+            UserModel.objects.all().count()
+        )
 
 
 class PostTests(BaseTest):
@@ -837,7 +994,7 @@ class PostTests(BaseTest):
         # create posts using the test covalent tx history API 
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address),
+            jobs.get_tx_history_url(self.test_signer.address, 0),
             body=self.erc20_tx_resp_data
         )
         jobs.process_address_txs(self.test_signer.address)
