@@ -259,18 +259,7 @@ function Profile(props) {
                     : posts.length === 0
                         ? <PostsNotFound retryAction={fetchPosts} />
                         : posts.map(post => (
-                            <Post
-                                key={post.id}
-                                id={post.id}
-                                author={post.author.address}
-                                ensName={props.ensName}
-                                text={post.text}
-                                imgUrl={post.imgUrl}
-                                created={post.created}
-                                pfp={post.author.image}
-                                refTx={post.refTx}
-                                numComments={post.numComments}
-                            />
+                            <Post key={post.id} data={post} />
             ))}
 
             {/* More Posts Link (pagination) */}

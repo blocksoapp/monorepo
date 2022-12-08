@@ -103,18 +103,7 @@ function Feed({ profileData }) {
                 ? <FeedError retryAction={fetchFeed} />
                 : <Container>
                     {feedItems && feedItems.map(post => (
-                        <Post
-                            key={post.id}
-                            id={post.id}
-                            author={post.author.address}
-                            text={post.text}
-                            pfp={post.author.image}
-                            imgUrl={post.imgUrl}
-                            created={post.created}
-                            refTx={post.refTx}
-                            numComments={post.numComments}
-                            profileAddress={profileData['address']}
-                        />
+                        <Post key={post.id} data={post} />
                     ))}
                 </Container>
             }

@@ -9,7 +9,7 @@ import {
     Row 
 } from "react-bootstrap"
 import { useEnsAvatar } from "wagmi";
-import { baseAPI, getCookie } from '../../utils';
+import { apiPostPost } from '../../api';
 import MentionsInput from "./MentionsInput";
 import PfpResolver from '../PfpResolver';
 
@@ -28,25 +28,11 @@ function NewPost({ profileData, submitPostCallback }) {
         event.preventDefault();
 
         // post data to api
-        const url = `${baseAPI}/posts/${address}/`;
         const data = {
             text: postText,
             tagged_users: taggedUsers,
-            imgUrl: "",
-            isShare: false,
-            isQuote: false,
-            refPost: null,
-            refTx: null,
         }
-        const resp = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFTOKEN': getCookie('csrftoken')
-            },
-            credentials: 'include'
-        });
+        const resp = await apiPostPost(data);
 
         // handle success
         if (resp.status === 201) {

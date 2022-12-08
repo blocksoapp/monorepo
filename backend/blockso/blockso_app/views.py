@@ -298,11 +298,18 @@ class UserRetrieve(
         return self.retrieve(request, *args, **kwargs)
 
 
-class PostCreateList(generics.ListCreateAPIView):
+class PostCreate(generics.CreateAPIView):
 
-    """ View that supports creating and listing Posts of an address. """
+    """ View that supports creating a post by the authed user. """
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.PostSerializer
+
+
+class PostList(generics.ListAPIView):
+
+    """ View that supports listing Posts of an address. """
+
     serializer_class = serializers.PostSerializer
     pagination_class = pagination.PostsPagination
 
@@ -361,6 +368,37 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RepostDestroy(
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports deleting a repost of the post id in the url. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.RepostSerializer
+
+    def get_object(self):
+        """
+        Returns the object to be deleted.
+        """
+        # get the signed in user
+        user = self.request.user.profile
+
+        # get original post id from the URL
+        post_id = self.kwargs["id"]
+
+        return Post.objects.get(
+            author=user,
+            refPost_id=post_id,
+            isShare=True
+        )
+
+    def delete(self, request, *args, **kwargs):
+        """ Signed in user deletes their repost of the given post. """
+
+        return self.destroy(request, *args, **kwargs)
 
 
 class ExploreList(generics.ListAPIView):

@@ -38,32 +38,6 @@ class BaseTest(APITestCase):
         cls.test_signer = eth_account.Account.create()
         cls.test_signer_2 = eth_account.Account.create()
 
-        # common data for updating profile
-        cls.update_profile_data = {
-            "image": "https://ipfs.io/ipfs/QmRRPWG96cmgTn2qSzjwr2qvfNEuhunv6FNeMFGa9bx6mQ",
-            "bio": "Hello world, I am a user.",
-            "socials": {
-                "website": "https://mysite.com/",
-                "telegram": "https://t.me/nullbitx8",
-                "discord": "https://discord.gg/nullbitx8",
-                "twitter": "https://twitter.com/nullbitx8",
-                "opensea": "https://opensea.com/nullbitx8.eth",
-                "looksrare": "https://looksrare.org/nullbitx8.eth",
-                "snapshot": "https://snapshot.org/nullbitx8.eth"
-            }
-        }
-
-        # common data for creating posts
-        cls.create_post_data = { 
-            "text": "My first post!",
-            "tagged_users": [],
-            "imgUrl": "https://fakeimage.com/img.png",
-            "isShare": False,
-            "isQuote": False,
-            "refPost": None,
-            "refTx": None
-        }
-
         # sample tx history json for erc20 transactions
         next_update = datetime.now(timezone.utc) + timedelta(minutes=5)
         next_update = next_update.isoformat().replace("+00:00", "000Z")
@@ -135,8 +109,34 @@ class BaseTest(APITestCase):
         self.mock_responses = responses.RequestsMock()
         self.mock_responses.start()
 
-        # clean up all mock patches
+        # clean up all mock patches in the end
         self.addCleanup(mock.patch.stopall)
+
+        # common data for updating profile
+        self.update_profile_data = {
+            "image": "https://ipfs.io/ipfs/QmRRPWG96cmgTn2qSzjwr2qvfNEuhunv6FNeMFGa9bx6mQ",
+            "bio": "Hello world, I am a user.",
+            "socials": {
+                "website": "https://mysite.com/",
+                "telegram": "https://t.me/nullbitx8",
+                "discord": "https://discord.gg/nullbitx8",
+                "twitter": "https://twitter.com/nullbitx8",
+                "opensea": "https://opensea.com/nullbitx8.eth",
+                "looksrare": "https://looksrare.org/nullbitx8.eth",
+                "snapshot": "https://snapshot.org/nullbitx8.eth"
+            }
+        }
+
+        # common data for creating posts
+        self.create_post_data = { 
+            "text": "",
+            "tagged_users": [],
+            "imgUrl": "",
+            "isShare": False,
+            "isQuote": False,
+            "refPost": None,
+            "refTx": None
+        }
 
     def tearDown(self):
         """ Runs after each test. """
@@ -229,14 +229,37 @@ class BaseTest(APITestCase):
         resp = self.client.put(url, self.update_profile_data)
         return resp
 
-    def _create_post(self, signer, tagged_users=[]):
+    def _create_post(self, tagged_users=[]):
         """
         Utility function to create a post.
         Returns the response of creating a post.
         """
-        url = f"/api/posts/{signer.address}/"
-        self.create_post_data["tagged_users"] = tagged_users
-        resp = self.client.post(url, self.create_post_data)
+        # prepare request
+        url = f"/api/post/"
+        data = self.create_post_data
+        data["text"] = "My first post!"
+        data["imgUrl"] = "https://fakeimage.com/img.png"
+        data["tagged_users"] = tagged_users
+
+        # send request
+        resp = self.client.post(url, data)
+
+        return resp
+
+    def _repost(self, post_id):
+        """
+        Utility function to repost a post.
+        Returns the response of creating the repost.
+        """
+        # prepare request
+        url = f"/api/post/"
+        data = self.create_post_data
+        data["isShare"] = True
+        data["refPost"] = post_id
+
+        # send request
+        resp = self.client.post(url, data)
+
         return resp
 
     def _create_comment(self, post_id, text, tagged_users=[]):
@@ -850,7 +873,7 @@ class PostTests(BaseTest):
         self._do_login(self.test_signer)
 
         # make request
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
 
         # make assertions
         self.assertEqual(resp.status_code, 201)
@@ -861,7 +884,7 @@ class PostTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # make request
@@ -919,7 +942,7 @@ class PostTests(BaseTest):
         """
         # prepare test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         new_text = "My updated post."
 
@@ -944,7 +967,7 @@ class PostTests(BaseTest):
         """
         # prepare test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # delete the post
@@ -1007,7 +1030,7 @@ class PostTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._create_comment(post_id, text="hello")
         self._create_comment(post_id, text="world")
@@ -1027,7 +1050,7 @@ class PostTests(BaseTest):
         # set up test
         self._do_login(self.test_signer)
         self._update_profile(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # make request
@@ -1051,7 +1074,6 @@ class PostTests(BaseTest):
         # make request
         tagged = [self.test_signer.address]
         resp = self._create_post(
-            self.test_signer_2,
             tagged_users=tagged
         )
 
@@ -1061,6 +1083,170 @@ class PostTests(BaseTest):
             resp.data["tagged_users"][0]["address"],
             tagged[0]
         )
+
+    def test_repost(self):
+        """
+        Assert that a user can repost another user's post.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost as user 2
+        self._do_login(self.test_signer_2)
+        resp = self._repost(post_id)
+
+        # assert that user 2 now has a post that references user 1's post
+        self.assertEqual(resp.status_code, 201)
+        new_post_id = resp.data["id"]
+        url = f"/api/post/{new_post_id}/"
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["refPost"]["id"], post_id)
+        self.assertEqual(
+            resp.data["refPost"]["author"]["address"],
+            self.test_signer.address
+        )
+        self.assertTrue(resp.data["isShare"])
+        self.assertFalse(resp.data["isQuote"])
+        self.assertIsNone(resp.data["refTx"])
+        self.assertEqual(resp.data["text"], "")
+        self.assertEqual(resp.data["imgUrl"], "")
+
+    def test_resposted_by_me_and_num_reposts(self):
+        """
+        Assert that 'respostedByMe' is True if the user
+        reposted the post in question.
+        Assert that 'numReposts' is correct.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost as user 2
+        self._do_login(self.test_signer_2)
+        self._repost(post_id)
+
+        # make request to get original post as user 2
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # assert that repostedByMe is True
+        self.assertTrue(resp.data["repostedByMe"])
+        # assert that numReposts is equal to 1
+        self.assertEqual(resp.data["numReposts"], 1)
+
+        # get feed of user 2
+        self._do_login(self.test_signer_2)
+        url = f"/api/feed/"
+        resp = self.client.get(url)
+
+        # assert that repostedByMe is True
+        self.assertEqual(resp.data["results"][0]["refPost"]["repostedByMe"], True)
+        # assert that numReposts is equal to 1
+        self.assertEqual(resp.data["results"][0]["refPost"]["numReposts"], 1)
+
+    def test_get_reposted_by_me_unauthed(self):
+        """
+        Assert that 'respostedByMe' is False if the
+        current user is not authenticated.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request to get original post as unauthed user
+        self._do_logout()
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # assert that repostedByMe is False
+        self.assertFalse(resp.data["repostedByMe"])
+
+    def test_cannot_repost_own_post(self):
+        """
+        Assert that a user cannot repost their own post.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # try to repost it as user 1
+        resp = self._repost(post_id)
+
+        # assert 400 BAD REQUEST
+        self.assertEqual(resp.status_code, 400)
+
+    def test_cannot_repost_item_twice(self):
+        """
+        Assert that a user cannot repost an item twice.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost it as user 2
+        self._do_login(self.test_signer_2)
+        self._repost(post_id)
+
+        # try to repost it again and
+        # assert 400 BAD REQUEST
+        resp = self._repost(post_id)
+        self.assertEqual(resp.status_code, 400)
+
+    def test_cannot_repost_a_repost(self):
+        """
+        Assert that a user cannot repost a repost.
+        """
+        # prepare test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost it as user 2
+        self._do_login(self.test_signer_2)
+        resp = self._repost(post_id)
+        repost_id = resp.data["id"]
+
+        # repost the repost as user 1
+        self._do_login(self.test_signer)
+        resp = self._repost(repost_id)
+
+        # assert 400 BAD REQUEST
+        self.assertEqual(resp.status_code, 400)
+
+    def test_delete_repost(self):
+        """
+        Assert that a user can delete their repost.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost as user 2
+        self._do_login(self.test_signer_2)
+        repost_id = self._repost(post_id)
+
+        # make request to delete repost of original post_id
+        url = f"/api/post/{post_id}/repost/"
+        resp = self.client.delete(url)
+
+        # assert deletion was successful
+        self.assertEqual(resp.status_code, 204)
+        url = f"/api/post/{repost_id}/" 
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
 
 
 class CommentsTests(BaseTest):
@@ -1074,7 +1260,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # make request
@@ -1099,7 +1285,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # make request
@@ -1114,7 +1300,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # make request
@@ -1137,7 +1323,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._create_comment(post_id, text="hello")
 
@@ -1155,7 +1341,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._create_comment(post_id, text="goodbye")
         self._create_comment(post_id, text="hello")
@@ -1176,7 +1362,7 @@ class CommentsTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # create 7 comments
@@ -1206,7 +1392,7 @@ class CommentsTests(BaseTest):
         # set up test
         self._do_login(self.test_signer)
         self._update_profile(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._create_comment(post_id, text="hello")
 
@@ -1248,7 +1434,7 @@ class FeedTests(BaseTest):
         """
         # set up test
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         expected_posts = [resp.data]
 
         # make request to get a feed
@@ -1267,14 +1453,14 @@ class FeedTests(BaseTest):
         # set up test
         # login user 2, create a post
         self._do_login(self.test_signer_2)
-        resp = self._create_post(self.test_signer_2)
+        resp = self._create_post()
 
         # logout user 2
         self._do_logout()
 
         # login user 1, create a post, and follow user 2
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         url = f"/api/{self.test_signer_2.address}/follow/"
         self.client.post(url)
 
@@ -1376,7 +1562,7 @@ class NotificationTests(BaseTest):
         # set up test
         # user 1 creates a post
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._do_logout()
 
@@ -1414,8 +1600,7 @@ class NotificationTests(BaseTest):
         # user 2 tags user 1 in a post
         tagged = [self.test_signer.address]
         resp = self._create_post(
-            self.test_signer_2,
-            tagged
+            tagged_users=tagged
         )
         post_id = resp.data["id"]
 
@@ -1448,7 +1633,7 @@ class NotificationTests(BaseTest):
         # user 1 creates a post and a comment
         # where they mention user 2
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
         self._create_comment(
             post_id,
@@ -1509,7 +1694,7 @@ class NotificationTests(BaseTest):
         # set up test
         # user 1 creates a post
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # user 2 comments on user 1's post twice
@@ -1542,7 +1727,7 @@ class NotificationTests(BaseTest):
         # set up test
         # user 1 creates a post
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # user 2 comments on user 1's post
@@ -1572,7 +1757,7 @@ class NotificationTests(BaseTest):
         # set up test
         # user 1 creates a post
         self._do_login(self.test_signer)
-        resp = self._create_post(self.test_signer)
+        resp = self._create_post()
         post_id = resp.data["id"]
 
         # user 2 comments on user 1's post
@@ -1595,3 +1780,35 @@ class NotificationTests(BaseTest):
 
         # assert that user 2 gets a 403
         self.assertEqual(resp.status_code, 403)
+
+    def test_repost_notif(self):
+        """
+        Assert that a user gets a notification when
+        another user reposts their post.
+        """
+        # set up test
+        # create post by user 1
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # repost user1's post by user2
+        self._do_login(self.test_signer_2)
+        resp = self._repost(post_id)
+        repost_id = resp.data["id"]
+
+        # make request to get user 1's notifications
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+
+        # assert that user 1 has a notification for the repost
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        notification = resp.data["results"][0]
+        event = notification["events"]["repostEvent"]
+        self.assertEqual(event["repost"], repost_id)
+        self.assertEqual(
+            event["repostedBy"]["address"],
+            self.test_signer_2.address
+        )
