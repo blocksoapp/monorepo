@@ -1,4 +1,3 @@
 release: cd ./blockso && python manage.py migrate
 web: gunicorn --pythonpath ./blockso blockso.wsgi
 worker: cd ./blockso && python manage.py heroku-worker
-worker: cd ./blockso && python manage.py heroku-worker
