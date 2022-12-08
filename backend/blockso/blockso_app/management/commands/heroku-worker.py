@@ -15,7 +15,7 @@ from rq.worker import HerokuWorker as Worker
 # our imports
 
 
-listen = ['high', 'default']
+listen = ['default']
 redis_url = settings.REDIS_URL
 url = urllib.parse.urlparse(redis_url)
 

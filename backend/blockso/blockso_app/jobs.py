@@ -45,21 +45,23 @@ def _get_redis_queue():
     return rq.Queue(connection=redis_client)
 
 
-def enqueue_all_users_tx_history():
+def enqueue_all_users_tx_history(limit):
     """
     Enqueues a job for each user in the system,
     to fetch their tx history and update the db.
+    limit is the number of transactions to fetch
+    for each user.
+    If limit is None then it fetches all txs.
     """
     # redis client and queue for scheduling jobs
     redis_queue = _get_redis_queue()
-    scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
 
     users = UserModel.objects.all()
     for user in users:
         redis_queue.enqueue(
             process_address_txs,
             user.ethereum_address,
-            1000,
+            limit,
             job_id=user.ethereum_address
         )
 
@@ -74,10 +76,6 @@ def _handle_scheduling_all_users_job(next_update):
     redis_queue = _get_redis_queue()
     scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
 
-    # do nothing if the job is already scheduled
-    if scheduled_job_name in scheduled_jobs:
-        return
-
     # transform data from covalent to a datetime
     next_update = datetime.datetime.fromisoformat(
         next_update[0:-4] + "+00:00"
@@ -87,6 +85,7 @@ def _handle_scheduling_all_users_job(next_update):
     result = redis_queue.enqueue_at(
         next_update,
         enqueue_all_users_tx_history,
+        50,
         job_id=scheduled_job_name
     )
 
@@ -114,11 +113,6 @@ def get_user_tx_history(address, limit):
     # TODO can this run out of memory if
     # there are thousands of txs?
     to_ret = []
-
-    # limit should be a multiple of 100
-    # which is the current page size when fetching
-    if limit is not None and limit % 100 != 0:
-        raise Exception("limit should be a multiple of 100")
 
     # paginate through results
     has_more = True
