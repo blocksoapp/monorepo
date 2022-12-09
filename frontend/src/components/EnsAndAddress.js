@@ -9,7 +9,7 @@ function EnsAndAddress(props) {
     })
 
     // returns
-    if (! "address" in props) return <span>Missing address</span>
+    if (!props.address) return <span>Searching address</span>
     if (isLoading) return <span>Fetching ENS name…</span>
     if (isError) return <span>Error fetching ENS name</span>
 

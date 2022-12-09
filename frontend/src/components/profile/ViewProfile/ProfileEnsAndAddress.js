@@ -40,7 +40,7 @@ function ProfileEnsAndAddress(props) {
     }
 
     // returns
-    if (! props.address) return <span>Missing address</span>
+    if (!props.address) return <span>Searching address</span>
     if (ensName.isLoading) return <span>Fetching ENS name</span>
     if (ensName === null) return <span>Error fetching ENS name</span>
 

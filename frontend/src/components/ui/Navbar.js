@@ -1,4 +1,4 @@
-import { useCallback, useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 import { Button, Container, Col, Form, Nav, Navbar, NavDropdown, NavItem } from 'react-bootstrap'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAccount } from 'wagmi';
@@ -15,6 +15,7 @@ function NavbarComponent() {
     const handleSearch = () => {
         const route = `${searchVal}/profile`;
         navigate(route);
+        setSearchVal("");  // clear input
     }
 
     const onKeyPress = (event) => {
@@ -41,9 +42,10 @@ function NavbarComponent() {
             <Col xs={10} lg={5}>
                 <Form.Control
                   type="search"
-                  placeholder="Search for user..."
+                  placeholder="Search ENS or address"
                   className="me-2"
                   aria-label="Search"
+                  value={searchVal}
                   onChange={event => {setSearchVal(event.target.value)}}
                   onKeyPress={onKeyPress}
                 />
