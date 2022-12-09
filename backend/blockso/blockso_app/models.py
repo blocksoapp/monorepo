@@ -289,3 +289,14 @@ class RepostEvent(models.Model):
         on_delete=models.CASCADE
     )
     created = models.DateTimeField(auto_now_add=True)
+
+
+class ActiveUserStats(models.Model):
+    """
+    Stores the number of active users for the day, week, and month,
+    relative to the day the entry is added.
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    day_to_date_count = models.PositiveIntegerField(blank=False)
+    week_to_date_count = models.PositiveIntegerField(blank=False)
+    month_to_date_count = models.PositiveIntegerField(blank=False)
