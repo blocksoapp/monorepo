@@ -54,7 +54,6 @@ function PfpResolver({address, imgUrl, height, width, fontSize, className, onCli
      * Set pfpImgUrl if the imgUrl property is changed.
      */
     useEffect(() => {
-        if (!imgUrl) return;
         setPfpImgUrl(imgUrl);
     }, [imgUrl])
 
