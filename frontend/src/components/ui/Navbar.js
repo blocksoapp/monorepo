@@ -7,7 +7,7 @@ import NotificationsDropdown from '../notifications/NotificationsDropdown';
 import { UserContext } from '../../contexts/UserContext'
 
 function NavbarComponent() {
-    const { user, setUser, isAuthenticated, setIsAuthenticated } = useContext(UserContext)
+    const { user } = useContext(UserContext)
     const navigate = useNavigate();
     const account = useAccount();
     const [searchVal, setSearchVal] = useState("");
@@ -61,11 +61,7 @@ function NavbarComponent() {
         {user !== null && <NotificationsDropdown />}
 
         {/* Sign In/Out */}
-        <SignInButton 
-          setUser={setUser} 
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-        />
+        <SignInButton buttonText="Sign In" />
       </Container>
     </Navbar>
   );
