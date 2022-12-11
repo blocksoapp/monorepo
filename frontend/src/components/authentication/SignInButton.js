@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 import {
     useAccount,
-    useConnect,
+    useDisconnect,
     useNetwork,
     useSignMessage
 } from 'wagmi'
-import { SiweMessage } from 'siwe'
-import { baseAPI, getCookie } from '../../utils.js'
 import { ConnectKitButton } from "connectkit"
+import { SiweMessage } from 'siwe'
+import { UserContext } from '../../contexts/UserContext'
+import { baseAPI, getCookie } from '../../utils.js'
 
 
-function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
+function SignInButton({buttonText}) {
+    const { setUser, isAuthenticated, setIsAuthenticated } = useContext(UserContext);
     const [nonceData, setNonceData] = useState('')
     const [isLoading, setIsLoading] = useState(Boolean)
     const [error, setError] = useState(Error)
@@ -21,23 +23,19 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
     const navigate = useNavigate()
 
     // Dependencies from wagmi
-    const { connect, connector} = useConnect()
     const { address, isConnected } = useAccount()
+    const { disconnect } = useDisconnect()
     const { chain: activeChain } = useNetwork()
     const { signMessageAsync } = useSignMessage()
 
 // Fetch nonce from backend + update nonce state
     const fetchNonce = async () => {
         try {
-            console.log('fetching nonce...')
             const url = `${baseAPI}/auth/nonce/`
             const nonceRes = await fetch(url)
-            console.log('fetch nonce:', nonceRes)
             const data = await nonceRes.json()
             const nonce = data.nonce
-            console.log("this is my nonce: ",nonce)
             setNonceData(nonce)
-            console.log("this is my state nonce", nonceData)
         } catch (error) {
             console.log('Could not retrieve nonce:', error)
         }
@@ -50,7 +48,6 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
         method: 'GET',
         credentials: 'include'
       })
-      console.log('fetched profile:', res)
       return res
     }
 
@@ -66,15 +63,13 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
       }
     }
     
-// Create a SIWE message for user to sign with nonce
+    // Create a SIWE message for user to sign with nonce
     const signIn = async () => {
       try {
         // Check validity of chain/address
         const chainId = activeChain.id
         if (!address || !chainId) return 
         setIsLoading(true)
-
-        console.log('nonce data before msg:', nonceData)
 
         const messageData = {
           address: address,
@@ -86,12 +81,8 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
           nonce: nonceData
         }
 
-        console.log('nonce data after msg:', nonceData)
-
-        console.log("message data: ", messageData)
          // Create SIWE message with pre-fetched nonce and sign with wallet
         var message = new SiweMessage(messageData)
-        console.log("this is my messsge: ",message)
         message = message.prepareMessage();
         const signature = await signMessageAsync({
           message: message,
@@ -114,7 +105,6 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
           setIsAuthenticated(true)
           setIsLoading(false)
           setNonceData('')
-          console.log('res is ok:', loginRes.status)
           // Check if profile exists
           checkProfileExists()
         
@@ -153,6 +143,9 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
       } catch (error) {
         console.log(error)
       }
+
+      // disconnect the wallet
+      disconnect();
     }
 
       // Function to handle authentication on refresh 
@@ -178,13 +171,24 @@ function SignInButton({ setUser, isAuthenticated, setIsAuthenticated }) {
       handleAuthentication()
     }, []);
 
+    /*
+     * Start the sign in process when
+     * a user connects their wallet.
+     */
+    useEffect(() => {
+        // do nothing when wallet is disconnected
+        if (!isConnected) {
+            return
+        }
+        signIn();
+    }, [isConnected]);
+
+
   return (
     <div className='pb-1'>
         {isAuthenticated
             ? <Button variant="light" onClick={signOut}>Sign out</Button>
-            : isConnected
-                ? <Button id="signInButton" disabled={isLoading} onClick={signIn}> Sign In</Button>
-                : <ConnectKitButton/>
+            : <ConnectKitButton label={buttonText} />
         }
     </div>
   );
