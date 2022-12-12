@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import 'react-image-lightbox/style.css';
 import App from './App';
 import { 
     WagmiConfig,
