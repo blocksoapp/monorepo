@@ -6,7 +6,7 @@ import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
 
 function EditProfile() {
   // Constant
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   // State
   const [pfp, setPfp] = useState(null);
   const [profile, setProfile] = useState({
@@ -87,6 +87,7 @@ function EditProfile() {
           checkForProfile={checkForProfile}
           pfp={pfp}
           setPfp={setPfp}
+          setUser={setUser}
         />
       </Container>
     </div>

@@ -19,13 +19,12 @@ function EditProfileForm({
   pfp,
   setPfp,
   checkForProfile,
+  setUser,
 }) {
   const { isConnected, address } = useAccount();
-
   const [pfpPreview, setPfpPreview] = useState(null);
   const [isPfpRemoved, setIsPfpRemoved] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -58,6 +57,12 @@ function EditProfileForm({
       setIsSuccess(true);
       setIsLoading(false);
       checkForProfile();
+      setUser((prevValue) => {
+        return {
+          ...prevValue,
+          profile: formProfile,
+        };
+      });
     } else {
       setIsError(true);
       setIsLoading(false);
