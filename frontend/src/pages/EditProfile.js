@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import { baseAPI } from "../utils";
 import { UserContext } from "../contexts/UserContext";
 import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
+import { apiGetUser } from "../api";
 
 function EditProfile() {
   // Constant
@@ -36,20 +37,9 @@ function EditProfile() {
     },
   });
 
-  // Fetch user profile status
-  const getUser = async () => {
-    const url = `${baseAPI}/user/`;
-    const res = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-    });
-    console.log("fetched profile:", res);
-    const data = res.json();
-    return data;
-  };
-
   const checkForProfile = async () => {
-    const res = await getUser();
+    const fetchUser = await apiGetUser();
+    const res = await fetchUser.json();
     if (res.profile !== null) {
       // set profile fields to existing values
       var profileData = res.profile;
