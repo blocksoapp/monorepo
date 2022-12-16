@@ -8,6 +8,7 @@ import PostsError from '../posts/PostsError';
 import PostsPlaceholder from '../posts/PostsPlaceholder';
 import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
+import PollNewItems from './PollNewItems';
 
 
 function Feed({ profileData }) {
@@ -94,6 +95,14 @@ function Feed({ profileData }) {
             <NewPost
                 profileData={profileData}
                 submitPostCallback={submitPostCallback}
+            />
+
+            {/* Poll for new feed items in background */}
+            <PollNewItems
+                interval={30000}  // 30 seconds
+                apiFunction={apiGetFeed}
+                oldItems={feedItems}
+                callback={fetchFeed}
             />
 
             {/* Feed or Placeholder */}
