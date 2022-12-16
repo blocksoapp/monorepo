@@ -19,7 +19,6 @@ code {
   color: #00A8E8
 }
 
-
 .fullheight-container {
   min-height: 100vh;
 }
@@ -38,6 +37,7 @@ code {
 }
 
 .link-style:hover {
+  color:#4285F4;
   text-decoration: underline;
   text-decoration-thickness: 15%;
 }
@@ -46,6 +46,12 @@ code {
   text-decoration: underline;
   text-decoration-color:#00A8E8;
   text-decoration-thickness: 20%;
+}
+
+.arrow:hover {
+  background-color: whitesmoke;
+  padding: .5rem;
+  border-radius: 2rem;
 }
 
 

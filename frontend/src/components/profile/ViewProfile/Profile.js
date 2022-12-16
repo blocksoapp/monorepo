@@ -4,16 +4,19 @@ import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
 import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
+import {
+    apiGetPosts, apiGetProfile, apiPostFollow, apiPostUnfollow, apiGetUrl
+} from '../../../api';
+import { UserContext } from '../../../contexts/UserContext';
 import Post from '../../posts/Post.js'; 
-import { apiGetPosts, apiGetProfile, apiPostFollow, apiPostUnfollow } from '../../../api';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
+import MorePosts from "../../posts/MorePosts";
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import PfpResolver from '../../PfpResolver';
-import { UserContext } from '../../../contexts/UserContext';
 
 function Profile(props) {
     // constants
@@ -27,6 +30,9 @@ function Profile(props) {
     const [posts, setPosts] = useState([]);
     const [postsError, setPostsError] = useState(false);
     const [activeLeftTab, setActiveLeftTab] = useState('first')
+    const [postsNextPage, setPostsNextPage] = useState(null);
+    const [morePostsLoading, setMorePostsLoading] = useState(false);
+    const [morePostsError, setMorePostsError] = useState(false);
  
     // functions
     const fetchPosts = async () => {
@@ -38,11 +44,32 @@ function Profile(props) {
             setPosts(data["results"]);
             setPostsError(false);
             setPostsLoading(false);
+            setPostsNextPage(data["next"]);
         }
         else {
             setPostsError(true);
             setPostsLoading(false);
             console.error(res);
+        }
+    }
+
+    const fetchMorePosts = async () => {
+        setMorePostsLoading(true);
+        const resp = await apiGetUrl(postsNextPage);
+
+        // success
+        if (resp.status === 200) {
+            var data = await resp.json();
+            setPosts(posts.concat(data["results"]));
+            setMorePostsError(false);
+            setMorePostsLoading(false);
+            setPostsNextPage(data["next"]);
+        }
+        // error
+        else {
+            setMorePostsError(true);
+            setMorePostsLoading(false);
+            console.error(resp);
         }
     }
 
@@ -112,6 +139,9 @@ function Profile(props) {
         setPostsLoading(true);
         setPosts([]);
         setPostsError(false);
+        setMorePostsError(false);
+        setMorePostsLoading(false);
+        setPostsNextPage(null);
 
         // load the new profile and its posts
         fetchProfile();
@@ -229,19 +259,19 @@ function Profile(props) {
                     : posts.length === 0
                         ? <PostsNotFound retryAction={fetchPosts} />
                         : posts.map(post => (
-                            <Post
-                                key={post.id}
-                                id={post.id}
-                                author={post.author.address}
-                                ensName={props.ensName}
-                                text={post.text}
-                                imgUrl={post.imgUrl}
-                                created={post.created}
-                                pfp={post.author.image}
-                                refTx={post.refTx}
-                                numComments={post.numComments}
-                            />
+                            <Post key={post.id} data={post} />
             ))}
+
+            {/* More Posts Link (pagination) */}
+            {postsNextPage === null
+                ? <></>
+                : morePostsLoading === true
+                    ? <PostsPlaceholder />
+                    : morePostsError === true
+                        ? <PostsError retryAction={fetchMorePosts} />
+                        : <MorePosts action={fetchMorePosts} />
+            }
+
         </>
     )
 }

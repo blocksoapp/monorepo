@@ -107,7 +107,7 @@ function FollowCard(props) {
     }, [])
 
   return (
-        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-md-5 light-hover">
+        <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-sm-2 px-lg-5 light-hover">
                 <PfpResolver
                     address={props.address}
                     imgUrl={props.imgUrl}
@@ -115,20 +115,20 @@ function FollowCard(props) {
                     width="90px"
                     fontSize="0.9rem"
                     onClick={navigateProfile}
-                    className="pointer d-flex justify-content-center"
+                    className="pointer d-flex justify-content-center mt-2"
                 />
-                <div className='flex-grow-1 ps-4'>
+                <div className='flex-grow-1 ps-sm-4'>
                     <div className='follow-body'>
                         <div className='d-flex flex-column'>
                             <ClickableEnsAndAddress address={props.address} className='fs-5 primary-color-hover pointer' onClick={navigateProfile}/>
-                            <Badge className='text-dark bg-light align-self-sm-start'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
+                            <Badge className='text-dark bg-light align-self-sm-start align-self-center'>{props.numFollowers} {props.numFollowers === 1 ? 'follower' : 'followers'} </Badge>
                         </div>
                         <div className='align-self-center follow-btn'>
                            {handleButtonDisplayed()}
                         </div>
                     </div>
-                    <div>
-                        {props.bio && <p className='fs-6 pt-1 bio'>{abbrBio(props.bio)}</p>}
+                    <div className=''>
+                        {props.bio && <p className='fs-6 pt-1 px-sm-0 px-3 bio'>{abbrBio(props.bio)}</p>}
                     </div>
                 </div>
         </div>

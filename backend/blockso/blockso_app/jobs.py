@@ -1,11 +1,14 @@
 # std lib imports
+import datetime
 import json
 
 # third party imports
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from web3 import Web3
+import redis
 import requests
+import rq
 
 # our imports
 from .models import ERC20Transfer, ERC721Transfer, Post, Profile, Transaction 
@@ -26,33 +29,123 @@ erc721_transfer_sig = "Transfer(indexed address from, "\
 
 # other constants
 zero_address = "0x0000000000000000000000000000000000000000"
+scheduled_job_name = "queue_tx_history_job_for_all_users"
 
 
-def get_tx_history_url(address):
+def _get_redis_queue():
+    """
+    Return an rq queue connected to a redis backend.
+    This creates a new connection every time it's called,
+    so be careful calling it.
+    DO NOT call this method from outside this module.
+    If you need to do that, then figure out a way to
+    create / use a singleton for uses outside this module.
+    """
+    redis_client = redis.from_url(settings.REDIS_URL)
+    return rq.Queue(connection=redis_client)
+
+
+def enqueue_all_users_tx_history(limit):
+    """
+    Enqueues a job for each user in the system,
+    to fetch their tx history and update the db.
+    limit is the number of transactions to fetch
+    for each user.
+    If limit is None then it fetches all txs.
+    """
+    # redis client and queue for scheduling jobs
+    redis_queue = _get_redis_queue()
+
+    users = UserModel.objects.all()
+    for user in users:
+        redis_queue.enqueue(
+            process_address_txs,
+            user.ethereum_address,
+            limit,
+            job_id=user.ethereum_address
+        )
+
+def _handle_scheduling_all_users_job(next_update):
+    """
+    Schedules the job that's responsible for queueing
+    individual jobs for getting all users' tx history.
+    Schedules the job to run at the 'next_update_at' date.
+    Does nothing if the job is already scheduled.
+    """
+    # redis client and queue for scheduling jobs
+    redis_queue = _get_redis_queue()
+    scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
+
+    # transform data from covalent to a datetime
+    next_update = datetime.datetime.fromisoformat(
+        next_update[0:-4] + "+00:00"
+    )
+
+    # schedule the job
+    result = redis_queue.enqueue_at(
+        next_update,
+        enqueue_all_users_tx_history,
+        50,
+        job_id=scheduled_job_name
+    )
+
+
+def get_tx_history_url(address, page_number):
     """
     Return URL for getting tx history of given address.
     """
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number=0&page-size=100"
+          f"&no-logs=false&page-number={page_number}&page-size=100"
 
     return url
 
 
-def get_user_tx_history(address):
+def get_user_tx_history(address, limit):
     """
-    Use the covalent API to get the previous 50
+    Use the covalent API to get the previous X
     transactions of the given address.
+    If 'limit' is None then all transactions are returned,
+    otherwise only 'limit' number of txs are returned.
     Returns a list of transactions data.
     """
-    url = get_tx_history_url(address)
-    resp = client.get(url) 
-    resp.raise_for_status()
-    data = resp.json()
-    txs = data["data"]["items"]
+    # TODO can this run out of memory if
+    # there are thousands of txs?
+    to_ret = []
 
-    return txs
+    # paginate through results
+    has_more = True
+    page_number = -1
+    while has_more is True:
+        # prepare url
+        page_number += 1
+        url = get_tx_history_url(address, page_number)
+
+        # make request for txs
+        resp = client.get(url)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # update results
+        to_ret += data["data"]["items"]
+        has_more = data["data"]["pagination"]["has_more"]
+
+        # schedule a job to update tx history of all users
+        # when covalent next updates its data
+        next_update = data["data"]["next_update_at"]
+        _handle_scheduling_all_users_job(next_update)
+
+        # stop looping if limit has been reached
+        if limit is not None and len(to_ret) >= limit:
+            break
+
+        # TODO remove this when a more robust tx indexing system is created
+        # for now break after 10 pages, to avoid overwhelming covalent
+        # and our job system
+        if page_number == 10: break
+
+    return to_ret
 
 
 def parse_and_create_tx(tx_data, address):
@@ -108,8 +201,10 @@ def parse_and_create_tx(tx_data, address):
         if event_sig == erc20_transfer_sig and \
             event["decoded"]["params"][0]["value"] == address:
 
+            # do not create db entries for txs that did not originate
+            # from the address that is being searched; helps avoid spam
             if tx is None:
-                tx, _ = Transaction.objects.get_or_create(**object_kwargs)
+                return
 
             ERC20Transfer.objects.create(
                 tx=tx,
@@ -195,14 +290,15 @@ def create_post(tx_record, post_author):
 
     return None
 
-def process_address_txs(address):
+def process_address_txs(address, limit=None):
     """
     Populates the database with the address' transaction history.
     Creates Posts based on the tx history.
-    Exits once it starts processing existing txs.
+    Processes all txs if 'limit' is None, otherwise processes
+    'limit' number of transactions.
     """
     # get tx history
-    history = get_user_tx_history(address)
+    history = get_user_tx_history(address, limit)
 
     # create a user/profile if they do not already exist
     user, _ = UserModel.objects.get_or_create(ethereum_address=address)

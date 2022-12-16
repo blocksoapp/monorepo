@@ -2,6 +2,19 @@
 import { baseAPI, getCookie } from './utils';
 
 
+/* Returns the response for deleting the authed user's repost of the given postId.  */
+export const apiDeleteRepost = async (postId) => {
+    const url = `${baseAPI}/post/${postId}/repost/`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        });
+    return res;
+}
+
 /* Returns the response for the comments of a post. */
 export const apiGetComments = async (postId) => {
     const url = `${baseAPI}/posts/${postId}/comments/`;
@@ -25,6 +38,16 @@ export const apiGetProfile = async (address) => {
 /* Returns the response for the profiles of explore page. */
 export const apiGetExplore = async () => {
     const url = `${baseAPI}/explore/`;
+    const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    return res;
+}
+
+/* Returns the response for the getting the feed items of the authed user. */
+export const apiGetFeed = async () => {
+    const url = `${baseAPI}/feed/`;
     const res = await fetch(url, {
         method: 'GET',
         credentials: 'include'
@@ -128,6 +151,36 @@ export const apiPostFollow = async (address) => {
             credentials: 'include'
         });
         return res
+}
+
+/* Returns the response for reposting an item  */
+export const apiPostPost = async (data) => {
+    // prepare request 
+    const url = `${baseAPI}/post/`;
+    const defaultData = {
+        text: "",
+        tagged_users: [],
+        imgUrl: "",
+        isShare: false,
+        isQuote: false,
+        refPost: null,
+        refTx: null,
+    }
+
+    // update defaultData with data that was passed in
+    const toSend = {...defaultData, ...data};
+
+    // send request
+    const resp = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(toSend),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
 }
 
 /* Returns the response for updating unfollow given an address  */

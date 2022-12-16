@@ -2,7 +2,7 @@
 	"data": {
 		"address": "0xc9eb983357b88921a89844d7047589a37b563108",
 		"updated_at": "2022-09-30T08:05:18.326458395Z",
-		"next_update_at": "2022-09-30T08:10:18.326458635Z",
+		"next_update_at": "REPLACEME_NEXT_UPDATE_AT",
 		"quote_currency": "USD",
 		"chain_id": 1,
 		"items": [{
@@ -268,7 +268,7 @@
 			}] 
 		}],
 		"pagination": {
-			"has_more": true,
+			"has_more": false,
 			"page_number": 0,
 			"page_size": 20,
 			"total_count": null

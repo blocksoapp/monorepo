@@ -299,11 +299,18 @@ class UserRetrieve(
         return self.retrieve(request, *args, **kwargs)
 
 
-class PostCreateList(generics.ListCreateAPIView):
+class PostCreate(generics.CreateAPIView):
 
-    """ View that supports creating and listing Posts of an address. """
+    """ View that supports creating a post by the authed user. """
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.PostSerializer
+
+
+class PostList(generics.ListAPIView):
+
+    """ View that supports listing Posts of an address. """
+
     serializer_class = serializers.PostSerializer
     pagination_class = pagination.PostsPagination
 
@@ -325,7 +332,7 @@ class PostCreateList(generics.ListCreateAPIView):
         # TODO this should create a job instead of
         # doing the actual work in the GET request
         # fetch and store the tx history of the person being searched
-        jobs.process_address_txs(self.kwargs["address"])
+        jobs.process_address_txs(self.kwargs["address"], 100)
 
         return self.list(request, *args, **kwargs)
 
@@ -381,10 +388,9 @@ class PostLikeCreateListDestroy(
         Returns the object to be deleted.
         """
         # get the signed in user
-        user = self.request.user
-        user = user.profile
+        user = self.request.user.profile
 
-        # get post id from the URL
+        # get original post id from the URL
         post_id = self.kwargs["id"]
 
         return PostLike.objects.get(post_id=post_id, liker=user)
@@ -410,6 +416,37 @@ class PostLikeCreateListDestroy(
 
     def delete(self, request, *args, **kwargs):
         """ Signed in user unlikes a post. """
+
+        return self.destroy(request, *args, **kwargs)
+
+
+class RepostDestroy(
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports deleting a repost of the post id in the url. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.RepostSerializer
+
+    def get_object(self):
+        """
+        Returns the object to be deleted.
+        """
+        # get the signed in user
+        user = self.request.user.profile
+
+        # get original post id from the URL
+        post_id = self.kwargs["id"]
+
+        return Post.objects.get(
+            author=user,
+            refPost_id=post_id,
+            isShare=True
+        )
+
+    def delete(self, request, *args, **kwargs):
+        """ Signed in user deletes their repost of the given post. """
 
         return self.destroy(request, *args, **kwargs)
 
@@ -441,6 +478,7 @@ class FeedList(generics.ListAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PostSerializer
+    pagination_class = pagination.FeedPagination
     queryset = Post.objects.all()
 
     def get_queryset(self):

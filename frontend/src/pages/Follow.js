@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 import LeftTabs from '../components/ui/LeftTabs'
@@ -7,16 +7,15 @@ import Following from '../components/follow/Following'
 
 function Follow() {
 
-    const {state} = useLocation();
-    const { activeLeftTab } = state; // Read values passed on state
-
+    const location = useLocation();
+    const activeLeftTab = location.state?.activeLeftTab   
 
   return (
-    <Container>
+    <Container className='pb-5'>
         <LeftTabs
         firstTab={<Followers/>}
         secondTab={<Following/>}
-        activeTab={activeLeftTab}
+        activeTab={activeLeftTab ? activeLeftTab : 'first'}
         />
     </Container>
   )

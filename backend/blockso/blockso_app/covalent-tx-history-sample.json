@@ -2,7 +2,7 @@
     "data": {
         "address": "0xa79e63e78eec28741e711f89a672a4c40876ebf3",
         "updated_at": "2022-09-15T16:47:51.139787124Z",
-        "next_update_at": "2022-09-15T16:52:51.139787394Z",
+        "next_update_at": "REPLACEME_NEXT_UPDATE_AT",
         "quote_currency": "USD",
         "chain_id": 1,
         "items": [
