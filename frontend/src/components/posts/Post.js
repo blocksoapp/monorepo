@@ -23,6 +23,7 @@ import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
+import ERC721Post from "./ERC721Post";
 
 
 function Post({data, bgColor}) {
@@ -50,6 +51,7 @@ function Post({data, bgColor}) {
     const [erc721Transfers, setErc721Transfers] = useState([]);
     const [txType, setTxType] = useState(null);
     const repostRef = useRef(null);
+
 
     // functions
 
@@ -247,8 +249,8 @@ function Post({data, bgColor}) {
                             {txType === txTypes.ERC20Transfer &&
                             <Card.Body>
                                 {/* show all transfers of a transaction */}
-                                {erc20Transfers.map(transfer => (
-                                    <Row className="align-items-end">
+                                {erc20Transfers.map((transfer, index) => (
+                                    <Row key={index} className="align-items-end">
                                         {/* token image */}
                                         <Col className="col-auto">
                                             <Image
@@ -282,32 +284,8 @@ function Post({data, bgColor}) {
                             }
 
                             {/* ERC721 Transfer */}
-                            {txType === txTypes.ERC721Transfer && 
-                            <Card.Body>
-                                {/* show all transfers of a transaction */}
-                                {/* TODO improve hacky way of skipping spam which is currently checking if there are more than 10 transfers */}
-                                {erc721Transfers.map(transfer => (
-                                    <Row>
-                                        {/* nft transfer details */}
-                                        <Col className="col-auto">
-                                            <Card.Text>
-                                                Sent&nbsp;
-                                                <a
-                                                    className="text-success"
-                                                    href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ fontStyle: 'italic', color: 'black' }}
-                                                >
-                                                    {transfer.contract_ticker} #{transfer.token_id}
-                                                </a>
-                                                &nbsp;to&nbsp;
-                                                <TxAddress address={transfer.to_address} />
-                                            </Card.Text>
-                                        </Col>
-                                    </Row>
-                                ))}
-                            </Card.Body>
+                            {(txType === txTypes.ERC721Transfer && erc721Transfers.length > 0) && 
+                             <ERC721Post transfers={erc721Transfers} />
                             }
 
                             {/* All other Transactions */}
