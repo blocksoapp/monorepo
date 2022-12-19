@@ -1097,7 +1097,7 @@ class PostTests(BaseTest):
         # make request by user 2 to like user 1 post
         url = f"/api/post/{post_id}/likes/"
         self._do_login(self.test_signer_2)
-        resp = self.client.post(url)
+        self.client.post(url)
 
         # assert post was liked successfully
         resp = self.client.get(url)
@@ -1114,6 +1114,52 @@ class PostTests(BaseTest):
         resp = self.client.get(url)
         self.assertEqual(resp.data["count"], 0)
         self.assertEqual(resp.data["results"], [])
+
+    def test_get_post_num_likes(self):
+        """
+        Assert that the number of likes a post has is returned
+        as part of the serialized Post data.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["numLikes"], 1)
+
+    def test_get_post_liked_by_me(self):
+        """
+        Assert that likedByMe is True if the user liked the given post.
+        Assert that likedByMe is False otherwise.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["likedByMe"], True)
 
     def test_repost(self):
         """

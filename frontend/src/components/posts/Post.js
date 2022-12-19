@@ -14,11 +14,12 @@ import { useNavigate } from "react-router-dom";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+    faHeart,
     faComment,
     faRetweet,
 } from '@fortawesome/free-solid-svg-icons';
 import { utils } from "ethers";
-import { apiDeleteRepost, apiPostPost } from "../../api";
+import { apiDeleteLike, apiDeleteRepost, apiPostLike, apiPostPost } from "../../api";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
@@ -153,6 +154,55 @@ function Post({data, bgColor}) {
                 ...postData,
                 numReposts: postData["numReposts"] - 1,
                 repostedByMe: false
+            });
+        }
+        // error handling
+        else {
+            console.error(resp);
+        }        
+    }
+
+    /*
+     * Handles user clicking the Like button.
+     * Likes the item if the user has not already liked.
+     * Unlikes the item if the user has already liked it.
+     */
+    const handleLikeClick = async function() {
+        postData.likedByMe ? await doUnlikePost() : await doLikePost();
+    }
+
+    /*
+     * Likes the current post as the authenticated user.
+     */
+    const doLikePost = async function() {
+        const resp = await apiPostLike(postData.id);
+
+        // success handling
+        if (resp.status === 201) {
+            setPostData({
+                ...postData,
+                numLikes: postData["numLikes"] + 1,
+                likedByMe: true
+            });
+        }
+        // error handling
+        else {
+            console.error(resp);
+        }        
+    }
+
+    /*
+     * Un-Likes the current post as the authenticated user.
+     */
+    const doUnlikePost = async function() {
+        const resp = await apiDeleteLike(postData.id);
+
+        // success handling
+        if (resp.status === 204) {
+            setPostData({
+                ...postData,
+                numLikes: postData["numLikes"] - 1,
+                likedByMe: false
             });
         }
         // error handling
@@ -317,12 +367,34 @@ function Post({data, bgColor}) {
                             <Card.Footer>
                                 <Row className="justify-content-around align-items-center">
 
+                                    {/* Like button */}
+                                    <Col className="col-auto">
+                                        <Button
+                                            size="sm"
+                                            variant={
+                                                postData["likedByMe"] === true
+                                                    ? "outline-danger"
+                                                    : "light"
+                                            }
+                                            onClick={() => handleLikeClick()}
+                                            style={{
+                                                color: postData.numLikes > 0 ? "#dc3545" : ""
+                                            }}
+                                        >
+                                            {postData.numLikes}&nbsp;&nbsp;
+                                            <FontAwesomeIcon icon={faHeart} />
+                                        </Button>
+                                    </Col>
+
                                     {/* Comment button */}
                                     <Col className="col-auto">
                                         <Button
                                             size="sm"
                                             variant="light"
                                             onClick={() => {navigate(`/posts/${postData.id}`)}}
+                                            style={{
+                                                color: postData.numComments > 0 ? "#0d6efd" : ""
+                                            }}
                                         >
                                             {postData.numComments}&nbsp;&nbsp;
                                             <FontAwesomeIcon icon={faComment} />
@@ -353,12 +425,15 @@ function Post({data, bgColor}) {
                                             {/* Repost button */}
                                             <Button
                                                 size="sm"
+                                                ref={repostRef}
                                                 variant={
                                                     postData["repostedByMe"] === true
                                                         ? "secondary"
                                                         : "light"
                                                 }
-                                                ref={repostRef}
+                                                style={{
+                                                    color: postData.numReposts > 0 ? "#00a8e8" : ""
+                                                }}
                                             >
                                                 {postData.numReposts}&nbsp;&nbsp;
                                                 <FontAwesomeIcon icon={faRetweet} />

@@ -258,13 +258,15 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created", "tagged_users",
-                  "numReposts", "repostedByMe"]
+                  "numReposts", "repostedByMe", "numLikes", "likedByMe"]
         read_only_fields = ["id", "author", "refTx", "numComments", "created",
-                            "numReposts", "repostedByMe"]
+                            "numReposts", "repostedByMe", "numLikes", "likedByMe"]
 
     author = ProfileSerializer(required=False)
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
+    numLikes = serializers.SerializerMethodField()
+    likedByMe = serializers.SerializerMethodField()
     numReposts = serializers.SerializerMethodField()
     repostedByMe = serializers.SerializerMethodField()
     refPost = RefPostField(
@@ -285,6 +287,26 @@ class PostSerializer(serializers.ModelSerializer):
             ).data
 
         return None
+
+    def get_numLikes(self, instance):
+        """ Returns number of likes on the post. """
+
+        return instance.likes.count()
+
+    def get_likedByMe(self, instance):
+        """ Returns whether the authenticated user liked the post. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return False
+
+        # handle anonymous users, i.e. not signed in
+        if isinstance(request.user, AnonymousUser):
+            return False
+
+        user = request.user.profile
+        return instance.likes.filter(liker=user).exists()
 
     def get_numComments(self, instance):
         """ Returns number of comments on the post. """

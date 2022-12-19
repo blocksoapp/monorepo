@@ -2,13 +2,26 @@
 import { baseAPI, getCookie } from './utils';
 
 
+/* Returns the response for unliking the given postId by the authed user.  */
+export const apiDeleteLike = async (postId) => {
+    const url = `${baseAPI}/post/${postId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
+
 /* Returns the response for deleting the authed user's repost of the given postId.  */
 export const apiDeleteRepost = async (postId) => {
     const url = `${baseAPI}/post/${postId}/repost/`;
         const res = await fetch(url, {
             method: 'DELETE',
             headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
+                'X-CSRFTOKEN': getCookie('csrftoken')
             },
             credentials: 'include'
         });
@@ -138,6 +151,19 @@ export const apiGetFollowing = async (address) => {
           credentials: 'include'
       });
       return res
+}
+
+/* Returns the response for liking a post.  */
+export const apiPostLike = async (postId) => {
+    const url = `${baseAPI}/post/${postId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+        'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
 }
 
 /* Returns the response for updating follow given an address  */
