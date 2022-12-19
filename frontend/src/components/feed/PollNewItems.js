@@ -71,22 +71,35 @@ function PollNewItems({apiFunction, interval, oldItems, callback}) {
 
     return (
         hasNewItems
-            ?   <Container>
-                    <Row className="justify-content-center p-5">
-                        <Col xs={10} lg={6}>
+            ?   <Container
+                    className="position-fixed"
+                    style={{
+                        zIndex: 1,
+                        marginTop: "-2%",
+                        left: "50%",
+                        transform: "translate(-50%, 0)"
+                    }}
+                >
+                    <Row className="justify-content-center">
+                        <Col xs={8} sm={10} md={8} lg={5} xl={4}>
                             <Alert variant="primary">
-                                There are new items in your feed!
-                                <Button
-                                    size="sm"
-                                    variant="outline-primary"
-                                    className="float-md-end mt-3 mt-md-0"
-                                    onClick={() => {
-                                        callback();
-                                        setHasNewItems(false);
-                                    }}
-                                >
-                                    Refresh
-                                </Button>
+                                <Row>
+                                    <Col xs={12}>
+                                        <span>There are new items in your feed!</span>
+                                        <span className="d-grid mt-2 d-sm-block mt-sm-0 float-sm-end">
+                                            <Button
+                                                size="sm"
+                                                variant="outline-primary"
+                                                onClick={() => {
+                                                    callback();
+                                                    setHasNewItems(false);
+                                                }}
+                                            >
+                                                Refresh
+                                            </Button>
+                                        </span>
+                                    </Col>
+                                </Row>
                             </Alert>
                         </Col>
                     </Row>

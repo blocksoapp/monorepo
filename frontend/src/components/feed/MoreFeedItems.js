@@ -6,13 +6,13 @@ function MoreFeedItems(props) {
     return (
         <Container>
             <Row className="justify-content-center p-5">
-                <Col xs={10} lg={6}>
+                <Col xs={12} md={10} lg={6}>
                     <Alert variant="primary">
                         There are more items in your feed!
                         <Button
                             size="sm"
                             variant="outline-primary"
-                            className="float-md-end mt-3 mt-md-0"
+                            className="d-grid mt-2 d-sm-block mt-sm-0 float-sm-end"
                             onClick={props.action}
                         >
                             Load More

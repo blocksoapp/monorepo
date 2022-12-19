@@ -91,18 +91,18 @@ function Feed({ profileData }) {
     return (
         <Container>
 
-            {/* New Post Form */}
-            <NewPost
-                profileData={profileData}
-                submitPostCallback={submitPostCallback}
-            />
-
             {/* Poll for new feed items in background */}
             <PollNewItems
                 interval={30000}  // 30 seconds
                 apiFunction={apiGetFeed}
                 oldItems={feedItems}
                 callback={fetchFeed}
+            />
+
+            {/* New Post Form */}
+            <NewPost
+                profileData={profileData}
+                submitPostCallback={submitPostCallback}
             />
 
             {/* Feed or Placeholder */}
@@ -118,7 +118,7 @@ function Feed({ profileData }) {
             }
 
             {/* More Feed Items Link (pagination) */}
-            {feedItemsNextPage === null
+            {feedItemsNextPage === null || loadingFeedItems
                 ? <></>
                 : moreFeedItemsLoading === true
                     ? <PostsPlaceholder />
