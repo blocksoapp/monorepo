@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Container } from "react-bootstrap";
-import { baseAPI } from "../utils";
 import { UserContext } from "../contexts/UserContext";
 import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
-import { apiGetUser } from "../api";
 
 function EditProfile() {
   // Constant
@@ -37,33 +35,27 @@ function EditProfile() {
     },
   });
 
-  const checkForProfile = async () => {
-    const fetchUser = await apiGetUser();
-    const res = await fetchUser.json();
-    if (res.profile !== null) {
-      // set profile fields to existing values
-      var profileData = res.profile;
+  const loadProfile = async () => {
+    if (user && user.profile) {
+      var profileData = user.profile;
       delete profileData.posts;
       delete profileData.numFollowers;
       delete profileData.numFollowing;
       setProfile(profileData);
-      return;
-    } else console.log("profile does not exist");
+      setPfp(profileData.image);
+    } else {
+      console.log("No profile found");
+    }
   };
 
   // load existing profile data
   useEffect(() => {
-    if (user && user.profile) {
-      setProfile(user.profile);
-    } else {
-      checkForProfile();
-    }
+    loadProfile();
   }, []);
 
   useEffect(() => {
-    setFormProfile(profile);
-    setPfp(profile.image);
-  }, [profile]);
+    loadProfile();
+  }, [user]);
 
   return (
     <div className="p-sm-4">
@@ -72,9 +64,8 @@ function EditProfile() {
         <EditProfileForm
           profile={profile}
           setProfile={setProfile}
-          formProfile={formProfile}
-          setFormProfile={setFormProfile}
-          checkForProfile={checkForProfile}
+          formProfile={profile}
+          setFormProfile={setProfile}
           pfp={pfp}
           setPfp={setPfp}
           setUser={setUser}

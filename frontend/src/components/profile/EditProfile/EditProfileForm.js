@@ -18,7 +18,6 @@ function EditProfileForm({
   setFormProfile,
   pfp,
   setPfp,
-  checkForProfile,
   setUser,
 }) {
   const { isConnected, address } = useAccount();
@@ -56,7 +55,6 @@ function EditProfileForm({
     if (formRes.ok) {
       setIsSuccess(true);
       setIsLoading(false);
-      checkForProfile();
       setUser((prevValue) => {
         return {
           ...prevValue,
