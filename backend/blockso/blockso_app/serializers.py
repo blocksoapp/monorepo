@@ -466,10 +466,14 @@ class PostLikeSerializer(serializers.ModelSerializer):
         post = Post.objects.get(pk=post_id)
 
         # create post like
-        like = PostLike.objects.create(
+        like, created = PostLike.objects.get_or_create(
             liker=user,
             post=post
         )
+
+        # raise 400 if user tried to like the same post twice
+        if created is False:
+            raise serializers.ValidationError("Cannot like a post twice.")
 
         # notify the post author that the user liked their post
         notif = Notification.objects.create(user=post.author)

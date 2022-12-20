@@ -155,6 +155,13 @@ class PostLike(models.Model):
 
     class Meta:
         ordering = ["-created"]
+        constraints = [
+            # user cannot like a post twice
+            models.UniqueConstraint(
+                fields=['post', 'liker'],
+                name='cannot like a post twice'
+            ),
+        ]
 
 
     post = models.ForeignKey(

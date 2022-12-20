@@ -1115,6 +1115,33 @@ class PostTests(BaseTest):
         self.assertEqual(resp.data["count"], 0)
         self.assertEqual(resp.data["results"], [])
 
+    def test_like_post_twice(self):
+        """
+        Assert that a user cannot like a post twice.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's post twice
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+        resp = self.client.post(url)
+
+        # assert second like was unsuccessful
+        self.assertEqual(resp.status_code, 400)
+
+        # assert that total likes is 1
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
     def test_get_post_num_likes(self):
         """
         Assert that the number of likes a post has is returned
