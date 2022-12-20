@@ -19,8 +19,8 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, Follow, Notification, Post, PostLike, Profile, \
-        Socials
+from .models import Comment, CommentLike, Follow, Notification, Post, \
+        PostLike, Profile, Socials
 from . import jobs, pagination, serializers
 
 
@@ -420,6 +420,42 @@ class PostLikeCreateListDestroy(
         return self.destroy(request, *args, **kwargs)
 
 
+class CommentLikeCreateListDestroy(PostLikeCreateListDestroy):
+    """
+    View that supports creating, deleting,
+    and listing Likes of a comment.
+    """
+
+    serializer_class = serializers.CommentLikeSerializer
+
+    def get_object(self):
+        """
+        Returns the object to be deleted.
+        """
+        # get the signed in user
+        user = self.request.user.profile
+
+        # get original comment id from the URL
+        post_id = self.kwargs["post_id"]
+        comment_id = self.kwargs["comment_id"]
+
+        return CommentLike.objects.get(
+            comment__post__id=post_id,
+            comment_id=comment_id,
+            liker=user
+        )
+
+    def get_queryset(self):
+        """
+        Return the queryset of CommentLike objects for the given comment.
+        The queryset is sorted from newest to oldest in the model class.
+        """
+        return CommentLike.objects.filter(
+            comment__post__pk=self.kwargs["post_id"],
+            pk=self.kwargs["comment_id"],
+        )
+
+
 class RepostDestroy(
     mixins.DestroyModelMixin,
     generics.GenericAPIView):
@@ -570,6 +606,23 @@ class CommentCreateList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = serializers.CommentSerializer
     pagination_class = pagination.CommentPagination
+
+
+    def get_queryset(self):
+        """
+        Return Comments of the post specified in the url.
+        """
+        return Comment.objects.filter(post__pk=self.kwargs["post_id"])
+
+
+class CommentRetrieve(generics.RetrieveAPIView):
+
+    """ View that supports retrieving a Comment. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.CommentSerializer
+    lookup_url_kwarg = "comment_id"
+    lookup_field = "id"
 
 
     def get_queryset(self):

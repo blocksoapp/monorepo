@@ -1510,6 +1510,118 @@ class CommentsTests(BaseTest):
             self.update_profile_data["image"]
         )
 
+    def test_like_unlike_comment(self):
+        """
+        Assert that a user can like/unlike another user's comment.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # assert comment was liked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+        # make request by user 2 to unlike user 1 comment
+        resp = self.client.delete(url)
+
+        # assert comment was unliked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 0)
+        self.assertEqual(resp.data["results"], [])
+
+    def test_like_comment_twice(self):
+        """
+        Assert that a user cannot like a comment twice.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's comment twice
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+
+        # assert second like was unsuccessful
+        self.assertEqual(resp.status_code, 400)
+
+        # assert that total likes is 1
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+    def test_get_comment_num_likes(self):
+        """
+        Assert that the number of likes a comment has is returned
+        as part of the serialized Comment data.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["numLikes"], 1)
+
+    def test_get_comment_liked_by_me(self):
+        """
+        Assert that likedByMe is True if the user liked the given comment.
+        Assert that likedByMe is False otherwise.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        resp = self.client.post(url)
+
+        # make request to get the comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["likedByMe"], True)
+
 
 class FeedTests(BaseTest):
     """

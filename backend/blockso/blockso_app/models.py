@@ -203,6 +203,33 @@ class Comment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
+class CommentLike(models.Model):
+    """ Represents a Like for a Comment. """
+
+    class Meta:
+        ordering = ["-created"]
+        constraints = [
+            # user cannot like a comment twice
+            models.UniqueConstraint(
+                fields=['comment', 'liker'],
+                name='cannot like a comment twice'
+            ),
+        ]
+
+
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE,
+        related_name="likes"
+    )
+    liker = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="comment_likes"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class Notification(models.Model):
     """ Represents a Notification created for a user. """
 
@@ -293,6 +320,25 @@ class FollowedEvent(models.Model):
         on_delete=models.CASCADE
     )
     followed_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class LikedCommentEvent(models.Model):
+    """ An event respresenting when a user likes another user's comment. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="liked_comment_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    liked_by = models.ForeignKey(
         to=Profile,
         on_delete=models.CASCADE
     )
