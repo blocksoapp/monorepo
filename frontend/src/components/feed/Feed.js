@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap";
-import { apiGetFeed, apiGetUrl } from "../../api";
-import NewPost from "../posts/NewPost.js";
-import Post from "../posts/Post.js";
-import PostsError from "../posts/PostsError";
-import PostsPlaceholder from "../posts/PostsPlaceholder";
-import MoreFeedItems from "./MoreFeedItems";
-import FeedError from "./FeedError";
+import { Container } from "react-bootstrap"
+import { apiGetFeed, apiGetUrl } from '../../api';
+import NewPost from '../posts/NewPost.js';
+import Post from '../posts/Post.js'; 
+import PostsError from '../posts/PostsError';
+import PostsPlaceholder from '../posts/PostsPlaceholder';
+import MoreFeedItems from './MoreFeedItems';
+import FeedError from './FeedError';
+import PollNewItems from './PollNewItems';
+
 
 function Feed({ profileData }) {
   // constants
@@ -82,38 +84,47 @@ function Feed({ profileData }) {
     fetchFeed();
   }, [routerLocation.key]);
 
-  return (
-    <Container>
-      {/* New Post Form */}
-      <NewPost
-        profileData={profileData}
-        submitPostCallback={submitPostCallback}
-      />
-
-      {/* Feed or Placeholder */}
-      {loadingFeedItems === true ? (
-        <PostsPlaceholder />
-      ) : feedItemsError === true ? (
-        <FeedError retryAction={fetchFeed} />
-      ) : (
+    return (
         <Container>
-          {feedItems &&
-            feedItems.map((post) => <Post key={post.id} data={post} />)}
-        </Container>
-      )}
 
-      {/* More Feed Items Link (pagination) */}
-      {feedItemsNextPage === null ? (
-        <></>
-      ) : moreFeedItemsLoading === true ? (
-        <PostsPlaceholder />
-      ) : moreFeedItemsError === true ? (
-        <PostsError retryAction={fetchMoreFeedItems} />
-      ) : (
-        <MoreFeedItems action={fetchMoreFeedItems} />
-      )}
-    </Container>
-  );
+            {/* Poll for new feed items in background */}
+            <PollNewItems
+                interval={30000}  // 30 seconds
+                apiFunction={apiGetFeed}
+                oldItems={feedItems}
+                callback={fetchFeed}
+            />
+
+            {/* New Post Form */}
+            <NewPost
+                profileData={profileData}
+                submitPostCallback={submitPostCallback}
+            />
+
+            {/* Feed or Placeholder */}
+            {loadingFeedItems === true
+            ? <PostsPlaceholder />
+            : feedItemsError === true
+                ? <FeedError retryAction={fetchFeed} />
+                : <Container>
+                    {feedItems && feedItems.map(post => (
+                        <Post key={post.id} data={post} />
+                    ))}
+                </Container>
+            }
+
+            {/* More Feed Items Link (pagination) */}
+            {feedItemsNextPage === null || loadingFeedItems
+                ? <></>
+                : moreFeedItemsLoading === true
+                    ? <PostsPlaceholder />
+                    : moreFeedItemsError === true
+                        ? <PostsError retryAction={fetchMoreFeedItems} />
+                        : <MoreFeedItems action={fetchMoreFeedItems} />
+            }
+
+        </Container>
+    );
 }
 
 export default Feed;
