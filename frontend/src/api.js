@@ -16,7 +16,7 @@ export const apiDeleteCommentLike = async (postId, commentId) => {
 }
 
 /* Returns the response for unliking the given postId by the authed user.  */
-export const apiDeleteLike = async (postId) => {
+export const apiDeletePostLike = async (postId) => {
     const url = `${baseAPI}/post/${postId}/likes/`;
     const resp = await fetch(url, {
         method: 'DELETE',
@@ -180,7 +180,7 @@ export const apiPostCommentLike = async (postId, commentId) => {
 }
 
 /* Returns the response for liking a post.  */
-export const apiPostLike = async (postId) => {
+export const apiPostPostLike = async (postId) => {
     const url = `${baseAPI}/post/${postId}/likes/`;
     const resp = await fetch(url, {
         method: 'POST',

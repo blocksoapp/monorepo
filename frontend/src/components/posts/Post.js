@@ -19,7 +19,7 @@ import {
     faRetweet,
 } from '@fortawesome/free-solid-svg-icons';
 import { utils } from "ethers";
-import { apiDeleteLike, apiDeleteRepost, apiPostLike, apiPostPost } from "../../api";
+import { apiDeletePostLike, apiDeleteRepost, apiPostPostLike, apiPostPost } from "../../api";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
@@ -175,7 +175,7 @@ function Post({data, bgColor}) {
      * Likes the current post as the authenticated user.
      */
     const doLikePost = async function() {
-        const resp = await apiPostLike(postData.id);
+        const resp = await apiPostPostLike(postData.id);
 
         // success handling
         if (resp.status === 201) {
@@ -195,7 +195,7 @@ function Post({data, bgColor}) {
      * Un-Likes the current post as the authenticated user.
      */
     const doUnlikePost = async function() {
-        const resp = await apiDeleteLike(postData.id);
+        const resp = await apiDeletePostLike(postData.id);
 
         // success handling
         if (resp.status === 204) {
