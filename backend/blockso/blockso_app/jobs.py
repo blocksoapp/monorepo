@@ -47,22 +47,28 @@ def _get_redis_queue():
 
 def enqueue_all_users_tx_history(limit):
     """
-    Enqueues a job for each user in the system,
+    Enqueues a job for all users in the system that:
+     - have an account that has logged in OR
+     - are being followed
     to fetch their tx history and update the db.
-    limit is the number of transactions to fetch
-    for each user.
+    limit is the number of transactions to fetch.
     If limit is None then it fetches all txs.
     """
     # redis client and queue for scheduling jobs
     redis_queue = _get_redis_queue()
 
-    users = UserModel.objects.all()
-    for user in users:
+    # fetch the union of users that have logged in or have followers
+    logged_in = Profile.objects.all().exclude(user__last_login=None)
+    have_followers = Profile.objects.all().exclude(follow_dest=None)
+    profiles = logged_in | have_followers
+
+    # queue a job to get the tx history of each user 
+    for profile in profiles:
         redis_queue.enqueue(
             process_address_txs,
-            user.ethereum_address,
+            profile.user.ethereum_address,
             limit,
-            job_id=user.ethereum_address
+            job_id=profile.user.ethereum_address
         )
 
 def _handle_scheduling_all_users_job(next_update):
