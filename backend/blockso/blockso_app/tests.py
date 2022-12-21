@@ -850,7 +850,7 @@ class BackgroundJobTests(BaseTest):
         self._do_login(self.test_signer_2)
 
         # run the job
-        jobs.enqueue_all_users_tx_history()
+        jobs.enqueue_all_users_tx_history(None)
 
         # assert that it added as many jobs as there are users
         # to the queue, where each job gets the tx history of that user
@@ -1083,6 +1083,110 @@ class PostTests(BaseTest):
             resp.data["tagged_users"][0]["address"],
             tagged[0]
         )
+
+    def test_like_unlike_post(self):
+        """
+        Assert that a user can like/unlike another user's post.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request by user 2 to like user 1 post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # assert post was liked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+        # make request by user 2 to unlike user 1 post
+        resp = self.client.delete(url)
+
+        # assert post was unliked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 0)
+        self.assertEqual(resp.data["results"], [])
+
+    def test_like_post_twice(self):
+        """
+        Assert that a user cannot like a post twice.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's post twice
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+        resp = self.client.post(url)
+
+        # assert second like was unsuccessful
+        self.assertEqual(resp.status_code, 400)
+
+        # assert that total likes is 1
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+    def test_get_post_num_likes(self):
+        """
+        Assert that the number of likes a post has is returned
+        as part of the serialized Post data.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["numLikes"], 1)
+
+    def test_get_post_liked_by_me(self):
+        """
+        Assert that likedByMe is True if the user liked the given post.
+        Assert that likedByMe is False otherwise.
+        """
+        # set up test
+        # user 1 creates post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        url = f"/api/post/{post_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the post
+        url = f"/api/post/{post_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["likedByMe"], True)
 
     def test_repost(self):
         """
@@ -1405,6 +1509,118 @@ class CommentsTests(BaseTest):
             resp.data["results"][0]["author"]["image"],
             self.update_profile_data["image"]
         )
+
+    def test_like_unlike_comment(self):
+        """
+        Assert that a user can like/unlike another user's comment.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # assert comment was liked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+        # make request by user 2 to unlike user 1 comment
+        resp = self.client.delete(url)
+
+        # assert comment was unliked successfully
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 0)
+        self.assertEqual(resp.data["results"], [])
+
+    def test_like_comment_twice(self):
+        """
+        Assert that a user cannot like a comment twice.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # make request by user 2 to like user 1's comment twice
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+
+        # assert second like was unsuccessful
+        self.assertEqual(resp.status_code, 400)
+
+        # assert that total likes is 1
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["liker"]["address"], 
+            self.test_signer_2.address
+        )
+
+    def test_get_comment_num_likes(self):
+        """
+        Assert that the number of likes a comment has is returned
+        as part of the serialized Comment data.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        self.client.post(url)
+
+        # make request to get the comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["numLikes"], 1)
+
+    def test_get_comment_liked_by_me(self):
+        """
+        Assert that likedByMe is True if the user liked the given comment.
+        Assert that likedByMe is False otherwise.
+        """
+        # set up test
+        # user 1 creates post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        self._do_login(self.test_signer_2)
+        resp = self.client.post(url)
+
+        # make request to get the comment
+        url = f"/api/posts/{post_id}/comments/{comment_id}/"
+        resp = self.client.get(url)
+        
+        # make assertions
+        self.assertEqual(resp.data["likedByMe"], True)
 
 
 class FeedTests(BaseTest):
@@ -1780,6 +1996,64 @@ class NotificationTests(BaseTest):
 
         # assert that user 2 gets a 403
         self.assertEqual(resp.status_code, 403)
+
+    def test_liked_your_post_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user likes their post.
+        """
+        # set up test
+        # user 1 creates a post
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # user 2 likes user 1's post
+        self._do_login(self.test_signer_2)
+        url = f"/api/post/{post_id}/likes/"
+        resp = self.client.post(url)
+
+        # assert that user 1 received a notification
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif = resp.data["results"][0]
+        event = notif["events"]["likedPostEvent"]
+        self.assertEqual(
+            event["likedBy"]["address"],
+            self.test_signer_2.address
+        )
+
+    def test_liked_your_comment_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user likes their comment.
+        """
+        # set up test
+        # user 1 creates a post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        self._do_login(self.test_signer_2)
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        resp = self.client.post(url)
+
+        # assert that user 1 received a notification
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif = resp.data["results"][0]
+        event = notif["events"]["likedCommentEvent"]
+        self.assertEqual(
+            event["likedBy"]["address"],
+            self.test_signer_2.address
+        )
+        self.assertEqual(event["comment"], comment_id)
+        self.assertEqual(event["post"], post_id)
 
     def test_repost_notif(self):
         """

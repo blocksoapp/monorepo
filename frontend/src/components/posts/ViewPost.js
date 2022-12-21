@@ -171,10 +171,8 @@ function ViewPost(props) {
                             : comments.map(comment => (
                                 <Comment
                                     key={comment.id}
-                                    author={comment.author.address}
-                                    text={comment.text}
-                                    created={comment.created}
-                                    pfp={comment.author.image}
+                                    data={comment}
+                                    postId={postId}
                                 />
                 ))}
 

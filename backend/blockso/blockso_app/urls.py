@@ -5,10 +5,11 @@ from django.urls import path
 
 # our imports
 from .views import auth_nonce, auth_login, auth_logout, CommentCreateList, \
-        ExploreList, FeedList, FollowCreateDestroy, FollowersList, \
-        FollowingList, NotificationListUpdate, PostCreate, PostList, \
-        PostRetrieveUpdateDestroy, ProfileCreateRetrieveUpdate, \
-        RepostDestroy, UserList, UserRetrieve
+        CommentLikeCreateListDestroy, CommentRetrieve, ExploreList, FeedList, \
+        FollowCreateDestroy, FollowersList, FollowingList, \
+        NotificationListUpdate, PostCreate, PostList, \
+        PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
+        ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
 
 
 urlpatterns = [
@@ -21,9 +22,15 @@ urlpatterns = [
         path("<str:address>/following/", FollowingList.as_view()),
         path("post/", PostCreate.as_view()),
         path("post/<int:id>/", PostRetrieveUpdateDestroy.as_view()),
+        path("post/<int:id>/likes/", PostLikeCreateListDestroy.as_view()),
         path("post/<int:id>/repost/", RepostDestroy.as_view()),
         path("posts/<str:address>/", PostList.as_view()),
         path("posts/<int:post_id>/comments/", CommentCreateList.as_view()),
+        path("posts/<int:post_id>/comments/<int:comment_id>/", CommentRetrieve.as_view()),
+        path(
+            "posts/<int:post_id>/comments/<int:comment_id>/likes/",
+            CommentLikeCreateListDestroy.as_view()
+        ),
         path("explore/", ExploreList.as_view()),
         path("feed/", FeedList.as_view()),
         path("notifications/", NotificationListUpdate.as_view()),

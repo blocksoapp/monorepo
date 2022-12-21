@@ -8,10 +8,11 @@ from rest_framework import serializers
 from web3 import Web3
 
 # our imports
-from .models import Comment, CommentOnPostEvent, ERC20Transfer, \
-        ERC721Transfer, Follow, FollowedEvent, MentionedInCommentEvent, \
-        MentionedInPostEvent, Notification, Post, Profile, RepostEvent, \
-        Socials, Transaction
+from .models import Comment, CommentLike, CommentOnPostEvent, ERC20Transfer, \
+        ERC721Transfer, Follow, FollowedEvent, LikedCommentEvent, \
+        LikedPostEvent, MentionedInCommentEvent, MentionedInPostEvent, \
+        Notification, Post, PostLike, Profile, RepostEvent, Socials, \
+        Transaction
 
 
 UserModel = get_user_model()
@@ -258,13 +259,15 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["id", "author", "text", "imgUrl", "isShare", "isQuote",
                   "refPost", "refTx", "numComments", "created", "tagged_users",
-                  "numReposts", "repostedByMe"]
+                  "numReposts", "repostedByMe", "numLikes", "likedByMe"]
         read_only_fields = ["id", "author", "refTx", "numComments", "created",
-                            "numReposts", "repostedByMe"]
+                            "numReposts", "repostedByMe", "numLikes", "likedByMe"]
 
     author = ProfileSerializer(required=False)
     refTx = serializers.SerializerMethodField()
     numComments = serializers.SerializerMethodField()
+    numLikes = serializers.SerializerMethodField()
+    likedByMe = serializers.SerializerMethodField()
     numReposts = serializers.SerializerMethodField()
     repostedByMe = serializers.SerializerMethodField()
     refPost = RefPostField(
@@ -285,6 +288,26 @@ class PostSerializer(serializers.ModelSerializer):
             ).data
 
         return None
+
+    def get_numLikes(self, instance):
+        """ Returns number of likes on the post. """
+
+        return instance.likes.count()
+
+    def get_likedByMe(self, instance):
+        """ Returns whether the authenticated user liked the post. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return False
+
+        # handle anonymous users, i.e. not signed in
+        if isinstance(request.user, AnonymousUser):
+            return False
+
+        user = request.user.profile
+        return instance.likes.filter(liker=user).exists()
 
     def get_numComments(self, instance):
         """ Returns number of comments on the post. """
@@ -422,6 +445,48 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class PostLikeSerializer(serializers.ModelSerializer):
+    """ PostLike model serializer. """
+
+    class Meta:
+        model = PostLike
+        fields = ["liker", "post"]
+        read_only_fields = fields
+
+    liker = ProfileSerializer(required=False)
+
+    def create(self, validated_data):
+        """ Likes a post. """
+
+        # get the signed in user
+        user = self.context.get("request").user
+        user = user.profile
+
+        # get post id from the URL
+        post_id = self.context.get("view").kwargs["id"]
+        post = Post.objects.get(pk=post_id)
+
+        # create post like
+        like, created = PostLike.objects.get_or_create(
+            liker=user,
+            post=post
+        )
+
+        # raise 400 if user tried to like the same post twice
+        if created is False:
+            raise serializers.ValidationError("Cannot like a post twice.")
+
+        # notify the post author that the user liked their post
+        notif = Notification.objects.create(user=post.author)
+        LikedPostEvent.objects.create(
+            notification=notif,
+            post=post,
+            liked_by=user
+        )
+
+        return like
+
+
 class RepostSerializer(serializers.ModelSerializer):
     """ Repost model serializer. """
 
@@ -434,8 +499,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ["id", "author", "post", "text", "tagged_users", "created"]
-        read_only_fields = ["id", "author", "created", "post"]
+        fields = ["id", "author", "post", "text", "tagged_users", "created",
+                  "numLikes", "likedByMe"]
+        read_only_fields = ["id", "author", "created", "post", "numLikes",
+                            "likedByMe"]
 
 
     author = ProfileSerializer(required=False)
@@ -443,7 +510,29 @@ class CommentSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Profile.objects.all()
     )
+    numLikes = serializers.SerializerMethodField()
+    likedByMe = serializers.SerializerMethodField()
 
+
+    def get_numLikes(self, instance):
+        """ Returns number of likes on the comment. """
+
+        return instance.likes.count()
+
+    def get_likedByMe(self, instance):
+        """ Returns whether the authenticated user liked the comment. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return False
+
+        # handle anonymous users, i.e. not signed in
+        if isinstance(request.user, AnonymousUser):
+            return False
+
+        user = request.user.profile
+        return instance.likes.filter(liker=user).exists()
 
     def create(self, validated_data):
         """ Creates a Comment. """
@@ -488,6 +577,48 @@ class CommentSerializer(serializers.ModelSerializer):
             )
 
         return comment
+
+
+class CommentLikeSerializer(serializers.ModelSerializer):
+    """ CommentLike model serializer. """
+
+    class Meta:
+        model = CommentLike
+        fields = ["liker", "comment"]
+        read_only_fields = fields
+
+    liker = ProfileSerializer(required=False)
+
+    def create(self, validated_data):
+        """ Likes a comment. """
+
+        # get the signed in user
+        user = self.context.get("request").user
+        user = user.profile
+
+        # get comment id from the URL
+        comment_id = self.context.get("view").kwargs["comment_id"]
+        comment = Comment.objects.get(pk=comment_id)
+
+        # create comment like
+        like, created = CommentLike.objects.get_or_create(
+            liker=user,
+            comment=comment
+        )
+
+        # raise 400 if user tried to like the same comment twice
+        if created is False:
+            raise serializers.ValidationError("Cannot like a comment twice.")
+
+        # notify the comment author that the user liked their comment
+        notif = Notification.objects.create(user=comment.author)
+        LikedCommentEvent.objects.create(
+            notification=notif,
+            comment=comment,
+            liked_by=user
+        )
+
+        return like
 
 
 class MentionedInPostEventSerializer(serializers.ModelSerializer):
@@ -557,6 +688,45 @@ class FollowedEventSerializer(serializers.ModelSerializer):
         return ProfileSerializer(obj.followed_by).data
 
 
+class LikedCommentEventSerializer(serializers.ModelSerializer):
+    """ LikedCommentEvent model serializer. """
+
+    class Meta:
+        model = LikedCommentEvent
+        fields = ["comment", "post", "likedBy", "created"]
+        read_only_fields = fields
+
+    likedBy = serializers.SerializerMethodField("get_liked_by")
+    post = serializers.SerializerMethodField("get_post")
+
+
+    def get_liked_by(self, obj):
+        """ Returns the user that did the liking. """
+
+        return ProfileSerializer(obj.liked_by).data
+
+    def get_post(self, obj):
+        """ Returns the post of the comment that was liked. """
+
+        return obj.comment.post.id
+
+
+class LikedPostEventSerializer(serializers.ModelSerializer):
+    """ LikedPostEvent model serializer. """
+
+    class Meta:
+        model = LikedPostEvent
+        fields = ["post", "likedBy", "created"]
+        read_only_fields = fields
+
+    likedBy = serializers.SerializerMethodField("get_liked_by")
+
+    def get_liked_by(self, obj):
+        """ Returns the user that did the liking. """
+
+        return ProfileSerializer(obj.liked_by).data
+
+
 class RepostEventSerializer(serializers.ModelSerializer):
     """ RepostEvent model serializer. """
 
@@ -595,6 +765,8 @@ class NotificationSerializer(serializers.ModelSerializer):
         events["commentOnPostEvent"] = self.get_comment_on_post_event(obj)
         events["followedEvent"] = self.get_followed_event(obj)
         events["repostEvent"] = self.get_repost_event(obj)
+        events["likedPostEvent"] = self.get_liked_post_event(obj)
+        events["likedCommentEvent"] = self.get_liked_comment_event(obj)
 
         return events
 
@@ -648,6 +820,32 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return FollowedEventSerializer(
             obj.followed_event
+        ).data
+
+    def get_liked_post_event(self, obj):
+        """
+        Returns the LikedPostEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "liked_post_event"):
+            return None
+
+        return LikedPostEventSerializer(
+            obj.liked_post_event
+        ).data
+
+    def get_liked_comment_event(self, obj):
+        """
+        Returns the LikedCommentEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "liked_comment_event"):
+            return None
+
+        return LikedCommentEventSerializer(
+            obj.liked_comment_event
         ).data
 
     def get_repost_event(self, obj):
