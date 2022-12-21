@@ -150,6 +150,33 @@ class Post(models.Model):
     created = models.DateTimeField(blank=False)
 
 
+class PostLike(models.Model):
+    """ Represents a Like for a Post. """
+
+    class Meta:
+        ordering = ["-created"]
+        constraints = [
+            # user cannot like a post twice
+            models.UniqueConstraint(
+                fields=['post', 'liker'],
+                name='cannot like a post twice'
+            ),
+        ]
+
+
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE,
+        related_name="likes"
+    )
+    liker = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="post_likes"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class Comment(models.Model):
     """ Represents a Comment created by a user. """
 
@@ -172,6 +199,33 @@ class Comment(models.Model):
     tagged_users = models.ManyToManyField(
         to=Profile,
         blank=True
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class CommentLike(models.Model):
+    """ Represents a Like for a Comment. """
+
+    class Meta:
+        ordering = ["-created"]
+        constraints = [
+            # user cannot like a comment twice
+            models.UniqueConstraint(
+                fields=['comment', 'liker'],
+                name='cannot like a comment twice'
+            ),
+        ]
+
+
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE,
+        related_name="likes"
+    )
+    liker = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE,
+        related_name="comment_likes"
     )
     created = models.DateTimeField(auto_now_add=True)
 
@@ -266,6 +320,44 @@ class FollowedEvent(models.Model):
         on_delete=models.CASCADE
     )
     followed_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class LikedCommentEvent(models.Model):
+    """ An event respresenting when a user likes another user's comment. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="liked_comment_event",
+        on_delete=models.CASCADE
+    )
+    comment = models.ForeignKey(
+        to=Comment,
+        on_delete=models.CASCADE
+    )
+    liked_by = models.ForeignKey(
+        to=Profile,
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class LikedPostEvent(models.Model):
+    """ An event respresenting when a user likes another user's post. """
+
+    notification = models.OneToOneField(
+        to=Notification,
+        related_name="liked_post_event",
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE
+    )
+    liked_by = models.ForeignKey(
         to=Profile,
         on_delete=models.CASCADE
     )
