@@ -1,6 +1,32 @@
 /* Module containing AJAX calls to the backend. */
 import { baseAPI, getCookie } from "./utils";
 
+/* Returns the response for unliking the given commentId by the authed user.  */
+export const apiDeleteCommentLike = async (postId, commentId) => {
+    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
+
+/* Returns the response for unliking the given postId by the authed user.  */
+export const apiDeletePostLike = async (postId) => {
+    const url = `${baseAPI}/post/${postId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
+
 /* Returns the response for deleting the authed user's repost of the given postId.  */
 export const apiDeleteRepost = async (postId) => {
   const url = `${baseAPI}/post/${postId}/repost/`;
@@ -148,6 +174,32 @@ export const apiGetFollowing = async (address) => {
   });
   return res;
 };
+
+/* Returns the response for liking a comment.  */
+export const apiPostCommentLike = async (postId, commentId) => {
+    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+        'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
+
+/* Returns the response for liking a post.  */
+export const apiPostPostLike = async (postId) => {
+    const url = `${baseAPI}/post/${postId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+        'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
 
 /* Returns the response for updating follow given an address  */
 export const apiPostFollow = async (address) => {

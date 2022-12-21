@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import { Card, Col, Collapse, Row } from "react-bootstrap";
 import Lightbox from "react-image-lightbox";
 import TxAddress from "../TxAddress";
-import ERC721Thumb from "./ERC721Thumb";
+import ERC721ThumbAndCaption from "./ERC721ThumbAndCaption";
 
 
 function ERC721Post({transfers}) {
@@ -12,36 +12,23 @@ function ERC721Post({transfers}) {
     const [ tokenImagesFull, setTokenImagesFull] = useState([]);
     const [ galleryIndex, setGalleryIndex ] = useState(0);
     const [ showGallery, setShowGallery ] = useState(false);
+    const [ showMoreItems, setShowMoreItems ] = useState(false);
 
 
     /*
-     * Fetch an image for each token in transfers.
+     * Initialize the tokenImagesThumb and tokenImagesFull
+     * arrays to be the same size as transfers, and fill
+     * them with empty strings.
+     *
+     * This allows the child component ERC721Thumb to then
+     * dynamically fill the urls of each token that was
+     * transferred, while maintaining the order of the
+     * gallery viewer.
      */
     useEffect(() => {
-        if (transfers.length == 0) return;  // do nothing if transfers is empty
-
-        // request token images from opensea
-        // TODO eventually should get an API key and move this to the backend
-        const fetchTokenImages = async () => {
-            var thumbUrls = [];
-            var fullUrls = [];
-
-            // fetch image for each transferred token
-            for (var transfer of transfers) {
-                // get asset url from opensea
-                var url = `https://api.opensea.io/api/v1/asset/${transfer.contract_address}/${transfer.token_id}/`
-                var resp = await fetch(url);
-                var json = await resp.json();
-
-                thumbUrls.push(json["image_thumbnail_url"]);
-                fullUrls.push(json["image_url"]);
-            }
-            
-            setTokenImagesThumb(thumbUrls);
-            setTokenImagesFull(fullUrls);
-        }
-
-        fetchTokenImages();
+        var empty = new Array(transfers.length).fill('');
+        setTokenImagesFull(empty);
+        setTokenImagesThumb(empty);
     }, [transfers])
 
 
@@ -69,41 +56,58 @@ function ERC721Post({transfers}) {
             )}
 
             {/* card body details, shows nft thumbnail, id, and recipient */}
-            {transfers.map((transfer, index) => (
-                <Row key={index} className="p-2 text-center align-items-center">
-                    {/* nft thumbnail */}
-                    <Col xs={4}>
-                        <ERC721Thumb
-                            fluid rounded
-                            src={tokenImagesThumb[index]}
-                            onClick={() => {
-                                setShowGallery(true);
-                                setGalleryIndex(index);
-                            }}
-                            style={{ cursor: "pointer" }}
-                        />
-                    </Col>
+            <ERC721ThumbAndCaption
+                key={0}
+                transfer={transfers[0]}
+                index={0}
+                setGalleryIndex={setGalleryIndex}
+                setShowGallery={setShowGallery}
+                tokenImagesThumb={tokenImagesThumb}
+                setTokenImagesThumb={setTokenImagesThumb}
+                tokenImagesFull={tokenImagesFull}
+                setTokenImagesFull={setTokenImagesFull}
+            />
 
-                    {/* nft token id and recipient of the transfer */}
-                    <Col xs={8}>
-                        <Card.Text className="fs-5">
-                            Sent&nbsp;
-                            <a
-                                className="text-success"
-                                href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ fontStyle: 'italic', color: 'black' }}
-                            >
-                                {transfer.contract_ticker} #{transfer.token_id}
-                            </a>
-                            <br/>
-                            to&nbsp;
-                            <TxAddress address={transfer.to_address} />
-                        </Card.Text>
-                    </Col>
-                </Row>
-            ))}
+            {/* if there is more than one transfer in a transaction */}
+            {transfers.length > 1 &&
+                <div className="text-center">
+                    <span
+                        style={{
+                            cursor: "pointer",
+                            textDecoration: "underline 1px dotted"
+                        }}
+                        onClick={() => setShowMoreItems(!showMoreItems)}
+                    >
+                        { showMoreItems ? "Show less items" : "Show more items" }
+                    </span>
+                </div>
+            }
+
+            {transfers.length > 1 &&
+                <Collapse in={showMoreItems}>
+                    <div>
+                        {transfers.map((transfer, index) => {
+                            // skip the 0th one since it is handled above
+                            if (index == 0) return 
+
+                            return (
+                                <ERC721ThumbAndCaption
+                                    className="mt-5"
+                                    key={index}
+                                    transfer={transfer}
+                                    index={index}
+                                    setGalleryIndex={setGalleryIndex}
+                                    setShowGallery={setShowGallery}
+                                    tokenImagesThumb={tokenImagesThumb}
+                                    setTokenImagesThumb={setTokenImagesThumb}
+                                    tokenImagesFull={tokenImagesFull}
+                                    setTokenImagesFull={setTokenImagesFull}
+                                />
+                            )
+                        })}
+                    </div>
+                </Collapse>
+            }
         </Card.Body>
     )
 }

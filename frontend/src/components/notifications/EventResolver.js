@@ -1,5 +1,7 @@
 import CommentOnPostEvent from "./events/CommentOnPostEvent";
 import FollowedEvent from "./events/FollowedEvent";
+import LikedCommentEvent from "./events/LikedCommentEvent";
+import LikedPostEvent from "./events/LikedPostEvent";
 import MentionedInCommentEvent from "./events/MentionedInCommentEvent";
 import MentionedInPostEvent from "./events/MentionedInPostEvent";
 import RepostEvent from "./events/RepostEvent";
@@ -9,6 +11,21 @@ function EventResolver({data, setHref}) {
 
     return (
         <>
+            {/* user liked your post */}
+            {data['likedPostEvent'] &&
+                <LikedPostEvent
+                    data={data['likedPostEvent']}
+                    setHref={setHref}
+                />
+            }
+
+            {data['likedCommentEvent'] &&
+                <LikedCommentEvent
+                    data={data['likedCommentEvent']}
+                    setHref={setHref}
+                />
+            }
+
             {/* user commented on your post */}
             {data['commentOnPostEvent'] &&
                 <CommentOnPostEvent

@@ -19,6 +19,14 @@ class CommentPagination(PageNumberPagination):
     max_page_size = 5 
 
 
+class LikesPagination(PageNumberPagination):
+    """
+    Pagination for listing Likes.
+    """
+    page_size = 5
+    max_page_size = 5 
+
+
 class NotificationPagination(PageNumberPagination):
     """
     Pagination for listing Notifications.
