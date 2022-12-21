@@ -2024,6 +2024,37 @@ class NotificationTests(BaseTest):
             self.test_signer_2.address
         )
 
+    def test_liked_your_comment_notifs(self):
+        """
+        Assert that a user gets a notification when
+        another user likes their comment.
+        """
+        # set up test
+        # user 1 creates a post and comment
+        self._do_login(self.test_signer)
+        resp = self._create_post()
+        post_id = resp.data["id"]
+        resp = self._create_comment(post_id, "hello")
+        comment_id = resp.data["id"]
+
+        # user 2 likes user 1's comment
+        self._do_login(self.test_signer_2)
+        url = f"/api/posts/{post_id}/comments/{comment_id}/likes/"
+        resp = self.client.post(url)
+
+        # assert that user 1 received a notification
+        self._do_login(self.test_signer)
+        url = "/api/notifications/"
+        resp = self.client.get(url)
+        notif = resp.data["results"][0]
+        event = notif["events"]["likedCommentEvent"]
+        self.assertEqual(
+            event["likedBy"]["address"],
+            self.test_signer_2.address
+        )
+        self.assertEqual(event["comment"], comment_id)
+        self.assertEqual(event["post"], post_id)
+
     def test_repost_notif(self):
         """
         Assert that a user gets a notification when

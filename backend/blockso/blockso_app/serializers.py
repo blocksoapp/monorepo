@@ -693,15 +693,22 @@ class LikedCommentEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LikedCommentEvent
-        fields = ["comment", "likedBy", "created"]
+        fields = ["comment", "post", "likedBy", "created"]
         read_only_fields = fields
 
     likedBy = serializers.SerializerMethodField("get_liked_by")
+    post = serializers.SerializerMethodField("get_post")
+
 
     def get_liked_by(self, obj):
         """ Returns the user that did the liking. """
 
         return ProfileSerializer(obj.liked_by).data
+
+    def get_post(self, obj):
+        """ Returns the post of the comment that was liked. """
+
+        return obj.comment.post.id
 
 
 class LikedPostEventSerializer(serializers.ModelSerializer):
@@ -759,6 +766,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         events["followedEvent"] = self.get_followed_event(obj)
         events["repostEvent"] = self.get_repost_event(obj)
         events["likedPostEvent"] = self.get_liked_post_event(obj)
+        events["likedCommentEvent"] = self.get_liked_comment_event(obj)
 
         return events
 
@@ -825,6 +833,19 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         return LikedPostEventSerializer(
             obj.liked_post_event
+        ).data
+
+    def get_liked_comment_event(self, obj):
+        """
+        Returns the LikedCommentEvent associated
+        with the notification.
+        """
+        # return None if the notification does not have this event
+        if not hasattr(obj, "liked_comment_event"):
+            return None
+
+        return LikedCommentEventSerializer(
+            obj.liked_comment_event
         ).data
 
     def get_repost_event(self, obj):

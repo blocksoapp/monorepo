@@ -4,10 +4,10 @@ import EnsAndAddress from "../../EnsAndAddress.js";
 import PfpResolver from "../../PfpResolver";
 
 
-function LikedPostEvent({data, setHref}) {
+function LikedCommentEvent({data, setHref}) {
 
     // constants
-    const href = `/posts/${data.post}`;
+    const href = `/posts/${data.post}#${data.comment}`;
 
     // effects
     useEffect(() => {
@@ -32,7 +32,7 @@ function LikedPostEvent({data, setHref}) {
                 <Col xs={10} className="ps-3">
                     <span>
                         <EnsAndAddress address={data.likedBy.address} />
-                        &nbsp;liked your post!
+                        &nbsp;liked your comment!
                     </span>
                 </Col>
             </Row>
@@ -41,4 +41,4 @@ function LikedPostEvent({data, setHref}) {
 }
 
 
-export default LikedPostEvent;
+export default LikedCommentEvent;

@@ -2,6 +2,19 @@
 import { baseAPI, getCookie } from './utils';
 
 
+/* Returns the response for unliking the given commentId by the authed user.  */
+export const apiDeleteCommentLike = async (postId, commentId) => {
+    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
+}
+
 /* Returns the response for unliking the given postId by the authed user.  */
 export const apiDeleteLike = async (postId) => {
     const url = `${baseAPI}/post/${postId}/likes/`;
@@ -151,6 +164,19 @@ export const apiGetFollowing = async (address) => {
           credentials: 'include'
       });
       return res
+}
+
+/* Returns the response for liking a comment.  */
+export const apiPostCommentLike = async (postId, commentId) => {
+    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+        'X-CSRFTOKEN': getCookie('csrftoken')
+        },
+        credentials: 'include'
+    });
+    return resp;
 }
 
 /* Returns the response for liking a post.  */
