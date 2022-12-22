@@ -11,7 +11,8 @@ import requests
 import rq
 
 # our imports
-from .models import ERC20Transfer, ERC721Transfer, Post, Profile, Transaction 
+from .models import ERC20Transfer, ERC721Transfer, Feed, Post, \
+                    Profile, Transaction 
 UserModel = get_user_model()
 
 
@@ -49,7 +50,8 @@ def enqueue_all_users_tx_history(limit):
     """
     Enqueues a job for all users in the system that:
      - have an account that has logged in OR
-     - are being followed
+     - are being followed OR
+     - are part of a Feed
     to fetch their tx history and update the db.
     limit is the number of transactions to fetch.
     If limit is None then it fetches all txs.
@@ -57,10 +59,12 @@ def enqueue_all_users_tx_history(limit):
     # redis client and queue for scheduling jobs
     redis_queue = _get_redis_queue()
 
-    # fetch the union of users that have logged in or have followers
+    # fetch the union of users that have logged in or
+    # have followers or are part of a Feed
     logged_in = Profile.objects.all().exclude(user__last_login=None)
     have_followers = Profile.objects.all().exclude(follow_dest=None)
-    profiles = logged_in | have_followers
+    on_feed = Profile.objects.filter(feed__in=Feed.objects.all())
+    profiles = logged_in | have_followers | on_feed
 
     # queue a job to get the tx history of each user 
     for profile in profiles:
