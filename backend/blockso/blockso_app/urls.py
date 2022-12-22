@@ -5,9 +5,9 @@ from django.urls import path
 
 # our imports
 from .views import auth_nonce, auth_login, auth_logout, CommentCreateList, \
-        CommentLikeCreateListDestroy, CommentRetrieve, ExploreList, FeedList, \
-        FollowCreateDestroy, FollowersList, FollowingList, \
-        NotificationListUpdate, PostCreate, PostList, \
+        CommentLikeCreateListDestroy, CommentRetrieve, ExploreList, \
+        FeedRetrieve, MyFeedList, FollowCreateDestroy, FollowersList, \
+        FollowingList, NotificationListUpdate, PostCreate, PostList, \
         PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
         ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
 
@@ -32,7 +32,8 @@ urlpatterns = [
             CommentLikeCreateListDestroy.as_view()
         ),
         path("explore/", ExploreList.as_view()),
-        path("feed/", FeedList.as_view()),
+        path("feed/", MyFeedList.as_view()),
+        path("feeds/<int:id>/", FeedRetrieve.as_view()),
         path("notifications/", NotificationListUpdate.as_view()),
         path("user/", UserRetrieve.as_view()),
         path("users/", UserList.as_view()),

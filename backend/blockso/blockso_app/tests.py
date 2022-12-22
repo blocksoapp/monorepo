@@ -16,7 +16,7 @@ import responses
 import rq
 
 # our imports
-from .models import Follow, Post, Profile, Transaction, \
+from .models import Feed, Follow, Post, Profile, Transaction, \
                     ERC20Transfer, ERC721Transfer
 from . import jobs
 
@@ -1625,7 +1625,52 @@ class CommentsTests(BaseTest):
 
 class FeedTests(BaseTest):
     """
-    Test behavior around feeds.
+    Test behavior around Feeds.
+    """
+    
+    def test_get_feed(self):
+        """
+        Assert that any user can get a specific feed.
+        """
+        # set up test
+        # create a post by user1 and user2
+        self._do_login(self.test_signer)
+        self._create_post()
+        self._do_login(self.test_signer_2)
+        self._create_post()
+        # add users 1 and 2 to a Feed
+        feed = Feed.objects.create(name="First Users")
+        feed.profiles.set(
+            Profile.objects.filter(
+                user_id__in=[
+                    self.test_signer.address,
+                    self.test_signer_2.address
+                ]
+            )
+        )
+
+        # make a request as an unauthenticated user to
+        # get the posts of the created Feed
+        self._do_logout()
+        url = f"/api/feeds/{feed.id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+        self.assertEqual(
+            resp.data["results"][0]["author"]["address"],
+            self.test_signer_2.address
+        )
+        self.assertEqual(
+            resp.data["results"][1]["author"]["address"],
+            self.test_signer.address
+        )
+
+
+class MyFeedTests(BaseTest):
+    """
+    Test behavior around a user's feed.
     """
 
     def test_get_feed(self):

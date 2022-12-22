@@ -19,7 +19,7 @@ from siwe.siwe import SiweMessage
 from web3 import Web3
 
 # our imports
-from .models import Comment, CommentLike, Follow, Notification, Post, \
+from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
 from . import jobs, pagination, serializers
 
@@ -508,7 +508,29 @@ class ExploreList(generics.ListAPIView):
         return queryset
 
 
-class FeedList(generics.ListAPIView):
+class FeedRetrieve(generics.ListAPIView):
+
+    """ View that supports retrieving a feed. """
+
+    serializer_class = serializers.PostSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return Posts of a Feed of activity for all the profiles in that feed.
+        Sort the queryset in descending chronological order.
+        """
+        # get profiles of feed in question
+        profiles = Feed.objects.get(pk=self.kwargs["id"]).profiles.all()
+
+        # get all posts by those users
+        queryset = Post.objects.filter(author__in=profiles)
+        queryset = queryset.order_by("-created")
+
+        return queryset
+
+
+class MyFeedList(generics.ListAPIView):
 
     """ View that supports retrieving the feed of the logged in user. """
 
