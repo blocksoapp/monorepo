@@ -36,6 +36,17 @@ class Socials(models.Model):
     snapshot = models.URLField(blank=True)
 
 
+class Feed(models.Model):
+    """
+    Represents a subscription to a group of users' activity.
+    """
+    name = models.CharField(blank=True, max_length=255)
+    profiles = models.ManyToManyField(
+        to=Profile,
+        blank=True
+    )
+
+
 class Follow(models.Model):
     """ Represents the follower-followed relationship between users. """
 
