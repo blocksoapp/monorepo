@@ -72,6 +72,7 @@ function SignInButton({ buttonText }) {
       if (res.ok) {
         return;
       } else {
+        setIsAuthenticated(false);
         setUser(null);
         setToggleToast(true);
       }
@@ -121,6 +122,7 @@ function SignInButton({ buttonText }) {
       if (loginRes.status === 200) {
         setIsAuthenticated(true);
         setIsLoading(false);
+        setToggleToast(false);
         setNonceData("");
         // Check if profile exists
         checkProfileExists();

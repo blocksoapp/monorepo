@@ -9,12 +9,7 @@ function SessionExpiredToast(props) {
     <>
       {props.isToggle ? (
         <ToastContainer position="top-end" className="p-3">
-          <Toast
-            show={props.isToggle}
-            onClose={() => props.setIsToggle(false)}
-            autohide={isAuthenticated}
-            delay={0}
-          >
+          <Toast show={props.isToggle} onClose={() => props.setIsToggle(false)}>
             <Toast.Header>
               <strong className="me-auto">Session Expired</strong>
             </Toast.Header>
