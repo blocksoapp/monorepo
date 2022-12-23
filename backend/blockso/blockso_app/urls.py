@@ -4,11 +4,11 @@
 from django.urls import path
 
 # our imports
-from .views import auth_nonce, auth_login, auth_logout, CommentCreateList, \
-        CommentLikeCreateListDestroy, CommentRetrieve, ExploreList, \
-        FeedRetrieve, MyFeedList, FollowCreateDestroy, FollowersList, \
-        FollowingList, NotificationListUpdate, PostCreate, PostList, \
-        PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
+from .views import auth_nonce, auth_login, auth_logout, auth_session, \
+        CommentCreateList, CommentLikeCreateListDestroy, CommentRetrieve, \
+        ExploreList, FeedRetrieve, MyFeedList, FollowCreateDestroy, \
+        FollowersList, FollowingList, NotificationListUpdate, PostCreate, \
+        PostList, PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
         ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
 
 
@@ -16,6 +16,7 @@ urlpatterns = [
         path("auth/nonce/", auth_nonce),
         path("auth/login/", auth_login),
         path("auth/logout/", auth_logout),
+        path("auth/session/", auth_session),
         path("<str:address>/profile/", ProfileCreateRetrieveUpdate.as_view()),
         path("<str:address>/follow/", FollowCreateDestroy.as_view()),
         path("<str:address>/followers/", FollowersList.as_view()),
