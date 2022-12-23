@@ -350,6 +350,36 @@ class AuthTests(BaseTest):
         # assert that the user no longer has a session
         self.assertEqual(resp.status_code, 200)
 
+    def test_auth_get_session(self):
+        """
+        Assert that an authenticated user gets
+        their authenticated ethereum address and chain id
+        when they make a GET to /auth/session/.
+        """
+        # do login
+        self._do_login(self.test_signer)
+
+        # make request to session endpoint
+        url = f"/api/auth/session/"
+        resp = self.client.get(url)
+
+        # assert correct data
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["address"], self.test_signer.address)
+        self.assertEqual(resp.data["chainId"], "1")
+
+    def test_auth_get_session_unauthenticated(self):
+        """
+        Assert that an un-authenticated user gets
+        a 403 when they GET /auth/session/.
+        """
+        # make request to session endpoint without logging in
+        url = f"/api/auth/session/"
+        resp = self.client.get(url)
+
+        # assert correct data
+        self.assertEqual(resp.status_code, 403)
+
 
 class ProfileTests(BaseTest):
     """ Tests profile related behavior. """
