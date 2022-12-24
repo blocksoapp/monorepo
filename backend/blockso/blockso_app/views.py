@@ -13,7 +13,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework import generics, mixins, status
+from rest_framework import generics, mixins, status, views
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 from web3 import Web3
@@ -487,25 +487,44 @@ class RepostDestroy(
         return self.destroy(request, *args, **kwargs)
 
 
-class ExploreList(generics.ListAPIView):
-
+class ExploreList(views.APIView):
     """
-    View that supports retrieving a list of profiles for the explore page.
+    View that supports retrieving a list of feeds
+    and profiles for the explore page.
     """
 
-    serializer_class = serializers.ProfileSerializer
+    def _get_feeds(self):
+        """
+        Return Feeds that are featured on the Explore page.
+        The current implementation returns the latest 4 feeds.
+        """
+        queryset = Feed.objects.all()[:4]
 
-    def get_queryset(self):
+        return serializers.FeedSerializer(queryset, many=True).data
+
+    def _get_profiles(self):
         """
         Return Profiles of users that are featured on the Explore page.
         The current implementation returns the top 8 profiles sorted
         from most followers to least followers.
         """
-        queryset = Profile.objects.annotate(num_followers=Count('follow_dest'))
+        queryset = Profile.objects.annotate(
+            num_followers=Count('follow_dest')
+        )
         queryset = queryset.order_by("-num_followers")
         queryset = queryset[:8]
 
-        return queryset
+        return serializers.ProfileSerializer(queryset, many=True).data
+
+    def get(self, request, format=None):
+        """
+        Handle GET request.
+        """
+        feeds = self._get_feeds()
+        profiles = self._get_profiles()
+        body = {"feeds": feeds, "profiles": profiles}
+
+        return Response(status=status.HTTP_200_OK, data=body)
 
 
 class FeedRetrieve(generics.ListAPIView):
