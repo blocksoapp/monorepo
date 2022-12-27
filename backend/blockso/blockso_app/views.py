@@ -112,7 +112,7 @@ def auth_session(request):
         status=200,
         data={
             "address": request.user.ethereum_address,
-            "chainId": request.session["chain_id"]
+            "chainId": int(request.session["chain_id"])
         }
     )
 

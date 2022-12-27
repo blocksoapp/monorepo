@@ -366,7 +366,7 @@ class AuthTests(BaseTest):
         # assert correct data
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["address"], self.test_signer.address)
-        self.assertEqual(resp.data["chainId"], "1")
+        self.assertEqual(resp.data["chainId"], 1)
 
     def test_auth_get_session_unauthenticated(self):
         """
