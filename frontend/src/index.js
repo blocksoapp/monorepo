@@ -77,18 +77,23 @@ const siweConfig = {
   verifyMessage: async ({ message, signature }) =>
     await fetch(`${baseAPI}/auth/login/`, {
       method: "POST",
-      body: JSON.stringify({ message, signature }),
       headers: {
         "Content-Type": "application/json",
         "X-CSRFTOKEN": getCookie("csrftoken"),
       },
       credentials: "include",
+      body: JSON.stringify({ message, signature }),
     }).then((res) => res.ok),
   getSession: async () =>
-    await fetch(`${baseAPI}/auth/session/`).then((res) =>
-      res.ok ? res.json() : null
-    ),
-  signOut: () => async () =>
+    await fetch(`${baseAPI}/auth/session/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
+      credentials: "include",
+    }).then((res) => (res.ok ? res.json() : null)),
+  signOut: async () =>
     await fetch(`${baseAPI}/auth/logout/`, {
       method: "POST",
       headers: {
