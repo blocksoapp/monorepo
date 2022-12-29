@@ -498,7 +498,7 @@ class ExploreList(views.APIView):
         Return Feeds that are featured on the Explore page.
         The current implementation returns the latest 4 feeds.
         """
-        queryset = Feed.objects.all()[:4]
+        queryset = Feed.objects.all().order_by("-id")[:4]
 
         return serializers.FeedSerializer(queryset, many=True).data
 
