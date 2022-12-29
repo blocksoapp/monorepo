@@ -9,6 +9,15 @@ function Pfp(props) {
     // state
 
     // functions
+    function charsToCharCodes(string) {
+        var toRet = "";
+        for (var i=0; i < string.length; i++) {
+            toRet += string.charCodeAt(i);
+        }
+
+        return toRet;
+    }
+
 
     // effects
 
@@ -35,12 +44,14 @@ function Pfp(props) {
                         style={{
                             height: props.height,
                             width: props.width,
-                            backgroundColor: `#${props.address.substr(36,6)}73`,
+                            backgroundColor: `hsla(
+                                ${charsToCharCodes(props.address.substr(36,6))}
+                                100% 37% / 0.77)`,
                             color: "white",
                             fontSize: props.fontSize
 
                         }}
-                        className="rounded-circle text-center justify-content-center"
+                        className="rounded-circle text-center justify-content-center p-2"
                     >
                             {props.ensName
                                 ? <Card.Text>{props.ensName}</Card.Text>
