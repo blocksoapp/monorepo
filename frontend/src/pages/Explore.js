@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from 'react-bootstrap'
-import FeaturedList from '../components/explore/FeaturedList';
 import InfoSection from '../components/explore/InfoSection';
+import ExploreSection from '../components/explore/ExploreSection';
 
 function Explore() {
  
@@ -9,7 +9,7 @@ function Explore() {
     <div>
       <Container fluid>
             <InfoSection/>
-            <FeaturedList/>
+            <ExploreSection />
       </Container>
     </div>
   );

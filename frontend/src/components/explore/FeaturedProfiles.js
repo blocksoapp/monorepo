@@ -6,32 +6,25 @@ import ListItem from './ListItem'
 import ExplorePlaceholder from './ExplorePlaceholder';
 
 
-function FeaturedList() {
-    const [profileData, setProfileData] = useState([])
+function FeaturedProfiles({profiles}) {
     const [isLoading, setIsLoading] = useState(Boolean)
 
-    // UseEffect Calling getFeaturedProfiles then map out each item
+    /*
+     * Sets isLoading to false when the
+     * profiles prop is not empty.
+     */
     useEffect(() => {
-        getFeaturedProfiles()
-    }, [])
+        profiles
+            ? setIsLoading(false)
+            : setIsLoading(true)
+    }, [profiles])
     
 
-    // Function to get profile data for each in array
-    const getFeaturedProfiles = async () => {
-        setIsLoading(true)
-        var res = await apiGetExplore();
-        const data = await res.json()
-        setProfileData(data);
-        setIsLoading(false)
-    }
-
-
-  return (
-    <div className='p-5'>
+    return (
         <Row>
             {isLoading 
             ? <ExplorePlaceholder />
-            : profileData.map( (item, index) => {
+            : profiles.map( (item, index) => {
                 return (
                     <div key={index} className="col-sm-6">
                         <ListItem
@@ -46,8 +39,7 @@ function FeaturedList() {
                 )})
             }
         </Row>
-  </div>
-  )
+    )
 }
 
-export default FeaturedList
+export default FeaturedProfiles;
