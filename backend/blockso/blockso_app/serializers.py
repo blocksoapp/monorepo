@@ -9,7 +9,7 @@ from web3 import Web3
 
 # our imports
 from .models import Comment, CommentLike, CommentOnPostEvent, ERC20Transfer, \
-        ERC721Transfer, Follow, FollowedEvent, LikedCommentEvent, \
+        ERC721Transfer, Feed, Follow, FollowedEvent, LikedCommentEvent, \
         LikedPostEvent, MentionedInCommentEvent, MentionedInPostEvent, \
         Notification, Post, PostLike, Profile, RepostEvent, Socials, \
         Transaction
@@ -159,6 +159,15 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
         return follow
+
+
+class FeedSerializer(serializers.ModelSerializer):
+    """ Feed model serializer. """
+
+    class Meta:
+        model = Feed
+        fields = ["id", "name", "image"]
+        read_only_fields = fields
 
 
 class ERC20TransferSerializer(serializers.ModelSerializer):

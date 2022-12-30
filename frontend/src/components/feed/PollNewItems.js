@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 
 
-function PollNewItems({apiFunction, interval, oldItems, callback}) {
+function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callback}) {
 
     /*
      * Polls the given apiFunction every interval.
@@ -11,6 +11,7 @@ function PollNewItems({apiFunction, interval, oldItems, callback}) {
      * Accepts: 
      *  - an interval
      *  - a function to poll against
+     *  - an array of arguments to be passed to the function
      *  - a list of items to compare new items to
      *  - a callback function.
      */
@@ -26,7 +27,7 @@ function PollNewItems({apiFunction, interval, oldItems, callback}) {
      * Sets items to the result of the apiFunction.
      */
     const pollForNewItems = async () => {
-        const resp = await apiFunction();
+        const resp = await apiFunction(...apiFunctionArgs);
         const data = await resp.json();
         setItems(data["results"]);
     }

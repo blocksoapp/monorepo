@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap"
-import { apiGetFeed, apiGetMyFeed, apiGetUrl } from '../../api';
+import { apiGetMyFeed, apiGetUrl } from '../../api';
 import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
@@ -11,8 +11,9 @@ import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
 
 
-function Feed({ id, name }) {
+function MyFeed({ profileData }) {
   // constants
+  const routerLocation = useLocation();
 
   // state
   const [loadingFeedItems, setLoadingFeedItems] = useState(true);
@@ -23,16 +24,17 @@ function Feed({ id, name }) {
   const [moreFeedItemsError, setMorePostsError] = useState(false);
 
   // functions
+  const submitPostCallback = (newPost) => {
+    setFeedItems([newPost].concat(feedItems));
+  };
 
   const fetchFeed = async () => {
     setLoadingFeedItems(true);
-
-    // get feed items
-    const resp = await apiGetFeed(id);
+    const res = await apiGetMyFeed();
 
     // success handling
-    if (resp.status === 200) {
-      var data = await resp.json();
+    if (res.status === 200) {
+      var data = await res.json();
       setFeedItems(data["results"]);
       setFeedItemsError(false);
       setLoadingFeedItems(false);
@@ -42,7 +44,7 @@ function Feed({ id, name }) {
     else {
       setFeedItemsError(true);
       setLoadingFeedItems(false);
-      console.error(resp);
+      console.error(res);
     }
   };
 
@@ -80,7 +82,7 @@ function Feed({ id, name }) {
 
     // load the new feed items
     fetchFeed();
-  }, [id]);
+  }, [routerLocation.key]);
 
     return (
         <Container>
@@ -88,10 +90,16 @@ function Feed({ id, name }) {
             {/* Poll for new feed items in background */}
             <PollNewItems
                 interval={30000}  // 30 seconds
-                apiFunction={apiGetFeed}
-                apiFunctionArgs={[id]}
+                apiFunction={apiGetMyFeed}
+                apiFunctionArgs={[]}
                 oldItems={feedItems}
                 callback={fetchFeed}
+            />
+
+            {/* New Post Form */}
+            <NewPost
+                profileData={profileData}
+                submitPostCallback={submitPostCallback}
             />
 
             {/* Feed or Placeholder */}
@@ -100,9 +108,6 @@ function Feed({ id, name }) {
             : feedItemsError === true
                 ? <FeedError retryAction={fetchFeed} />
                 : <Container>
-                    <p className="display-5 text-center mb-5">
-                        {name}
-                    </p>
                     {feedItems && feedItems.map(post => (
                         <Post key={post.id} data={post} />
                     ))}
@@ -123,4 +128,4 @@ function Feed({ id, name }) {
     );
 }
 
-export default Feed;
+export default MyFeed;

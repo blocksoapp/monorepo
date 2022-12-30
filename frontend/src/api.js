@@ -80,8 +80,18 @@ export const apiGetExplore = async () => {
   return res;
 };
 
-/* Returns the response for the getting the feed items of the authed user. */
-export const apiGetFeed = async () => {
+/* Returns the response for getting the items of the given feedId. */
+export const apiGetFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return res;
+};
+
+/* Returns the response for getting the feed items of the authed user. */
+export const apiGetMyFeed = async () => {
   const url = `${baseAPI}/feed/`;
   const res = await fetch(url, {
     method: "GET",

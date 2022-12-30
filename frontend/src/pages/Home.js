@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Container } from 'react-bootstrap'
-import Feed from '../components/feed/Feed';
+import MyFeed from '../components/feed/MyFeed';
 import { UserContext } from '../contexts/UserContext'
 
 
@@ -13,7 +13,7 @@ function Home() {
     return (
         <Container>
           {user !== null && isAuthenticated ?
-          <Feed
+          <MyFeed
               className="mt-5"
               profileData={user}
           /> : 
