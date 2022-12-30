@@ -10,9 +10,9 @@ function Pfp(props) {
 
     // functions
     function charsToCharCodes(string) {
-        var toRet = "";
+        var toRet = 0;
         for (var i=0; i < string.length; i++) {
-            toRet += string.charCodeAt(i);
+            toRet += parseInt(string.charCodeAt(i));
         }
 
         return toRet;
@@ -44,9 +44,7 @@ function Pfp(props) {
                         style={{
                             height: props.height,
                             width: props.width,
-                            backgroundColor: `hsla(
-                                ${charsToCharCodes(props.address.substr(2,6))}
-                                100% 37% / 0.77)`,
+                            backgroundColor: `hsla(${charsToCharCodes(props.address.substr(36,6))} 100% 37% / 0.77)`,
                             color: "white",
                             fontSize: props.fontSize
 
