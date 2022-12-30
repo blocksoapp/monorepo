@@ -33,3 +33,45 @@ export function getCookie(name) {
 export function abbrAddress(address) {
     return address.substr(2,4) + "..." + address.substr(38,4);
 }
+
+/*
+ * Returns an abbreviated time delta based on
+ * the current time and the given timestamp.
+ *  - If the given timestamp was greater than a day ago,
+ *      the return value is formatted according to the
+ *      given datetime formatting options in the user's locale.
+ *  - If the given timestamp is between 1 day and 1 hour,
+ *      the return value is formatted as "1-23h ago".
+ *  - If the given timestamp is between 1 hour and 1 minute,
+ *      the return value is formatted as "1-59m ago".
+ *  - If the given timestamp is between 1 minute and 1 second,
+ *      the return value is formatted as "1-59s ago".
+ */
+export function getTimeAgo(timestamp, dtFmtOpts) {
+    // get difference between now and timestamp
+    const backThen = new Date(timestamp);
+    const diff = Date.now() - backThen;  // milliseconds
+
+    // intervals to compare with
+    const secondInMillis = 1000;
+    const minuteInMillis = 60 * 1000;
+    const hourInMillis = minuteInMillis * 60; 
+    const dayInMillis = hourInMillis * 24; 
+
+    // between 0s and 1m ago, show as 59s
+    if (diff >= 0 && diff < minuteInMillis) {
+        return `${parseInt(diff/secondInMillis)}s`;
+    }
+    // between 1m and 1h ago, show as 59m
+    if (diff >= minuteInMillis && diff < hourInMillis) {
+        return `${parseInt(diff/minuteInMillis)}m`;
+    }
+    // more than 1 hour ago, show as 23h
+    if (diff >= hourInMillis && diff < dayInMillis) {
+        return `${parseInt(diff/hourInMillis)}h`;
+    }
+    // more than 1 day ago, show as Nov. 7
+    if (diff >= dayInMillis) {
+        return backThen.toLocaleDateString("en-US", dtFmtOpts);
+    }
+}

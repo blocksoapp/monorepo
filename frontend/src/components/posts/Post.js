@@ -20,6 +20,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { utils } from "ethers";
 import { apiDeletePostLike, apiDeleteRepost, apiPostPostLike, apiPostPost } from "../../api";
+import { getTimeAgo } from "../../utils";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
@@ -99,6 +100,18 @@ function Post({data, bgColor}) {
         var formatted = utils.formatUnits(amount, decimals);
         formatted = (+formatted).toFixed(4);  // truncate after 4 places
         return formatted;
+    }
+
+    /* 
+     * Formats the result of getTimeAgo based on its result.
+     * If the result is greater than 3 characters, then
+     * show the result without the "ago" suffix.
+     * Otherwise show the "ago" suffix.
+     */
+    const formatTimeAgo = function(timeAgo) {
+        return timeAgo.length > 3
+            ? timeAgo
+            : `${timeAgo} ago`
     }
 
     /*
@@ -228,7 +241,6 @@ function Post({data, bgColor}) {
 
 
     const render = function () {
-        const dateObj = new Date(postData.created);
 
         // do not render spammy txs
         // TODO improve hacky way of skipping spam
@@ -272,7 +284,9 @@ function Post({data, bgColor}) {
                                             <AuthorAddress address={postData.author.address} />
                                         </h5>
                                         <p>
-                                            {dateObj.toLocaleDateString("en-US", datetimeOpts)}
+                                            {formatTimeAgo(
+                                                getTimeAgo(postData.created, datetimeOpts)
+                                            )}
                                         </p>
                                     </Col>
                                 </Row>
