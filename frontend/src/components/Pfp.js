@@ -45,7 +45,7 @@ function Pfp(props) {
                             height: props.height,
                             width: props.width,
                             backgroundColor: `hsla(
-                                ${charsToCharCodes(props.address.substr(36,6))}
+                                ${charsToCharCodes(props.address.substr(2,6))}
                                 100% 37% / 0.77)`,
                             color: "white",
                             fontSize: props.fontSize
