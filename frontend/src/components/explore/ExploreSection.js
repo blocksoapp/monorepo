@@ -30,7 +30,7 @@ function ExploreSection() {
 
   return (
     <div>
-        <h3 className="display-6 my-5 text-center text-muted">Latest activity from the...</h3>
+        <h3 className="display-6 my-5 text-center text-muted">Latest activity from...</h3>
         <FeaturedFeeds feeds={featuredFeedItems} />
 
         <h3 className="display-4 my-5 text-center text-muted">Featured Profiles</h3>
