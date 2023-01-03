@@ -7,7 +7,7 @@ import NotificationsDropdown from "../notifications/NotificationsDropdown";
 import { UserContext } from "../../contexts/UserContext";
 
 function NavbarComponent() {
-  const { user } = useContext(UserContext);
+  const { user, isAuthenticated } = useContext(UserContext);
   const navigate = useNavigate();
   const [searchVal, setSearchVal] = useState("");
 
@@ -33,7 +33,7 @@ function NavbarComponent() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="w-100">
-            {user !== null && (
+            {(user !== null && isAuthenticated) && (
               <Nav.Link as={Link} to="/home">
                 Home
               </Nav.Link>
@@ -41,12 +41,12 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/explore">
               Explore
             </Nav.Link>
-            {user !== null && (
+            {(user !== null && isAuthenticated) && (
               <Nav.Link as={Link} to="/edit-profile">
                 Edit Profile
               </Nav.Link>
             )}
-            {user !== null && (
+            {(user !== null && isAuthenticated) && (
               <Nav.Link as={Link} to={`${user["address"]}/profile`}>
                 My Profile
               </Nav.Link>
@@ -75,7 +75,7 @@ function NavbarComponent() {
         </Navbar.Collapse>
 
         {/* Notifications */}
-        {user !== null && <NotificationsDropdown />}
+        {(user !== null && isAuthenticated) && <NotificationsDropdown />}
 
         {/* Sign In/Out */}
         <SignInButton buttonText="Sign In" />

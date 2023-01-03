@@ -40,7 +40,7 @@ function App(props) {
         <Router>
           <NavbarComponent />
           <Routes>
-            {user !== null ? (
+            {(user !== null && isAuthenticated) ? (
               <Route path="/" element={<Home />}></Route>
             ) : (
               <Route path="/" element={<Explore />}></Route>
