@@ -1,3 +1,6 @@
+import { utils } from "ethers";
+
+
 /*
  * URL of backend.
  */
@@ -74,4 +77,13 @@ export function getTimeAgo(timestamp, dtFmtOpts) {
     if (diff >= dayInMillis) {
         return backThen.toLocaleDateString("en-US", dtFmtOpts);
     }
+}
+
+/* 
+ * Formats token amount with decimal places.
+ */
+export function formatTokenAmount(amount, decimals) {
+    var formatted = utils.formatUnits(amount, decimals);
+    formatted = (+formatted).toFixed(4);  // truncate after 4 places
+    return formatted;
 }

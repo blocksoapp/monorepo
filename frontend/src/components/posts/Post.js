@@ -18,9 +18,8 @@ import {
     faComment,
     faRetweet,
 } from '@fortawesome/free-solid-svg-icons';
-import { utils } from "ethers";
 import { apiDeletePostLike, apiDeleteRepost, apiPostPostLike, apiPostPost } from "../../api";
-import { getTimeAgo } from "../../utils";
+import { formatTokenAmount, getTimeAgo } from "../../utils";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
@@ -91,15 +90,6 @@ function Post({data, bgColor}) {
         else {
             setTxType(txTypes.Transaction);
         }
-    }
-
-    /* 
-     * Formats token amount with decimal places.
-     */
-    const formatTokenAmount = function(amount, decimals) {
-        var formatted = utils.formatUnits(amount, decimals);
-        formatted = (+formatted).toFixed(4);  // truncate after 4 places
-        return formatted;
     }
 
     /* 
@@ -349,7 +339,10 @@ function Post({data, bgColor}) {
 
                             {/* ERC721 Transfer */}
                             {(txType === txTypes.ERC721Transfer && erc721Transfers.length > 0) && 
-                             <ERC721Post transfers={erc721Transfers} />
+                             <ERC721Post
+                                author={postData.author.address}
+                                transfers={erc721Transfers}
+                             />
                             }
 
                             {/* All other Transactions */}
