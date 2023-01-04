@@ -41,6 +41,7 @@ function ERC721Thumb({
         if (!resp.ok) {
             setIsError(true);
             setIsLoading(false);
+            throw new Error(resp);
         }
         resp = await resp.json();
 

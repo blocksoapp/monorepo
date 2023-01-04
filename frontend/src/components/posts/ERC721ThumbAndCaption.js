@@ -14,9 +14,13 @@ import ERC721Thumb from "./ERC721Thumb";
 
 
 function ERC721ThumbAndCaption({
-    className="", transfer, index, setGalleryIndex, setShowGallery,
+    className="", author, transfer, index, setGalleryIndex, setShowGallery,
     tokenImagesThumb, setTokenImagesThumb, tokenImagesFull, setTokenImagesFull
 }) {
+
+    // constants
+    const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 
     return (
         <Row className={`text-center align-items-center ${className}`}>
@@ -36,23 +40,91 @@ function ERC721ThumbAndCaption({
 
             {/* nft token id and recipient of the transfer */}
             <Col xs={12} className="mt-3 p-4">
-                <Card.Text className="fs-5">
-                    Sent&nbsp;
-                    <a
-                        href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style= {{
-                            textDecoration: "underline 1px dotted",
-                            fontStyle: 'italic',
-                            color: 'black'
-                        }}
-                    >
-                        {transfer.contract_ticker} #{transfer.token_id}
-                    </a>
-                    &nbsp;to&nbsp;
-                    <TxAddress address={transfer.to_address} />
-                </Card.Text>
+
+                {/* minted from zero address */}
+                {(transfer.from_address === zeroAddress &&
+                    transfer.to_address === author.toLowerCase()) &&
+                    <Card.Text className="fs-5">
+                        Minted&nbsp;
+                        <a
+                            href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style= {{
+                                textDecoration: "underline 1px dotted",
+                                fontStyle: 'italic',
+                                color: 'black'
+                            }}
+                        >
+                            {transfer.contract_ticker} #{transfer.token_id}
+                        </a>
+                    </Card.Text>
+                }
+
+                {/* burned to zero address */}
+                {(transfer.to_address === zeroAddress &&
+                    transfer.from_address === author.toLowerCase()) &&
+                    <Card.Text className="fs-5">
+                        Burned&nbsp;
+                        <a
+                            href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style= {{
+                                textDecoration: "underline 1px dotted",
+                                fontStyle: 'italic',
+                                color: 'black'
+                            }}
+                        >
+                            {transfer.contract_ticker} #{transfer.token_id}
+                        </a>
+                    </Card.Text>
+                }
+
+                {/* sent from the post author */}
+                {(transfer.from_address === author.toLowerCase() &&
+                    transfer.to_address !== zeroAddress) &&
+                    <Card.Text className="fs-5">
+                        Sent&nbsp;
+                        <a
+                            href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style= {{
+                                textDecoration: "underline 1px dotted",
+                                fontStyle: 'italic',
+                                color: 'black'
+                            }}
+                        >
+                            {transfer.contract_ticker} #{transfer.token_id}
+                        </a>
+                        &nbsp;to&nbsp;
+                        <TxAddress address={transfer.to_address} />
+                    </Card.Text>
+                }
+
+                {/* received by the post author */}
+                {(transfer.to_address === author.toLowerCase() &&
+                    transfer.from_address !== zeroAddress) &&
+                    <Card.Text className="fs-5">
+                        Received&nbsp;
+                        <a
+                            href={`https://opensea.io/assets/ethereum/${transfer.contract_address}/${transfer.token_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style= {{
+                                textDecoration: "underline 1px dotted",
+                                fontStyle: 'italic',
+                                color: 'black'
+                            }}
+                        >
+                            {transfer.contract_ticker} #{transfer.token_id}
+                        </a>
+                        &nbsp;from&nbsp;
+                        <TxAddress address={transfer.from_address} />
+                    </Card.Text>
+                }
+
             </Col>
         </Row>
     )

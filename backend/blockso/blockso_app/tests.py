@@ -703,7 +703,7 @@ class TransactionParsingTests(BaseTest):
         # make assertions
         # assert that the correct number of ERC20Transfers has been created
         transfer_count = ERC20Transfer.objects.all().count()
-        self.assertEqual(transfer_count, 2)
+        self.assertEqual(transfer_count, 4)
 
     def test_process_erc721_transfers(self):
         """
@@ -785,7 +785,7 @@ class TransactionParsingTests(BaseTest):
 
         # assert that all of the users' tx history was parsed
         self.assertEqual(ERC721Transfer.objects.all().count(), 1)
-        self.assertEqual(ERC20Transfer.objects.all().count(), 2)
+        self.assertEqual(ERC20Transfer.objects.all().count(), 4)
 
 
 class BackgroundJobTests(BaseTest):
