@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext } from "react";
 import { Container } from "react-bootstrap";
 import Feed from "../components/feed/Feed";
 import { UserContext } from "../contexts/UserContext";
@@ -8,8 +8,6 @@ function Home() {
   // constants
   const { user } = useContext(UserContext);
   const { signedIn } = useSIWE();
-
-  // functions
 
   return (
     <Container>

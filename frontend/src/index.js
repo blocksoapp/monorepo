@@ -61,7 +61,6 @@ const siweConfig = {
     const res = await fetch(`${baseAPI}/auth/nonce/`);
     const data = await res.json();
     const nonce = data.nonce;
-    console.log("nonce: ", nonce);
     return nonce;
   },
   createMessage: ({ nonce, address, chainId }) =>

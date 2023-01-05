@@ -3,19 +3,17 @@ import { Toast, ToastContainer } from "react-bootstrap";
 import { ConnectKitButton } from "connectkit";
 import { UserContext } from "../../contexts/UserContext";
 
-function SessionExpiredToast(props) {
-  const { isAuthenticated } = useContext(UserContext);
+function ToastComponent(props) {
   return (
     <>
       {props.isToggle ? (
         <ToastContainer position="top-end" className="p-3">
           <Toast show={props.isToggle} onClose={() => props.setIsToggle(false)}>
             <Toast.Header>
-              <strong className="me-auto">Session Expired</strong>
+              <strong className="me-auto">{props.heading}</strong>
             </Toast.Header>
             <Toast.Body>
-              Your session has timed out. Please sign in again.{" "}
-              <ConnectKitButton />
+              {props.body} <ConnectKitButton />
             </Toast.Body>
           </Toast>
         </ToastContainer>
@@ -26,4 +24,4 @@ function SessionExpiredToast(props) {
   );
 }
 
-export default SessionExpiredToast;
+export default ToastComponent;

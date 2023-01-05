@@ -1,13 +1,14 @@
 import { useState, useContext } from "react";
 import { Button, Container, Col, Form, Nav, Navbar } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { useAccount } from "wagmi";
 import SignInButton from "../authentication/SignInButton";
 import NotificationsDropdown from "../notifications/NotificationsDropdown";
 import { UserContext } from "../../contexts/UserContext";
+import { useSIWE } from "connectkit";
 
 function NavbarComponent() {
   const { user } = useContext(UserContext);
+  const { signedIn } = useSIWE();
   const navigate = useNavigate();
   const [searchVal, setSearchVal] = useState("");
 
@@ -33,7 +34,7 @@ function NavbarComponent() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="w-100">
-            {user !== null && (
+            {user !== null && signedIn && (
               <Nav.Link as={Link} to="/home">
                 Home
               </Nav.Link>
@@ -41,12 +42,12 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/explore">
               Explore
             </Nav.Link>
-            {user !== null && (
+            {user !== null && signedIn && (
               <Nav.Link as={Link} to="/edit-profile">
                 Edit Profile
               </Nav.Link>
             )}
-            {user !== null && (
+            {user !== null && signedIn && (
               <Nav.Link as={Link} to={`${user["address"]}/profile`}>
                 My Profile
               </Nav.Link>
