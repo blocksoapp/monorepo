@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Container } from "react-bootstrap";
-import Feed from "../components/feed/Feed";
+import MyFeed from "../components/feed/MyFeed";
 import { UserContext } from "../contexts/UserContext";
 import { useSIWE } from "connectkit";
 
@@ -12,7 +12,7 @@ function Home() {
   return (
     <Container>
       {user !== null && signedIn ? (
-        <Feed className="mt-5" profileData={user} />
+        <MyFeed className="mt-5" profileData={user} />
       ) : (
         <h1 class="text-muted text-center">Please sign in.</h1>
       )}

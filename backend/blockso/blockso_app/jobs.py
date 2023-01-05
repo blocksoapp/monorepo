@@ -189,14 +189,18 @@ def parse_and_create_tx(tx_data, address):
     ).count() > 0:
         return None
 
-    # create transaction if it originated from the given address
-    if object_kwargs["from_address"] == address:
-        # recipient in contract creation txs comes back as None,
-        # set it to zero address instead
-        if object_kwargs["to_address"] is None:
-            object_kwargs["to_address"] = zero_address
+    # return if the given address is not the origin of the tx
+    # this helps avoid spam until there's a better system in place
+    if object_kwargs["from_address"] != address:
+        return None
 
-        tx = Transaction.objects.create(**object_kwargs)
+    # recipient in contract creation txs comes back as None,
+    # set it to zero address instead
+    if object_kwargs["to_address"] is None:
+        object_kwargs["to_address"] = zero_address
+
+    # create tx
+    tx = Transaction.objects.create(**object_kwargs)
 
     # create db records for the events we support
     log_events = tx_data["log_events"]
@@ -205,17 +209,9 @@ def parse_and_create_tx(tx_data, address):
         if event["decoded"] is None:
             continue
 
-        # create an erc20 transfer record if
-        # the from address in the log matches that of the sender
+        # create records for erc20 transfers
         event_sig = event["decoded"]["signature"]
-        if event_sig == erc20_transfer_sig and \
-            event["decoded"]["params"][0]["value"] == address:
-
-            # do not create db entries for txs that did not originate
-            # from the address that is being searched; helps avoid spam
-            if tx is None:
-                return
-
+        if event_sig == erc20_transfer_sig:
             ERC20Transfer.objects.create(
                 tx=tx,
                 contract_address=event["sender_address"],
@@ -228,14 +224,8 @@ def parse_and_create_tx(tx_data, address):
                 decimals=event["sender_contract_decimals"]
             )
 
-        # create an erc721 transfer record if
-        # the from address in the log matches that of the sender
-        if event_sig == erc721_transfer_sig and \
-            event["decoded"]["params"][0]["value"] == address:
-
-            if tx is None:
-                tx, _ = Transaction.objects.get_or_create(**object_kwargs)
-
+        # create records for erc721 transfers
+        if event_sig == erc721_transfer_sig:
             ERC721Transfer.objects.create(
                 tx=tx,
                 contract_address=event["sender_address"],
@@ -252,12 +242,11 @@ def parse_and_create_tx(tx_data, address):
 
 def create_post(tx_record, post_author):
     """
-    Creates a Post using a db record of Transaction, ERC20Transaction,
-    or ERC721Transaction, where the post_author is the from address
-    of the transaction or transfer.
+    Creates a Post using a db record of Transaction where the
+    post_author is the from address of the transaction.
     Returns the created object.
     Returns None if the post_author is not the originator of the
-    transaction or transfer(s).
+    transaction. 
     """
     # Post details that remain the same
     object_kwargs = {
@@ -278,27 +267,8 @@ def create_post(tx_record, post_author):
             **object_kwargs
         )
 
-    # create Post if author is the sender of an erc20 transfer in the tx
-    for transfer in tx_record.erc20_transfers.all():
-        if transfer.from_address == address:
-            return Post.objects.create(
-                author=post_author,
-                refTx=tx_record,
-                created=tx_record.block_signed_at,
-                **object_kwargs
-            )
-
-    # create Post if author is the sender of an erc721 transfer in the tx
-    for transfer in tx_record.erc721_transfers.all():
-        if transfer.from_address == address:
-            return Post.objects.create(
-                author=post_author,
-                refTx=tx_record,
-                created=tx_record.block_signed_at,
-                **object_kwargs
-            )
-
     return None
+
 
 def process_address_txs(address, limit=None):
     """

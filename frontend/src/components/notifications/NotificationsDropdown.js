@@ -113,7 +113,10 @@ function NotificationsDropdown() {
         <NavDropdown
             id="nav-notifications-dropdown"
             className="me-3"
-            drop="start"
+            drop={
+                /* drop down center on xs devices and down left on larger ones */
+                window.innerWidth < 576 ? "down-centered" : "start"
+            }
             title={
                 <Button variant={unreadCount > 0 ? "danger" : "outline-dark"}>
                     <FontAwesomeIcon icon={faBell} />

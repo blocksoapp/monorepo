@@ -5,7 +5,7 @@ import TxAddress from "../TxAddress";
 import ERC721ThumbAndCaption from "./ERC721ThumbAndCaption";
 
 
-function ERC721Post({transfers}) {
+function ERC721Post({author, transfers}) {
 
     // state
     const [ tokenImagesThumb, setTokenImagesThumb] = useState([]);
@@ -58,6 +58,7 @@ function ERC721Post({transfers}) {
             {/* card body details, shows nft thumbnail, id, and recipient */}
             <ERC721ThumbAndCaption
                 key={0}
+                author={author}
                 transfer={transfers[0]}
                 index={0}
                 setGalleryIndex={setGalleryIndex}
@@ -94,6 +95,7 @@ function ERC721Post({transfers}) {
                                 <ERC721ThumbAndCaption
                                     className="mt-5"
                                     key={index}
+                                    author={author}
                                     transfer={transfer}
                                     index={index}
                                     setGalleryIndex={setGalleryIndex}

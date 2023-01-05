@@ -281,6 +281,14 @@ class BaseTest(APITestCase):
         resp = self.client.post(url)
         return resp
 
+    def _create_feed(self):
+        """
+        Creates a Feed and adds all users to it.
+        """
+        feed = Feed.objects.create(name="First Users")
+        feed.profiles.set(Profile.objects.all())
+        return feed
+
 
 class AuthTests(BaseTest):
     """
@@ -725,7 +733,7 @@ class TransactionParsingTests(BaseTest):
         # make assertions
         # assert that the correct number of ERC20Transfers has been created
         transfer_count = ERC20Transfer.objects.all().count()
-        self.assertEqual(transfer_count, 2)
+        self.assertEqual(transfer_count, 4)
 
     def test_process_erc721_transfers(self):
         """
@@ -807,7 +815,7 @@ class TransactionParsingTests(BaseTest):
 
         # assert that all of the users' tx history was parsed
         self.assertEqual(ERC721Transfer.objects.all().count(), 1)
-        self.assertEqual(ERC20Transfer.objects.all().count(), 2)
+        self.assertEqual(ERC20Transfer.objects.all().count(), 4)
 
 
 class BackgroundJobTests(BaseTest):
@@ -1370,7 +1378,8 @@ class PostTests(BaseTest):
 
         # repost as user 2
         self._do_login(self.test_signer_2)
-        repost_id = self._repost(post_id)
+        resp = self._repost(post_id)
+        repost_id = resp.data["id"]
 
         # make request to delete repost of original post_id
         url = f"/api/post/{post_id}/repost/"
@@ -1668,16 +1677,8 @@ class FeedTests(BaseTest):
         self._create_post()
         self._do_login(self.test_signer_2)
         self._create_post()
-        # add users 1 and 2 to a Feed
-        feed = Feed.objects.create(name="First Users")
-        feed.profiles.set(
-            Profile.objects.filter(
-                user_id__in=[
-                    self.test_signer.address,
-                    self.test_signer_2.address
-                ]
-            )
-        )
+        # create a Feed and add users 1 and 2 it
+        feed = self._create_feed()
 
         # make a request as an unauthenticated user to
         # get the posts of the created Feed
@@ -1777,7 +1778,24 @@ class ExploreTests(BaseTest):
     Test behavior around explore page.
     """
 
-    def test_profiles_by_follower_count(self):
+    def test_explore_feed(self):
+        """
+        Assert that the explore endpoint returns a featured feed.
+        """
+        # set up test
+        # create a feed
+        feed = self._create_feed()
+        
+        # make a request to the explore endpoint
+        url = "/api/explore/"
+        resp = self.client.get(url)
+
+        # assert that the created feed is in the featured feeds
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["feeds"][0]["name"], feed.name)
+        self.assertEqual(resp.data["feeds"][0]["image"], feed.image)
+
+    def test_explore_profiles_by_follower_count(self):
         """
         Assert that the top 8 profiles by follower count are returned.
         """
@@ -1801,14 +1819,17 @@ class ExploreTests(BaseTest):
 
         # make assertions
         # assert that the top 8 profiles are returned
-        self.assertEqual(len(resp.data), 8)
+        self.assertEqual(len(resp.data["profiles"]), 8)
 
         # assert that the explore profiles are sorted
         # in order from most followers to least
         # user 10 should have the most followers
         # user 3 should have the least followers
         for i in range(8):
-            self.assertEqual(resp.data[i]["address"], signers[9-i].address)
+            self.assertEqual(
+                resp.data["profiles"][i]["address"],
+                signers[9-i].address
+            )
 
 
 class NotificationTests(BaseTest):

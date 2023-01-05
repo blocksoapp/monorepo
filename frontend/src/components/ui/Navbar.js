@@ -76,7 +76,7 @@ function NavbarComponent() {
         </Navbar.Collapse>
 
         {/* Notifications */}
-        {user !== null && <NotificationsDropdown />}
+        {user !== null && signedIn && <NotificationsDropdown />}
 
         {/* Sign In/Out */}
         <SignInButton buttonText="Sign In" />

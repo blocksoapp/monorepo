@@ -41,6 +41,7 @@ class Feed(models.Model):
     Represents a subscription to a group of users' activity.
     """
     name = models.CharField(blank=True, max_length=255)
+    image = models.URLField(blank=True, default="")
     profiles = models.ManyToManyField(
         to=Profile,
         blank=True
