@@ -164,8 +164,6 @@ def parse_and_create_tx(tx_data, address):
     Returns the created Transaction object.
     Returns None if the transaction:
      - does not originate from the given address, or
-     - does not have any transfers that originate from
-       the given address, or
      - the transaction already exists in the db.
     """
     tx = None
