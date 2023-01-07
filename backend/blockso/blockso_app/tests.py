@@ -927,7 +927,7 @@ class PostTests(BaseTest):
             )
 
         # make request
-        url = f"/api/posts/{self.test_signer.address}/"
+        url = f"/api/{self.test_signer.address}/posts/"
         resp = self.client.get(url)
 
         # make assertions

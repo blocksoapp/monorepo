@@ -17,6 +17,7 @@ urlpatterns = [
         path("auth/login/", auth_login),
         path("auth/logout/", auth_logout),
         path("<str:address>/profile/", ProfileCreateRetrieveUpdate.as_view()),
+        path("<str:address>/posts/", PostList.as_view()),
         path("<str:address>/follow/", FollowCreateDestroy.as_view()),
         path("<str:address>/followers/", FollowersList.as_view()),
         path("<str:address>/following/", FollowingList.as_view()),
@@ -24,7 +25,6 @@ urlpatterns = [
         path("post/<int:id>/", PostRetrieveUpdateDestroy.as_view()),
         path("post/<int:id>/likes/", PostLikeCreateListDestroy.as_view()),
         path("post/<int:id>/repost/", RepostDestroy.as_view()),
-        path("posts/<str:address>/", PostList.as_view()),
         path("posts/<int:post_id>/comments/", CommentCreateList.as_view()),
         path("posts/<int:post_id>/comments/<int:comment_id>/", CommentRetrieve.as_view()),
         path(
