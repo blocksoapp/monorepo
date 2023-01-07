@@ -15,11 +15,8 @@ function EnsAndAddress(props) {
 
     // ens name found
     if (data !== null) return (
-        <span className=''>
+        <span>
             {data}
-            <span className="fs-6">
-                &nbsp;({abbrAddress(props.address)})
-            </span>
         </span>
     )
 

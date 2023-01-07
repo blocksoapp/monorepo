@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { Container } from 'react-bootstrap'
 import { useEnsAddress, useEnsName, useProvider } from 'wagmi'
 import { utils as ethersUtils } from 'ethers';
+import { zeroAddress } from "../../../utils";
 import ContractProfile from "./ContractProfile";
 import Profile from "./Profile";
 import ProfileInvalid from "./ProfileInvalid";
@@ -30,7 +31,9 @@ function ProfileResolver() {
     const determineContractOrEOA = async (address) => {
         // get address code
         const code = await provider.getCode(address);
-        return code === "0x" ? setIsEOA(true) : setIsEOA(false);
+        return (code === "0x" && address !== zeroAddress)
+            ? setIsEOA(true)
+            : setIsEOA(false);
     }
 
     /*
