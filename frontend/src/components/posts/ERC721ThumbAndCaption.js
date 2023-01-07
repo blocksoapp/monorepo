@@ -9,6 +9,7 @@
  */
 import { useState } from "react";
 import { Card, Col, Collapse, Row } from "react-bootstrap";
+import { zeroAddress } from "../../utils";
 import TxAddress from "../TxAddress";
 import ERC721Thumb from "./ERC721Thumb";
 
@@ -17,10 +18,6 @@ function ERC721ThumbAndCaption({
     className="", author, transfer, index, setGalleryIndex, setShowGallery,
     tokenImagesThumb, setTokenImagesThumb, tokenImagesFull, setTokenImagesFull
 }) {
-
-    // constants
-    const zeroAddress = "0x0000000000000000000000000000000000000000";
-
 
     return (
         <Row className={`text-center align-items-center ${className}`}>

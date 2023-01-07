@@ -24,6 +24,7 @@ import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
+import ERC20Post from "./ERC20Post";
 import ERC721Post from "./ERC721Post";
 
 
@@ -75,13 +76,17 @@ function Post({data, bgColor}) {
         if (!postData.refTx) return
 
         // ERC20 transfer
-        if (postData.refTx.erc20_transfers.length > 0) {
+        if (postData.refTx.erc20_transfers.length > 0 &&
+            postData.refTx.erc721_transfers.length === 0) {
+
             setErc20Transfers(postData.refTx.erc20_transfers);
             setTxType(txTypes.ERC20Transfer);
         }
 
         // ERC721 transfer
-        else if (postData.refTx.erc721_transfers.length > 0) {
+        else if (postData.refTx.erc721_transfers.length > 0 &&
+                 postData.refTx.erc20_transfers.length === 0) {
+
             setErc721Transfers(postData.refTx.erc721_transfers);
             setTxType(txTypes.ERC721Transfer);
         }
@@ -232,9 +237,10 @@ function Post({data, bgColor}) {
 
     const render = function () {
 
-        // do not render spammy txs
-        // TODO improve hacky way of skipping spam
-        if (erc20Transfers.length > 10 || erc721Transfers.length > 10) return
+        // only show transactions we have rich support for atm 
+        // so that feeds looks more alive
+        if (erc20Transfers.length > 1 ||
+            txType === txTypes.Transaction) return
 
         return (
             <Container id={postData.id} className="mt-4">
@@ -300,41 +306,12 @@ function Post({data, bgColor}) {
 
                             {/* Card body that includes the transaction details. */}
                             {/* ERC20 Transfer */}
-                            {txType === txTypes.ERC20Transfer &&
-                            <Card.Body>
-                                {/* show all transfers of a transaction */}
-                                {erc20Transfers.map((transfer, index) => (
-                                    <Row key={index} className="align-items-end">
-                                        {/* token image */}
-                                        <Col className="col-auto">
-                                            <Image
-                                                src={transfer.logo_url}
-                                                height="25px"
-                                                width="25px"
-                                                roundedCircle
-                                            />
-                                        </Col>
-
-                                        {/* transfer details */}
-                                        <Col className="col-auto">
-                                            <Card.Text className="text-wrap">
-                                                Sent&nbsp;
-                                                <a
-                                                    className="text-success"
-                                                    href={`https://etherscan.io/tx/${postData.refTx.tx_hash}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ fontStyle: 'italic', color: 'black' }}
-                                                >
-                                                    {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
-                                                </a>
-                                                &nbsp;to&nbsp;
-                                                <TxAddress address={transfer.to_address} />
-                                            </Card.Text>
-                                        </Col>
-                                    </Row>
-                                ))}
-                            </Card.Body>
+                            {(txType === txTypes.ERC20Transfer && erc20Transfers.length > 0) &&
+                             <ERC20Post
+                                author={postData.author.address}
+                                transfers={erc20Transfers}
+                                txHash={postData.refTx.tx_hash}
+                             />
                             }
 
                             {/* ERC721 Transfer */}

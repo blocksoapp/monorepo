@@ -2,6 +2,11 @@ import { utils } from "ethers";
 
 
 /*
+ * Zero Address
+ */
+export const zeroAddress = "0x0000000000000000000000000000000000000000";
+
+/*
  * URL of backend.
  */
 export const baseAPI = `${process.env.REACT_APP_BACKEND_URL}/api`
