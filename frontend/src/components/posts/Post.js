@@ -104,7 +104,7 @@ function Post({data, bgColor}) {
      * Otherwise show the "ago" suffix.
      */
     const formatTimeAgo = function(timeAgo) {
-        return timeAgo.length > 3
+        return (timeAgo.length > 3 || timeAgo.toLowerCase() === "now")
             ? timeAgo
             : `${timeAgo} ago`
     }

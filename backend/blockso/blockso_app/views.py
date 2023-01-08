@@ -213,20 +213,15 @@ class ProfileCreateRetrieveUpdate(
         queryset lookups.  Eg if objects are referenced using multiple
         keyword arguments in the url conf.
         """
-        queryset = self.filter_queryset(self.get_queryset())
+        # gets the user that is being searched
+        # or creates it if it does not exist
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+        user, _ = UserModel.objects.get_or_create(
+            ethereum_address=address
+        )
+        profile, _ = Profile.objects.get_or_create(user=user)
 
-        # transform the address to checksum format since
-        # that is how it is stored in the DB
-        filter_kwargs = {
-            "user": Web3.toChecksumAddress(self.kwargs["address"])
-        }
-
-        obj = generics.get_object_or_404(queryset, **filter_kwargs)
-
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
-
-        return obj
+        return profile
 
     def post(self, request, *args, **kwargs):
         """ Create a Profile for the given address. """

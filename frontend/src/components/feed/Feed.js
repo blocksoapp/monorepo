@@ -92,6 +92,7 @@ function Feed({ id, name }) {
                 apiFunctionArgs={[id]}
                 oldItems={feedItems}
                 callback={fetchFeed}
+                text="There are new items in the feed!"
             />
 
             {/* Feed or Placeholder */}

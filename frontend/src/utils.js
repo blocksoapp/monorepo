@@ -67,7 +67,10 @@ export function getTimeAgo(timestamp, dtFmtOpts) {
     const dayInMillis = hourInMillis * 24; 
 
     // between 0s and 1m ago, show as 59s
-    if (diff >= 0 && diff < minuteInMillis) {
+    if (diff < secondInMillis) {
+        return "now";
+    }
+    if (diff >= secondInMillis && diff < minuteInMillis) {
         return `${parseInt(diff/secondInMillis)}s`;
     }
     // between 1m and 1h ago, show as 59m

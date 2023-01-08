@@ -94,6 +94,7 @@ function MyFeed({ profileData }) {
                 apiFunctionArgs={[]}
                 oldItems={feedItems}
                 callback={fetchFeed}
+                text="There are new items in your feed!"
             />
 
             {/* New Post Form */}

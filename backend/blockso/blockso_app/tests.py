@@ -958,6 +958,9 @@ class PostTests(BaseTest):
         the tx history of the user when
         fetching their posts.
         """
+        # set up test
+        self._do_login(self.test_signer)
+
         # make request
         url = f"/api/{self.test_signer.address}/posts/"
         resp = self.client.get(url)
