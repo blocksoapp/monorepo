@@ -12,6 +12,7 @@ import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faQuoteRight, faComment  } from '@fortawesome/free-solid-svg-icons'
 import { apiDeleteCommentLike, apiPostCommentLike } from '../../../api.js';
+import { formatTimeAgo, getTimeAgo } from '../../../utils.js';
 import MentionsOutput from '../MentionsOutput';
 import PfpResolver from '../../PfpResolver';
 import AuthorAddress from "../AuthorAddress";
@@ -84,7 +85,6 @@ function Comment(props) {
 
 
     const render = function () {
-        const dateObj = new Date(data.created);
 
         return (
             <Container id={data.id} className="mt-3">
@@ -108,7 +108,7 @@ function Comment(props) {
                                             <AuthorAddress address={data.author.address} />
                                         </h5>
                                         <p>
-                                            {dateObj.toLocaleDateString("en-US", datetimeOpts)}
+                                            {formatTimeAgo(getTimeAgo(data.created, datetimeOpts))}
                                         </p>
                                     </Col>
                                 </Row>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 
 
-function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callback}) {
+function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callback, text}) {
 
     /*
      * Polls the given apiFunction every interval.
@@ -86,7 +86,7 @@ function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callbac
                             <Alert variant="primary">
                                 <Row>
                                     <Col xs={12}>
-                                        <span>There are new items in your feed!</span>
+                                        <span>{text}</span>
                                         <span className="d-grid mt-2 d-sm-block mt-sm-0 float-sm-end">
                                             <Button
                                                 size="sm"

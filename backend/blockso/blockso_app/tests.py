@@ -18,7 +18,7 @@ import rq
 # our imports
 from .models import Feed, Follow, Post, Profile, Transaction, \
                     ERC20Transfer, ERC721Transfer
-from . import jobs
+from . import jobs, redis_client
 
 
 UserModel = get_user_model()
@@ -376,6 +376,7 @@ class ProfileTests(BaseTest):
         self.assertEqual(resp.data["address"], self.test_signer.address)
         self.assertEqual(resp.data["image"], "")
         self.assertEqual(resp.data["bio"], "")
+        self.assertIsNotNone(resp.data["lastLogin"])
 
     def test_update_profile(self):
         """
@@ -397,17 +398,17 @@ class ProfileTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
+        profile = Profile.objects.get(user_id=self.test_signer.address)
         expected = update_data
         expected.update({
             "address": self.test_signer.address,
             "numFollowers": 0,
             "numFollowing": 0,
-            "followedByMe": False
+            "followedByMe": False,
+            "lastLogin": profile.user.last_login
         })
         self.assertDictEqual(resp.data, expected)
 
-    # TODO remove or update this patch when a job queue is added
-    @mock.patch("blockso_app.jobs.process_address_txs", lambda x: None)
     def test_retrieve_profile(self):
         """
         Assert that a profile is retrieved successfully.
@@ -422,14 +423,16 @@ class ProfileTests(BaseTest):
 
         # make assertions
         self.assertEqual(resp.status_code, 200)
+        profile = Profile.objects.get(user_id=self.test_signer.address)
         expected = self.update_profile_data
         expected.update({
             "address": self.test_signer.address,
             "numFollowers": 0,
             "numFollowing": 0,
-            "followedByMe": False
+            "followedByMe": False,
+            "lastLogin": profile.user.last_login 
         })
-        self.assertDictEqual(resp.data, expected)
+        self.assertEqual(resp.data, expected)
 
     def test_retrieve_user(self):
         """
@@ -449,6 +452,7 @@ class ProfileTests(BaseTest):
             self.test_signer.address
         )
         self.assertIsNotNone(resp.data["profile"])
+        self.assertIsNotNone(resp.data["profile"]["lastLogin"])
 
     def test_retrieve_user_unauthed(self):
         """
@@ -902,7 +906,6 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 200)
 
-    @mock.patch("blockso_app.jobs.process_address_txs", mock.MagicMock)
     def test_get_posts(self):
         """
         Assert that a list of a user's posts are
@@ -927,7 +930,7 @@ class PostTests(BaseTest):
             )
 
         # make request
-        url = f"/api/posts/{self.test_signer.address}/"
+        url = f"/api/{self.test_signer.address}/posts/"
         resp = self.client.get(url)
 
         # make assertions
@@ -942,6 +945,34 @@ class PostTests(BaseTest):
                 datetime.fromisoformat(results[prev]["created"][:-1]),
                 datetime.fromisoformat(results[i]["created"][:-1])
             )
+
+        # assert job to fetch tx history was added to the high queue
+        queue = redis_client.RedisConnection().get_high_queue()
+        jobs = queue.get_job_ids()
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0], self.test_signer.address)
+
+    def test_get_posts_queue_job(self):
+        """
+        Assert that a job is queued to fetch
+        the tx history of the user when
+        fetching their posts.
+        """
+        # set up test
+        self._do_login(self.test_signer)
+
+        # make request
+        url = f"/api/{self.test_signer.address}/posts/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+
+        # assert job to fetch tx history was added to the high queue
+        queue = redis_client.RedisConnection().get_high_queue()
+        jobs = queue.get_job_ids()
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0], self.test_signer.address)
 
     def test_update_post(self):
         """

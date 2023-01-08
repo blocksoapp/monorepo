@@ -12,11 +12,14 @@ import Post from '../../posts/Post.js';
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
+import PostsFetching from '../../posts/PostsFetching';
 import MorePosts from "../../posts/MorePosts";
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import PfpResolver from '../../PfpResolver';
+import PollNewItems from '../../feed/PollNewItems';
+
 
 function Profile(props) {
     // constants
@@ -81,10 +84,6 @@ function Profile(props) {
             setProfileData(data);
             setProfileDataLoading(false);
         }
-        else if (res.status === 404) {
-            console.log('profile not found, it will be created when fetching posts');
-            setProfileDataLoading(false);
-        }
         else {
             console.error(res);
             setProfileDataLoading(false);
@@ -113,14 +112,14 @@ function Profile(props) {
         }
     }
     
-        // Navigate to user's followers
-        const handleFollowerClick = () => {
-            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'first' } })
-        }
+    // Navigate to user's followers
+    const handleFollowerClick = () => {
+        navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'first' } })
+    }
 
-        const handleFollowingClick = () => {
-            navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'second' } })
-        }
+    const handleFollowingClick = () => {
+        navigate(`/${props.address}/profile/follow`, { state: { activeLeftTab: 'second' } })
+    }
 
     // effects
 
@@ -150,21 +149,6 @@ function Profile(props) {
     }, [props.address])
 
 
-    useEffect(() => {
-        // TODO clean this up once a job system is added in
-        // https://github.com/blocksoapp/monorepo/issues/25
-        // this refetches the profile if it was not found
-        // the first time around, since currently a profile is
-        // created in the backend when fetching posts
-        if (posts.length === 0) {
-            return;
-        }
-        if (Object.keys(profileData).length === 0) {
-            fetchProfile();
-        }
-    }, [posts]);
-
-
     return (
         <>
             {/* show placeholder or profile data */}
@@ -174,6 +158,17 @@ function Profile(props) {
 
                     {/* User Info Section */}
                     <Container className="border-bottom border-light">
+
+
+                        {/* Poll for new posts in background */}
+                        <PollNewItems
+                            interval={30000}  // 30 seconds
+                            apiFunction={apiGetPosts}
+                            apiFunctionArgs={[props.address]}
+                            oldItems={posts}
+                            callback={fetchPosts}
+                            text="New posts available!"
+                        />
 
                         {/* Profile picture */}
                         <Row className="justify-content-center">
@@ -256,10 +251,12 @@ function Profile(props) {
                 ? <PostsPlaceholder />
                 : postsError === true
                     ? <PostsError retryAction={fetchPosts} />
-                    : posts.length === 0
-                        ? <PostsNotFound retryAction={fetchPosts} />
-                        : posts.map(post => (
-                            <Post key={post.id} data={post} />
+                    : posts.length === 0 && profileData.lastLogin === null
+                        ? <PostsFetching />
+                        : posts.length === 0 && profileData.lastLogin !== null
+                            ? <PostsNotFound retryAction={fetchPosts} />
+                            : posts.map(post => (
+                                <Post key={post.id} data={post} />
             ))}
 
             {/* More Posts Link (pagination) */}

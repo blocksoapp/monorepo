@@ -17,11 +17,12 @@ from rest_framework import generics, mixins, status, views
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 from web3 import Web3
+import rq
 
 # our imports
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import jobs, pagination, serializers
+from . import jobs, pagination, redis_client, serializers
 
 
 UserModel = get_user_model()
@@ -212,20 +213,15 @@ class ProfileCreateRetrieveUpdate(
         queryset lookups.  Eg if objects are referenced using multiple
         keyword arguments in the url conf.
         """
-        queryset = self.filter_queryset(self.get_queryset())
+        # gets the user that is being searched
+        # or creates it if it does not exist
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+        user, _ = UserModel.objects.get_or_create(
+            ethereum_address=address
+        )
+        profile, _ = Profile.objects.get_or_create(user=user)
 
-        # transform the address to checksum format since
-        # that is how it is stored in the DB
-        filter_kwargs = {
-            "user": Web3.toChecksumAddress(self.kwargs["address"])
-        }
-
-        obj = generics.get_object_or_404(queryset, **filter_kwargs)
-
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
-
-        return obj
+        return profile
 
     def post(self, request, *args, **kwargs):
         """ Create a Profile for the given address. """
@@ -328,11 +324,24 @@ class PostList(generics.ListAPIView):
         """
         # clean the address
         self.kwargs["address"] = Web3.toChecksumAddress(self.kwargs["address"])
+        address = self.kwargs["address"]
 
-        # TODO this should create a job instead of
-        # doing the actual work in the GET request
-        # fetch and store the tx history of the person being searched
-        jobs.process_address_txs(self.kwargs["address"], 100)
+        # get the profile being searched or create it
+        user, _ = UserModel.objects.get_or_create(
+            ethereum_address=address
+        )
+        profile, _ = Profile.objects.get_or_create(user=user)
+
+        # queue a job to fetch the profile's transaction history
+        client = redis_client.RedisConnection()
+        queue = client.get_high_queue()
+        if address not in rq.registry.FinishedJobRegistry(queue=queue):
+            queue.enqueue(
+                jobs.process_address_txs,
+                address,
+                100,
+                job_id=address
+            )
 
         return self.list(request, *args, **kwargs)
 
