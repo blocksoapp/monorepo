@@ -19,7 +19,7 @@ import {
     faRetweet,
 } from '@fortawesome/free-solid-svg-icons';
 import { apiDeletePostLike, apiDeleteRepost, apiPostPostLike, apiPostPost } from "../../api";
-import { formatTokenAmount, getTimeAgo } from "../../utils";
+import { formatTimeAgo, formatTokenAmount, getTimeAgo } from "../../utils";
 import MentionsOutput from './MentionsOutput';
 import PfpResolver from '../PfpResolver';
 import AuthorAddress from "./AuthorAddress";
@@ -95,18 +95,6 @@ function Post({data, bgColor}) {
         else {
             setTxType(txTypes.Transaction);
         }
-    }
-
-    /* 
-     * Formats the result of getTimeAgo based on its result.
-     * If the result is greater than 3 characters, then
-     * show the result without the "ago" suffix.
-     * Otherwise show the "ago" suffix.
-     */
-    const formatTimeAgo = function(timeAgo) {
-        return (timeAgo.length > 3 || timeAgo.toLowerCase() === "now")
-            ? timeAgo
-            : `${timeAgo} ago`
     }
 
     /*

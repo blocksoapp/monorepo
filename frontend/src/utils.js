@@ -88,6 +88,18 @@ export function getTimeAgo(timestamp, dtFmtOpts) {
 }
 
 /* 
+ * Formats the result of getTimeAgo based on its result.
+ * If the result is greater than 3 characters, or "now",
+ * then show the result without the "ago" suffix.
+ * Otherwise show the "ago" suffix.
+ */
+export function formatTimeAgo(timeAgo) {
+    return (timeAgo.length > 3 || timeAgo.toLowerCase() === "now")
+        ? timeAgo
+        : `${timeAgo} ago`
+}
+
+/* 
  * Formats token amount with decimal places.
  */
 export function formatTokenAmount(amount, decimals) {
