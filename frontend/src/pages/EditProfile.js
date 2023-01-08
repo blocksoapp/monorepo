@@ -1,26 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import { UserContext } from "../contexts/UserContext";
 import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
+import { useSIWE } from "connectkit";
 
 function EditProfile() {
   // Constant
   const { user, setUser } = useContext(UserContext);
+  const { signedIn } = useSIWE();
+  const navigate = useNavigate();
   // State
   const [pfp, setPfp] = useState(null);
-  const [profile, setProfile] = useState({
-    image: "",
-    bio: "",
-    socials: {
-      website: "",
-      telegram: "",
-      discord: "",
-      twitter: "",
-      opensea: "",
-      looksrare: "",
-      snapshot: "",
-    },
-  });
   const [formProfile, setFormProfile] = useState({
     image: "",
     bio: "",
@@ -41,7 +32,7 @@ function EditProfile() {
       delete profileData.posts;
       delete profileData.numFollowers;
       delete profileData.numFollowing;
-      setProfile(profileData);
+      setFormProfile(profileData);
       setPfp(profileData.image);
     } else {
       console.log("No profile found");
@@ -57,19 +48,29 @@ function EditProfile() {
     loadProfile();
   }, [user]);
 
+  // Redirect to home page on disconnect
+  useEffect(() => {
+    if (!signedIn) {
+      return navigate("/");
+    }
+  }, [signedIn]);
+
   return (
     <div className="p-sm-4">
       <Container>
         <h2 className="fw-bold mb-5">Edit Your Blockso Profile</h2>
-        <EditProfileForm
-          profile={profile}
-          setProfile={setProfile}
-          formProfile={profile}
-          setFormProfile={setProfile}
-          pfp={pfp}
-          setPfp={setPfp}
-          setUser={setUser}
-        />
+        {user ? (
+          <EditProfileForm
+            formProfile={formProfile}
+            setFormProfile={setFormProfile}
+            pfp={pfp}
+            setPfp={setPfp}
+            setUser={setUser}
+            user={user}
+          />
+        ) : (
+          <h1>Please sign in...</h1>
+        )}
       </Container>
     </div>
   );

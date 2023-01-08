@@ -12,21 +12,6 @@ function SignInButton({ buttonText }) {
   // State
   const [toggleToast, setToggleToast] = useState(Boolean);
 
-  useEffect(() => {
-    if (!signedIn) return;
-    const loadUserContext = async () => {
-      const res = await apiGetUser();
-      if (res.ok) {
-        const json = await res.json();
-        setUser(json);
-      } else {
-        console.log("Failed to load user data.");
-      }
-    };
-
-    loadUserContext();
-  }, [signedIn]);
-
   return (
     <div className="pb-1">
       <ToastComponent

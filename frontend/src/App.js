@@ -18,6 +18,25 @@ function App(props) {
   // State
   const [user, setUser] = useState(null);
 
+  const loadUserContext = async () => {
+    const res = await apiGetUser();
+    if (res.ok) {
+      const json = await res.json();
+      setUser(json);
+    } else {
+      console.log("Failed to load user data.");
+    }
+  };
+
+  useEffect(() => {
+    if (!signedIn) return;
+    loadUserContext();
+  }, [signedIn]);
+
+  useEffect(() => {
+    loadUserContext();
+  }, []);
+
   return (
     <>
       <UserContext.Provider
