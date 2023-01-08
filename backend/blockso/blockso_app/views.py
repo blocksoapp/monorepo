@@ -17,11 +17,12 @@ from rest_framework import generics, mixins, status, views
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
 from web3 import Web3
+import rq
 
 # our imports
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import jobs, pagination, serializers
+from . import jobs, pagination, redis_client, serializers
 
 
 UserModel = get_user_model()
@@ -328,11 +329,24 @@ class PostList(generics.ListAPIView):
         """
         # clean the address
         self.kwargs["address"] = Web3.toChecksumAddress(self.kwargs["address"])
+        address = self.kwargs["address"]
 
-        # TODO this should create a job instead of
-        # doing the actual work in the GET request
-        # fetch and store the tx history of the person being searched
-        jobs.process_address_txs(self.kwargs["address"], 100)
+        # get the profile being searched or create it
+        user, _ = UserModel.objects.get_or_create(
+            ethereum_address=address
+        )
+        profile, _ = Profile.objects.get_or_create(user=user)
+
+        # queue a job to fetch the profile's transaction history
+        client = redis_client.RedisConnection()
+        queue = client.get_high_queue()
+        if address not in rq.registry.FinishedJobRegistry(queue=queue):
+            queue.enqueue(
+                jobs.process_address_txs,
+                address,
+                100,
+                job_id=address
+            )
 
         return self.list(request, *args, **kwargs)
 

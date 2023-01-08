@@ -33,13 +33,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["address", "bio", "image", "socials", "numFollowers",
-                  "numFollowing", "followedByMe"]
+                  "numFollowing", "followedByMe", "lastLogin"]
 
     socials = SocialsSerializer()
     address = serializers.SerializerMethodField("get_address")
     numFollowers = serializers.SerializerMethodField("get_num_followers")
     numFollowing = serializers.SerializerMethodField("get_num_following")
     followedByMe = serializers.SerializerMethodField("get_followed_by_me")
+    lastLogin = serializers.SerializerMethodField("get_last_login")
 
     def get_address(self, obj):
         """ Returns the address of the User associated with the Profile. """
@@ -73,6 +74,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         # check if authed user follows the profile
         return Follow.objects.filter(src=authed_user, dest=obj).exists()
+
+    def get_last_login(self, obj):
+        """ Returns the profile's last login datetime. """
+
+        return obj.user.last_login
 
     def create(self, validated_data):
         """ Creates a Profile. """
