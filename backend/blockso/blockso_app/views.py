@@ -357,7 +357,8 @@ class PostList(generics.ListAPIView):
         # queue a job to fetch the profile's transaction history
         client = redis_client.RedisConnection()
         queue = client.get_high_queue()
-        if address not in rq.registry.FinishedJobRegistry(queue=queue):
+        if address not in queue.get_job_ids() and \
+           address not in rq.registry.FinishedJobRegistry(queue=queue):
             queue.enqueue(
                 jobs.process_address_txs,
                 address,

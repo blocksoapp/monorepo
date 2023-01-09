@@ -71,7 +71,7 @@ function ERC721Post({author, transfers}) {
 
             {/* if there is more than one transfer in a transaction */}
             {transfers.length > 1 &&
-                <div className="text-center">
+                <div className="text-center my-2">
                     <span
                         style={{
                             cursor: "pointer",

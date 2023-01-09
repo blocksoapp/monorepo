@@ -21,22 +21,9 @@ function ERC721ThumbAndCaption({
 
     return (
         <Row className={`text-center align-items-center ${className}`}>
-            {/* nft thumbnail */}
-            <Col xs={12}>
-                <ERC721Thumb
-                    transfer={transfer}
-                    index={index}
-                    setGalleryIndex={setGalleryIndex}
-                    setShowGallery={setShowGallery}
-                    tokenImagesThumb={tokenImagesThumb}
-                    setTokenImagesThumb={setTokenImagesThumb}
-                    tokenImagesFull={tokenImagesFull}
-                    setTokenImagesFull={setTokenImagesFull}
-                />
-            </Col>
 
             {/* nft token id and recipient of the transfer */}
-            <Col xs={12} className="mt-3 p-4">
+            <Col xs={12} className="p-4">
 
                 {/* minted from zero address */}
                 {(transfer.from_address === zeroAddress &&
@@ -122,6 +109,20 @@ function ERC721ThumbAndCaption({
                     </Card.Text>
                 }
 
+            </Col>
+
+            {/* nft thumbnail */}
+            <Col xs={12} className="mb-3">
+                <ERC721Thumb
+                    transfer={transfer}
+                    index={index}
+                    setGalleryIndex={setGalleryIndex}
+                    setShowGallery={setShowGallery}
+                    tokenImagesThumb={tokenImagesThumb}
+                    setTokenImagesThumb={setTokenImagesThumb}
+                    tokenImagesFull={tokenImagesFull}
+                    setTokenImagesFull={setTokenImagesFull}
+                />
             </Col>
         </Row>
     )
