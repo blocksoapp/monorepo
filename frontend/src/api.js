@@ -3,29 +3,29 @@ import { baseAPI, getCookie } from "./utils";
 
 /* Returns the response for unliking the given commentId by the authed user.  */
 export const apiDeleteCommentLike = async (postId, commentId) => {
-    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
-    const resp = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-    });
-    return resp;
-}
+  const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
 
 /* Returns the response for unliking the given postId by the authed user.  */
 export const apiDeletePostLike = async (postId) => {
-    const url = `${baseAPI}/post/${postId}/likes/`;
-    const resp = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-    });
-    return resp;
-}
+  const url = `${baseAPI}/post/${postId}/likes/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
 
 /* Returns the response for deleting the authed user's repost of the given postId.  */
 export const apiDeleteRepost = async (postId) => {
@@ -63,6 +63,16 @@ export const apiGetProfile = async (address) => {
 // Fetch user profile status
 export const apiGetUser = async () => {
   const url = `${baseAPI}/user/`;
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return res;
+};
+
+// Fetch user session ID
+export const apiGetSession = async () => {
+  const url = `${baseAPI}/auth/session/`;
   const res = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -187,29 +197,29 @@ export const apiGetFollowing = async (address) => {
 
 /* Returns the response for liking a comment.  */
 export const apiPostCommentLike = async (postId, commentId) => {
-    const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
-    const resp = await fetch(url, {
-        method: 'POST',
-        headers: {
-        'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-    });
-    return resp;
-}
+  const url = `${baseAPI}/posts/${postId}/comments/${commentId}/likes/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
 
 /* Returns the response for liking a post.  */
 export const apiPostPostLike = async (postId) => {
-    const url = `${baseAPI}/post/${postId}/likes/`;
-    const resp = await fetch(url, {
-        method: 'POST',
-        headers: {
-        'X-CSRFTOKEN': getCookie('csrftoken')
-        },
-        credentials: 'include'
-    });
-    return resp;
-}
+  const url = `${baseAPI}/post/${postId}/likes/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
 
 /* Returns the response for updating follow given an address  */
 export const apiPostFollow = async (address) => {

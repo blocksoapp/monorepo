@@ -75,6 +75,9 @@ def auth_login(request):
             # log user in
             login(request, wallet)
 
+            # set chain_id on their session
+            request.session["chain_id"] = auth_kwargs["siwe_message"].chain_id
+
             # create profile for user
             profile, _ = Profile.objects.get_or_create(
                 user=wallet
@@ -94,6 +97,25 @@ def auth_logout(request):
 
     logout(request)
     return Response(status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def auth_session(request):
+    """
+    Returns a 200 with JSON body of the authenticated user's
+        - ethereum address
+        - chain id
+    Both of these are set on the session when the user authenticates.
+    Returns a 403 if the user is not authenticated.
+    """
+    return Response(
+        status=200,
+        data={
+            "address": request.user.ethereum_address,
+            "chainId": int(request.session["chain_id"])
+        }
+    )
 
 
 class FollowCreateDestroy(

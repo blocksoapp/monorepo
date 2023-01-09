@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { baseAPI, getCookie } from "../../../utils";
@@ -18,14 +18,17 @@ function EditProfileForm({
   setFormProfile,
   pfp,
   setPfp,
+  user,
   setUser,
 }) {
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const [pfpPreview, setPfpPreview] = useState(null);
   const [isPfpRemoved, setIsPfpRemoved] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+
+  //const { user, setUser } = useContext(UserContext);
 
   // Form State Update
   const handleChange = (event) => {
@@ -42,7 +45,7 @@ function EditProfileForm({
   const handleSubmit = async () => {
     if (!isConnected) return;
     setIsLoading(true);
-    const url = `${baseAPI}/${address}/profile/`;
+    const url = `${baseAPI}/${user.address}/profile/`;
     const formRes = await fetch(url, {
       method: "PUT",
       body: JSON.stringify(formProfile),
@@ -122,7 +125,7 @@ function EditProfileForm({
                     <FormPfp
                       pfp={pfpPreview}
                       pfpPreview={pfpPreview}
-                      address={address}
+                      address={user.address}
                       removePfp={removePfp}
                       isPfpRemoved={isPfpRemoved}
                       isConnected={isConnected}
@@ -132,7 +135,7 @@ function EditProfileForm({
                   <div>
                     <FormPfp
                       pfp={pfp}
-                      address={address}
+                      address={user.address}
                       removePfp={removePfp}
                       isPfpRemoved={isPfpRemoved}
                       isConnected={isConnected}
@@ -170,7 +173,7 @@ function EditProfileForm({
                   }
                   thirdPane={
                     <FormEns
-                      address={address}
+                      address={user.address}
                       setProfile={setFormProfile}
                       profile={formProfile}
                       setPfpPreview={setPfpPreview}

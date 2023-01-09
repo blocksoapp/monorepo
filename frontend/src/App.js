@@ -10,21 +10,31 @@ import { UserContext } from "./contexts/UserContext";
 import Follow from "./pages/Follow";
 import { useEffect } from "react";
 import { apiGetUser } from "./api";
+import { useSIWE } from "connectkit";
 
 function App(props) {
-  const [isAuthenticated, setIsAuthenticated] = useState(Boolean);
+  // Constants
+  const { signedIn } = useSIWE();
+  // State
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const loadUserContext = async () => {
-      const fetchUser = await apiGetUser();
-      const json = await fetchUser.json();
+  const loadUserContext = async () => {
+    const res = await apiGetUser();
+    if (res.ok) {
+      const json = await res.json();
       setUser(json);
-    };
-
-    if (!user) {
-      loadUserContext();
+    } else {
+      console.log("Failed to load user data.");
     }
+  };
+
+  useEffect(() => {
+    if (!signedIn) return;
+    loadUserContext();
+  }, [signedIn]);
+
+  useEffect(() => {
+    loadUserContext();
   }, []);
 
   return (
@@ -33,14 +43,12 @@ function App(props) {
         value={{
           user,
           setUser,
-          isAuthenticated,
-          setIsAuthenticated,
         }}
       >
         <Router>
           <NavbarComponent />
           <Routes>
-            {(user !== null && isAuthenticated) ? (
+            {user !== null && signedIn ? (
               <Route path="/" element={<Home />}></Route>
             ) : (
               <Route path="/" element={<Explore />}></Route>
