@@ -102,8 +102,8 @@ const siweConfig = {
       credentials: "include",
     }).then((res) => res.ok),
   enabled: true,
-  nonceRefetchInterval: 28800, // in seconds, defaults to 5 minutes
-  sessionRefetchInterval: 28800, // in seconds, defaults to 5 minutes
+  nonceRefetchInterval: 300000, // in seconds, defaults to 5 minutes
+  sessionRefetchInterval: 300000, // in seconds, defaults to 5 minutes
 };
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
