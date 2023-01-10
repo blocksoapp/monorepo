@@ -45,7 +45,7 @@ function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callbac
         if (!items) return;
 
         // compare new items to old items
-        if (JSON.stringify(items[0]) !== JSON.stringify(oldItems[0])) {
+        if (items[0].id !== oldItems[0].id) {
             setHasNewItems(true);
         }
     }, [items])
