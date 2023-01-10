@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useLocation } from "react-router-dom";
 import { Button, Container, Col, Form, Nav, Navbar } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import SignInButton from "../authentication/SignInButton";
@@ -7,6 +8,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useSIWE } from "connectkit";
 
 function NavbarComponent() {
+  const routerLocation = useLocation();
   const { user } = useContext(UserContext);
   const { signedIn } = useSIWE();
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ function NavbarComponent() {
       handleSearch();
     }
   };
+  
 
   return (
     <Navbar bg="light" expand="lg" className="mb-5">
@@ -33,23 +36,26 @@ function NavbarComponent() {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="w-100">
+          <Nav className="w-100" activeKey={routerLocation.pathname}>
             {user !== null && signedIn && (
-              <Nav.Link as={Link} to="/home">
-                Home
+              <Nav.Link as={Link} to="/" eventKey="/">
+                My Feed
               </Nav.Link>
             )}
-            <Nav.Link as={Link} to="/explore">
+            <Nav.Link as={Link} to="/explore" eventKey="/explore">
               Explore
             </Nav.Link>
             {user !== null && signedIn && (
-              <Nav.Link as={Link} to="/edit-profile">
+              <Nav.Link as={Link} to="/edit-profile" eventKey="/edit-profile">
                 Edit Profile
               </Nav.Link>
             )}
             {user !== null && signedIn && (
-              <Nav.Link as={Link} to={`${user["address"]}/profile`}>
-                My Profile
+              <Nav.Link
+                as={Link}
+                to={`${user["address"]}/profile`}
+                eventKey={`${user["address"]}/profile`}>
+                My Posts
               </Nav.Link>
             )}
             <Col className="col-auto"></Col>

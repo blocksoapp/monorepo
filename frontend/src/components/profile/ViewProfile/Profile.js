@@ -8,12 +8,12 @@ import {
     apiGetPosts, apiGetProfile, apiPostFollow, apiPostUnfollow, apiGetUrl
 } from '../../../api';
 import { UserContext } from '../../../contexts/UserContext';
+import { usePageBottom } from '../../../hooks/usePageBottom';
 import Post from '../../posts/Post.js'; 
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
 import PostsNotFound from '../../posts/PostsNotFound';
 import PostsFetching from '../../posts/PostsFetching';
-import MorePosts from "../../posts/MorePosts";
 import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
@@ -25,6 +25,7 @@ function Profile(props) {
     // constants
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
+    const reachedPageBottom = usePageBottom();
 
     // state
     const [profileDataLoading, setProfileDataLoading] = useState(true);
@@ -36,6 +37,7 @@ function Profile(props) {
     const [postsNextPage, setPostsNextPage] = useState(null);
     const [morePostsLoading, setMorePostsLoading] = useState(false);
     const [morePostsError, setMorePostsError] = useState(false);
+    const [polledOnce, setPolledOnce] = useState(false);
  
     // functions
     const fetchPosts = async () => {
@@ -46,7 +48,9 @@ function Profile(props) {
             var data = await res.json();
             setPosts(data["results"]);
             setPostsError(false);
-            setPostsLoading(false);
+            if (data["results"].length > 0) {
+                setPostsLoading(false);
+            }
             setPostsNextPage(data["next"]);
         }
         else {
@@ -141,12 +145,50 @@ function Profile(props) {
         setMorePostsError(false);
         setMorePostsLoading(false);
         setPostsNextPage(null);
+        setPolledOnce(false);
 
         // load the new profile and its posts
         fetchProfile();
         fetchPosts();
 
     }, [props.address])
+
+    /*
+     * If fetching user tx history for the first time,
+     * poll for new posts every 10 seconds and show a
+     * feedback message if we've polled once and posts
+     * are still empty.
+     */
+    useEffect(() => {
+      // return if not getting tx history for the first time
+      if (posts.length !== 0 || profileData.lastLogin !== null) {
+          setPolledOnce(false);
+          return
+      }
+
+      // poll every 10 seconds for new posts
+      const timeout = setTimeout(() => {
+          fetchPosts();
+          setPolledOnce(true);
+      }, 10000)
+
+      // clean up timeout on unmount
+      return () => {
+          clearTimeout(timeout);
+      }
+
+    }, [posts]);
+
+    /*
+     * Paginate once user scrolls to bottom.
+     */
+    useEffect(() => {
+      if (!reachedPageBottom) return
+      if (!postsNextPage) return
+
+      // paginate the profile's posts
+      fetchMorePosts();
+    }, [reachedPageBottom]);
 
 
     return (
@@ -156,19 +198,19 @@ function Profile(props) {
                 ? <Container className="justify-content-center"><ProfilePlaceholder /></Container>
                 : <Container fluid>
 
+                    {/* Poll for new posts in background */}
+                    {(posts.length !== 0 && profileData.lastLogin !== null) &&
+                     <PollNewItems
+                        interval={30000}  // 30 seconds
+                        apiFunction={apiGetPosts}
+                        apiFunctionArgs={[props.address]}
+                        oldItems={posts}
+                        callback={fetchPosts}
+                        text="New posts available!"
+                     />}
+
                     {/* User Info Section */}
                     <Container className="border-bottom border-light">
-
-
-                        {/* Poll for new posts in background */}
-                        <PollNewItems
-                            interval={30000}  // 30 seconds
-                            apiFunction={apiGetPosts}
-                            apiFunctionArgs={[props.address]}
-                            oldItems={posts}
-                            callback={fetchPosts}
-                            text="New posts available!"
-                        />
 
                         {/* Profile picture */}
                         <Row className="justify-content-center">
@@ -246,28 +288,39 @@ function Profile(props) {
                 </Container>
             }
 
+
             {/* Posts Section -- show placeholder or posts */}
-            {postsLoading === true
-                ? <PostsPlaceholder />
-                : postsError === true
-                    ? <PostsError retryAction={fetchPosts} />
-                    : posts.length === 0 && profileData.lastLogin === null
-                        ? <PostsFetching />
-                        : posts.length === 0 && profileData.lastLogin !== null
+            <Container>
+                {(polledOnce === true && posts.length === 0) &&
+                 <Row className="justify-content-center">
+                    <Col xs={6}>
+                        <p className="fs-4 mt-5 text-center">
+                            Hang on a sec...
+                        </p>
+                    </Col>
+                 </Row>
+                }
+                {postsLoading === true
+                    ? <PostsPlaceholder />
+                    : postsError === true
+                        ? <PostsError retryAction={fetchPosts} />
+                        : posts.length === 0 && profileData.lastLogin !== null 
                             ? <PostsNotFound retryAction={fetchPosts} />
                             : posts.map(post => (
                                 <Post key={post.id} data={post} />
-            ))}
+                ))}
 
-            {/* More Posts Link (pagination) */}
-            {postsNextPage === null
-                ? <></>
-                : morePostsLoading === true
-                    ? <PostsPlaceholder />
-                    : morePostsError === true
-                        ? <PostsError retryAction={fetchMorePosts} />
-                        : <MorePosts action={fetchMorePosts} />
-            }
+
+                {/* Paginate through posts when user scrolls to the end */}
+                {postsNextPage === null
+                    ? <></>
+                    : morePostsLoading === true
+                        ? <PostsPlaceholder />
+                        : morePostsError === true
+                            ? <PostsError retryAction={fetchMorePosts} />
+                            : <></>
+                }
+            </Container>
 
         </>
     )

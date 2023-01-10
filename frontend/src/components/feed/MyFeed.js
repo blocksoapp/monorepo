@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap"
 import { apiGetMyFeed, apiGetUrl } from '../../api';
+import { usePageBottom } from '../../hooks/usePageBottom';
 import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
 import PostsPlaceholder from '../posts/PostsPlaceholder';
-import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
 
@@ -14,6 +14,7 @@ import PollNewItems from './PollNewItems';
 function MyFeed({ profileData }) {
   // constants
   const routerLocation = useLocation();
+  const reachedPageBottom = usePageBottom();
 
   // state
   const [loadingFeedItems, setLoadingFeedItems] = useState(true);
@@ -84,6 +85,18 @@ function MyFeed({ profileData }) {
     fetchFeed();
   }, [routerLocation.key]);
 
+  /*
+   * Paginate once user scrolls to bottom.
+   */
+  useEffect(() => {
+    if (!reachedPageBottom) return
+    if (!feedItemsNextPage) return
+
+    // paginate the feed items
+    fetchMoreFeedItems();
+  }, [reachedPageBottom]);
+
+
     return (
         <Container>
 
@@ -115,14 +128,14 @@ function MyFeed({ profileData }) {
                 </Container>
             }
 
-            {/* More Feed Items Link (pagination) */}
+            {/* Pagination loading placeholder or error*/}
             {feedItemsNextPage === null || loadingFeedItems
                 ? <></>
                 : moreFeedItemsLoading === true
                     ? <PostsPlaceholder />
                     : moreFeedItemsError === true
                         ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <MoreFeedItems action={fetchMoreFeedItems} />
+                        : <></>
             }
 
         </Container>
