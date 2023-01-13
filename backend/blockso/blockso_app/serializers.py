@@ -13,6 +13,7 @@ from .models import Comment, CommentLike, CommentOnPostEvent, ERC20Transfer, \
         LikedPostEvent, MentionedInCommentEvent, MentionedInPostEvent, \
         Notification, Post, PostLike, Profile, RepostEvent, Socials, \
         Transaction
+from . import alchemy
 
 
 UserModel = get_user_model()
@@ -164,6 +165,9 @@ class FollowSerializer(serializers.ModelSerializer):
             followed_by=user
         )
 
+        # make a request to Alchemy to update the Notify webhook
+        alchemy.update_notify_webhook()
+
         return follow
 
 
@@ -202,9 +206,8 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
-        fields = ["chain_id", "tx_hash", "block_signed_at", "tx_offset",
-                  "successful", "from_address", "to_address", "value",
-                  "erc20_transfers", "erc721_transfers"]
+        fields = ["chain_id", "tx_hash", "block_signed_at", "from_address",
+                "to_address", "value", "erc20_transfers", "erc721_transfers"]
         read_only_fields = fields
 
     erc20_transfers = serializers.SerializerMethodField()

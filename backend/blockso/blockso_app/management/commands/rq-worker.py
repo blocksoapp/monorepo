@@ -15,7 +15,6 @@ from rq.worker import HerokuWorker as Worker
 # our imports
 
 
-listen = ['high', 'default']
 redis_url = settings.REDIS_URL
 url = urllib.parse.urlparse(redis_url)
 
@@ -26,8 +25,13 @@ class Command(BaseCommand):
     single rqworker command must share the same connection.
 
     Example usage:
-    python manage.py heroku-worker
+    python manage.py rq-worker queue1 queue2 ...
     """
+
+    def add_arguments(self, parser):
+        """ Arguments to be passed to the command. """
+
+        parser.add_argument('queues', nargs='+', type=str)
 
     def handle(self, *args, **options):
         """ Main entrypoint into the django command. """
@@ -37,5 +41,5 @@ class Command(BaseCommand):
         )
 
         with Connection(conn):
-            worker = Worker(map(Queue, listen))
-            worker.work(with_scheduler=True)
+            worker = Worker(map(Queue, options["queues"]))
+            worker.work()

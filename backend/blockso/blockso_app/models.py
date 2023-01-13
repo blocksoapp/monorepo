@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 
 # our imports
+from .web3_client import w3
 
 
 class Profile(models.Model):
@@ -83,11 +84,18 @@ class Transaction(models.Model):
     chain_id = models.PositiveSmallIntegerField(blank=False)
     tx_hash = models.CharField(max_length=255, blank=False) 
     block_signed_at = models.DateTimeField(blank=False)
-    tx_offset = models.PositiveSmallIntegerField(blank=False)
-    successful = models.BooleanField(blank=False)
     from_address = models.CharField(max_length=255, blank=False)
     to_address = models.CharField(max_length=255, blank=False)
     value = models.CharField(max_length=255, blank=False)
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to make sure the
+        ethereum addresses are checksum encoded when written.
+        """
+        self.from_address = w3.toChecksumAddress(self.from_address)
+        self.to_address = w3.toChecksumAddress(self.to_address)
+        super().save(*args, **kwargs)
 
 
 class ERC20Transfer(models.Model):
@@ -108,6 +116,16 @@ class ERC20Transfer(models.Model):
     amount = models.CharField(max_length=255, blank=False)
     decimals = models.PositiveSmallIntegerField(blank=False)
 
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to make sure the
+        ethereum addresses are checksum encoded when written.
+        """
+        self.contract_address = w3.toChecksumAddress(self.contract_address)
+        self.from_address = w3.toChecksumAddress(self.from_address)
+        self.to_address = w3.toChecksumAddress(self.to_address)
+        super().save(*args, **kwargs)
+
 
 class ERC721Transfer(models.Model):
     """ Represents an ERC721 transfer. """
@@ -125,6 +143,16 @@ class ERC721Transfer(models.Model):
     from_address = models.CharField(max_length=255, blank=False)
     to_address = models.CharField(max_length=255, blank=False)
     token_id = models.CharField(max_length=255, blank=False)
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to make sure the
+        ethereum addresses are checksum encoded when written.
+        """
+        self.contract_address = w3.toChecksumAddress(self.contract_address)
+        self.from_address = w3.toChecksumAddress(self.from_address)
+        self.to_address = w3.toChecksumAddress(self.to_address)
+        super().save(*args, **kwargs)
 
 
 class Post(models.Model):

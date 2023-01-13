@@ -11,8 +11,8 @@ import requests
 import rq
 
 # our imports
-from .models import ERC20Transfer, ERC721Transfer, Feed, Post, \
-                    Profile, Transaction 
+from ..models import ERC20Transfer, ERC721Transfer, Feed, Post, \
+                     Profile, Transaction 
 UserModel = get_user_model()
 
 
@@ -30,74 +30,6 @@ erc721_transfer_sig = "Transfer(indexed address from, "\
 
 # other constants
 zero_address = "0x0000000000000000000000000000000000000000"
-scheduled_job_name = "queue_tx_history_job_for_all_users"
-
-
-def _get_redis_queue():
-    """
-    Return an rq queue connected to a redis backend.
-    This creates a new connection every time it's called,
-    so be careful calling it.
-    DO NOT call this method from outside this module.
-    If you need to do that, then figure out a way to
-    create / use a singleton for uses outside this module.
-    """
-    redis_client = redis.from_url(settings.REDIS_URL)
-    return rq.Queue(connection=redis_client)
-
-
-def enqueue_all_users_tx_history(limit):
-    """
-    Enqueues a job for all users in the system that:
-     - have an account that has logged in OR
-     - are being followed OR
-     - are part of a Feed
-    to fetch their tx history and update the db.
-    limit is the number of transactions to fetch.
-    If limit is None then it fetches all txs.
-    """
-    # redis client and queue for scheduling jobs
-    redis_queue = _get_redis_queue()
-
-    # fetch the union of users that have logged in or
-    # have followers or are part of a Feed
-    logged_in = Profile.objects.all().exclude(user__last_login=None)
-    have_followers = Profile.objects.all().exclude(follow_dest=None)
-    on_feed = Profile.objects.filter(feed__in=Feed.objects.all())
-    profiles = logged_in | have_followers | on_feed
-
-    # queue a job to get the tx history of each user 
-    for profile in profiles:
-        redis_queue.enqueue(
-            process_address_txs,
-            profile.user.ethereum_address,
-            limit,
-            job_id=profile.user.ethereum_address
-        )
-
-def _handle_scheduling_all_users_job(next_update):
-    """
-    Schedules the job that's responsible for queueing
-    individual jobs for getting all users' tx history.
-    Schedules the job to run at the 'next_update_at' date.
-    Does nothing if the job is already scheduled.
-    """
-    # redis client and queue for scheduling jobs
-    redis_queue = _get_redis_queue()
-    scheduled_jobs = rq.registry.ScheduledJobRegistry(queue=redis_queue)
-
-    # transform data from covalent to a datetime
-    next_update = datetime.datetime.fromisoformat(
-        next_update[0:-4] + "+00:00"
-    )
-
-    # schedule the job
-    result = redis_queue.enqueue_at(
-        next_update,
-        enqueue_all_users_tx_history,
-        50,
-        job_id=scheduled_job_name
-    )
 
 
 def get_tx_history_url(address, page_number):
@@ -141,11 +73,6 @@ def get_user_tx_history(address, limit):
         to_ret += data["data"]["items"]
         has_more = data["data"]["pagination"]["has_more"]
 
-        # schedule a job to update tx history of all users
-        # when covalent next updates its data
-        next_update = data["data"]["next_update_at"]
-        _handle_scheduling_all_users_job(next_update)
-
         # stop looping if limit has been reached
         if limit is not None and len(to_ret) >= limit:
             break
@@ -174,8 +101,6 @@ def parse_and_create_tx(tx_data, address):
         "chain_id": chain_id,
         "tx_hash": tx_data["tx_hash"],
         "block_signed_at": tx_data["block_signed_at"],
-        "tx_offset": tx_data["tx_offset"],
-        "successful": tx_data["successful"],
         "from_address": tx_data["from_address"],
         "to_address": tx_data["to_address"],
         "value": tx_data["value"]
@@ -254,7 +179,7 @@ def create_post(tx_record, post_author):
         "isQuote": False,
         "refPost": None
     }
-    address = post_author.user.ethereum_address.lower()
+    address = post_author.user.ethereum_address
 
     # create Post if author is the sender of the tx
     if tx_record.from_address == address:

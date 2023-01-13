@@ -1,5 +1,7 @@
 # std lib imports
 from datetime import datetime, timedelta
+import hashlib
+import hmac
 import json
 import pytz
 import secrets
@@ -20,12 +22,51 @@ from web3 import Web3
 import rq
 
 # our imports
+from .jobs import alchemy_jobs, covalent_jobs
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import jobs, pagination, redis_client, serializers
+from . import pagination, redis_client, serializers
 
 
 UserModel = get_user_model()
+
+
+def get_expected_alchemy_sig(message):
+    """
+    Returns the value of message signed with settings.ALCHEMY_WH_SIGNING_KEY.
+    """
+    return hmac.new(
+        bytes(settings.ALCHEMY_WH_SIGNING_KEY, "utf-8"),
+        msg=bytes(message, "utf-8"),
+        digestmod=hashlib.sha256,
+    ).hexdigest()
+
+
+@api_view(['POST'])
+def alchemy_notify_webhook(request):
+    """
+    Wehbook that receives a payload from Alchemy.
+    Creates a job to process the payload, and puts it on a redis queue.
+    Raises PermissionDenied if the signature in
+    the request header does not match Alchemy's signing key.
+    """
+    # check request header containing alchemy's signature
+    str_body = str(request.body, request.encoding or "utf-8")
+    given_sig = request.headers["X-Alchemy-Signature"]
+    expected_sig = get_expected_alchemy_sig(str_body)
+
+    # raise PermissionDenied if signature is invalid
+    if given_sig != expected_sig:
+        raise PermissionDenied("bad signature")
+
+    # queue job for processing the request payload
+    queue = redis_client.RedisConnection().get_tx_processing_queue()
+    queue.enqueue(
+        alchemy_jobs.process_webhook_data,
+        request.data
+    )
+
+    return Response(status=200)
 
 
 @api_view(['GET'])
@@ -360,7 +401,7 @@ class PostList(generics.ListAPIView):
         if address not in queue.get_job_ids() and \
            address not in rq.registry.FinishedJobRegistry(queue=queue):
             queue.enqueue(
-                jobs.process_address_txs,
+                covalent_jobs.process_address_txs,
                 address,
                 100,
                 job_id=address

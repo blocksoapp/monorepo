@@ -4,7 +4,7 @@
 from django.urls import path
 
 # our imports
-from .views import auth_nonce, auth_login, auth_logout, auth_session, \
+from .views import alchemy_notify_webhook, auth_nonce, auth_login, auth_logout, auth_session, \
         CommentCreateList, CommentLikeCreateListDestroy, CommentRetrieve, \
         ExploreList, FeedRetrieve, MyFeedList, FollowCreateDestroy, \
         FollowersList, FollowingList, NotificationListUpdate, PostCreate, \
@@ -13,6 +13,7 @@ from .views import auth_nonce, auth_login, auth_logout, auth_session, \
 
 
 urlpatterns = [
+        path("alchemy-notify-webhook/", alchemy_notify_webhook),
         path("auth/nonce/", auth_nonce),
         path("auth/login/", auth_login),
         path("auth/logout/", auth_logout),
