@@ -25,3 +25,6 @@ class RedisConnection():
 
     def get_high_queue(self):
         return rq.Queue(name='high', connection=self.redis_client)
+
+    def get_tx_processing_queue(self):
+        return rq.Queue('tx_processing', connection=self.redis_client)

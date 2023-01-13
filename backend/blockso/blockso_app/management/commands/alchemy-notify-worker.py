@@ -15,7 +15,7 @@ from rq.worker import HerokuWorker as Worker
 # our imports
 
 
-listen = ['high', 'default']
+listen = ['tx_processing']
 redis_url = settings.REDIS_URL
 url = urllib.parse.urlparse(redis_url)
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
     single rqworker command must share the same connection.
 
     Example usage:
-    python manage.py heroku-worker
+    python manage.py alchemy-notify-worker
     """
 
     def handle(self, *args, **options):

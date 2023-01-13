@@ -147,7 +147,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # cross-site request forgery config
 CSRF_USE_SESSIONS = config("CSRF_USE_SESSIONS", cast=bool) 
-CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 CSRF_COOKIE_DOMAIN = config("CSRF_COOKIE_DOMAIN", cast=str)
 
@@ -186,3 +185,10 @@ COVALENT_API_KEY = config("COVALENT_API_KEY", cast=str)
 
 # redis and rq config
 REDIS_URL = config("REDIS_URL", cast=str)
+
+
+# alchemy configuration
+ALCHEMY_HTTPS_URL = config("ALCHEMY_HTTPS_URL", cast=str)
+ALCHEMY_WH_SIGNING_KEY = config("ALCHEMY_WH_SIGNING_KEY", cast=str)
+ALCHEMY_WH_ID = config("ALCHEMY_WH_ID", cast=str)
+ALCHEMY_NOTIFY_TOKEN = config("ALCHEMY_NOTIFY_TOKEN", cast=str)

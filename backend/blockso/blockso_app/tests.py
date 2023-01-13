@@ -5,20 +5,26 @@ import json
 import pytz
 
 # third party imports
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
 from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
+from web3.datastructures import AttributeDict
 import eth_account
 import fakeredis
 import responses
 import rq
 
 # our imports
+from .jobs import alchemy_jobs, covalent_jobs
 from .models import Feed, Follow, Post, Profile, Transaction, \
                     ERC20Transfer, ERC721Transfer
-from . import jobs, redis_client
+from .samples import alchemy_notify_samples
+from .views import get_expected_alchemy_sig
+from .web3_client import w3
+from . import alchemy, redis_client
 
 
 UserModel = get_user_model()
@@ -43,7 +49,7 @@ class BaseTest(APITestCase):
         next_update = next_update.isoformat().replace("+00:00", "000Z")
         cls.covalent_next_update = next_update
         with open(
-            "./blockso_app/covalent-tx-history-sample.json",
+            "./blockso_app/samples/covalent-tx-history-sample.json",
             "r",
             encoding="utf-8"
         ) as fobj:
@@ -64,7 +70,7 @@ class BaseTest(APITestCase):
 
         # sample tx history json for erc721 transactions
         with open(
-            "./blockso_app/covalent-tx-history-erc721.json",
+            "./blockso_app/samples/covalent-tx-history-erc721.json",
             "r",
             encoding="utf-8"
         ) as fobj:
@@ -540,6 +546,14 @@ class FollowTests(BaseTest):
     Tests follow related behavior.
     """
 
+    def setUp(self):
+        """ Runs before each test. """
+
+        super().setUp()
+
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
     def test_follow(self):
         """
         Assert that a user can follow another.
@@ -683,11 +697,45 @@ class FollowTests(BaseTest):
                 signers[4-i].address
             )
 
+    def test_follow_update_alchemy_wh(self):
+        """
+        Assert that a request is made to update the addresses
+        in Alchemy Notify when a user is followed.
+        """
+        # create 5 users and log them in
+        expected = []
+        signers = self._create_users(5)
+        for i in range(len(signers)):
+            self._do_login(signers[i])
+            expected.append(signers[i].address)
+        
+        # set up a mock response that asserts that the request
+        # to alchemy was made with the expected parameters
+        self.mock_responses.replace(
+            responses.PUT,
+            alchemy.url,
+            match=[
+                responses.matchers.header_matcher(
+                    {"X-Alchemy-Token": settings.ALCHEMY_NOTIFY_TOKEN}
+                ),
+                responses.matchers.json_params_matcher(
+                    {
+                        "webhook_id": settings.ALCHEMY_WH_ID,
+                        "addresses": expected
+                    }
+                )
+            ]
+        )
 
-class TransactionParsingTests(BaseTest):
+        # make user 1 follow user 2
+        self._do_login(signers[0])
+        self._follow_user(signers[1].address)
+
+
+class CovalentTransactionParsingTests(BaseTest):
     """
     Tests behavior related to getting transaction history
-    and using it to create Posts.
+    from Covalent and using it to create Posts.
     """
 
     def _mock_tx_history_response(self, address, json_response):
@@ -696,7 +744,7 @@ class TransactionParsingTests(BaseTest):
         """
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(address, 0),
+            covalent_jobs.get_tx_history_url(address, 0),
             body=json_response
         )
 
@@ -714,7 +762,7 @@ class TransactionParsingTests(BaseTest):
         )
 
         # call function
-        jobs.process_address_txs(self.test_signer.address)
+        covalent_jobs.process_address_txs(self.test_signer.address)
 
         # make assertions
         # assert that the correct number of Transactions has been created
@@ -732,7 +780,7 @@ class TransactionParsingTests(BaseTest):
         self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
 
         # call function
-        jobs.process_address_txs(self.test_signer.address)
+        covalent_jobs.process_address_txs(self.test_signer.address)
 
         # make assertions
         # assert that the correct number of ERC20Transfers has been created
@@ -751,7 +799,7 @@ class TransactionParsingTests(BaseTest):
         )
 
         # call function
-        jobs.process_address_txs(self.test_signer.address)
+        covalent_jobs.process_address_txs(self.test_signer.address)
 
         # make assertions
         # assert that the correct number of Transactions has been created
@@ -779,7 +827,7 @@ class TransactionParsingTests(BaseTest):
         self._mock_tx_history_response(self.test_signer.address, self.erc20_tx_resp_data)
 
         # call function
-        jobs.process_address_txs(self.test_signer.address)
+        covalent_jobs.process_address_txs(self.test_signer.address)
 
         # make assertions
         # assert that the correct number of Posts has been created
@@ -800,7 +848,7 @@ class TransactionParsingTests(BaseTest):
         )
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 0),
+            covalent_jobs.get_tx_history_url(self.test_signer.address, 0),
             body=has_more_results
         )
 
@@ -810,95 +858,287 @@ class TransactionParsingTests(BaseTest):
         no_more_results = self.erc721_tx_resp_data
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 1),
+            covalent_jobs.get_tx_history_url(self.test_signer.address, 1),
             body=no_more_results
         )
 
         # run the job
-        jobs.process_address_txs(self.test_signer.address, limit=None)
+        covalent_jobs.process_address_txs(self.test_signer.address, limit=None)
 
         # assert that all of the users' tx history was parsed
         self.assertEqual(ERC721Transfer.objects.all().count(), 1)
         self.assertEqual(ERC20Transfer.objects.all().count(), 4)
 
 
-class BackgroundJobTests(BaseTest):
+class AlchemyNotifyTxParsingTests(BaseTest):
     """
-    Test the background job system.
+    Tests behavior related to getting transaction history
+    from Alchemy Notify and using it to create Posts.
     """
 
-    def test_schedule_all_users_tx_history_job(self):
+    def setUp(self):
+        """ Runs before each test. """
+
+        super().setUp()
+
+        # mock get_block return data -- only mocking values we need
+        mock_block_data = AttributeDict({
+            'timestamp': 1673395967
+        })
+        self.web3_get_block_patcher = mock.patch(
+            "web3.eth.Eth.get_block",
+            return_value=mock_block_data
+        )
+        self.web3_get_block_patcher.start()
+
+        # mock get_transaction return data -- only mocking values we need
+        mock_tx_data = AttributeDict({
+            'from': '0xA1E4380A3B1f749673E270229993eE55F35663b4',
+            'to': '0x5DF9B87991262F6BA471F09758CDE1c0FC1De734',
+            'value': 31337,
+        })
+        self.web3_get_transaction_by_block_patcher = mock.patch(
+            "web3.eth.Eth.get_transaction_by_block",
+            return_value=mock_tx_data
+        )
+        self.web3_get_transaction_by_block_patcher.start()
+        self.web3_get_transaction_patcher = mock.patch(
+            "web3.eth.Eth.get_transaction",
+            return_value=mock_tx_data
+        )
+        self.web3_get_transaction_patcher.start()
+
+        # mock contract call function
+        self.web3_call_patcher = mock.patch(
+            "web3.contract.ContractFunction.call",
+            return_value="Fake Val"
+        )
+        self.web3_call_patcher.start()
+
+    def tearDown(self):
+        """ Runs after each test. """
+
+        super().tearDown()
+
+        # clean up web3 patcher
+        self.web3_get_block_patcher.stop()
+        self.web3_get_transaction_patcher.stop()
+        self.web3_get_transaction_by_block_patcher.stop()
+        self.web3_call_patcher.stop()
+
+    @mock.patch("web3.eth.Eth.get_transaction")
+    def test_process_external_eth_transfer(self, mock_get_tx):
         """
-        Assert that a job to fetch all users' tx histories
-        is scheduled during the job that fetches one user's
-        tx history.
-        Assert that the job is scheduled to run on the
-        'next_update_at' time given by covalent.
+        Assert that an external eth transfer
+        from or to an address is handled correctly.
+        Assert that a Transaction is created.
+        Assert that a Post is created for the
+        sender and recipient.
         """
         # set up test
-        self._do_login(self.test_signer)
-        # mock out the request for getting the user's tx history
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 0),
-            body=self.erc20_tx_resp_data
-        )
+        eth_transfer = alchemy_notify_samples.eth_transfer
+        activity = eth_transfer["event"]["activity"][0]
+        mock_get_tx.return_value = AttributeDict({
+            "from": activity["fromAddress"],
+            "to": activity["toAddress"],
+            'value': 31337
+        })
 
-        # make request to process one user's tx history
-        # which should trigger the scheduling of a job to
-        # process all users' tx history
-        jobs.process_address_txs(self.test_signer.address)
+        # call function
+        alchemy_jobs.process_webhook_data(eth_transfer)
 
-        # assert that a new job is scheduled to process all users' tx history
-        self.assertTrue(
-            jobs.scheduled_job_name in self.scheduled_job_registry
-        )
+        # make assertions
+        # assert that a Transaction was created
+        tx = Transaction.objects.get(tx_hash=activity["hash"])
 
-    def test_schedule_all_users_tx_history_job_already_exists(self):
+        # assert that a Post was created for both the from and to addresses
+        from_address = w3.toChecksumAddress(activity["fromAddress"])
+        from_post = Post.objects.get(author__user_id=from_address)
+        self.assertEqual(from_post.refTx, tx)
+
+        to_address = w3.toChecksumAddress(activity["toAddress"])
+        to_post = Post.objects.get(author__user_id=to_address)
+        self.assertEqual(to_post.refTx, tx)
+
+    @mock.patch("web3.eth.Eth.get_transaction")
+    def test_process_multiple_external_eth_transfer(self, mock_get_tx):
         """
-        Assert that a second job isn't scheduled if one
-        is already scheduled.
-        """
-        # set up test
-        self._do_login(self.test_signer)
-        # mock out the request for getting the user's tx history
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 0),
-            body=self.erc20_tx_resp_data
-        )
-        self.mock_responses.add(
-            responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 0),
-            body=self.erc20_tx_resp_data
-        )
-
-        # make two requests to process one user's tx history
-        # the first should schedule a job
-        # the second should not schedule a job
-        jobs.process_address_txs(self.test_signer.address)
-        jobs.process_address_txs(self.test_signer.address)
-
-        # assert that only one job is scheduled
-        self.assertEqual(self.scheduled_job_registry.count, 1)
-
-    def test_enqueue_all_users_tx_history(self):
-        """
-        Assert that the job creates a job for every user in the system.
+        Assert that multiple external eth transfers
+        are handled correctly.
+        Assert that a Transaction is created.
+        Assert that a Post is created for the
+        sender and recipient.
         """
         # set up test
-        # create users 1 and 2
-        self._do_login(self.test_signer)
-        self._do_login(self.test_signer_2)
+        eth_transfers = alchemy_notify_samples.multiple_eth_transfers
+        side_effects = []
+        for item in eth_transfers["event"]["activity"]:
+            side_effects.append(
+                AttributeDict({
+                    "from": item["fromAddress"],
+                    "to": item["toAddress"],
+                    'value': 31337
+                })
+            )
+        mock_get_tx.side_effect = side_effects
 
-        # run the job
-        jobs.enqueue_all_users_tx_history(None)
+        # call function
+        alchemy_jobs.process_webhook_data(eth_transfers)
 
-        # assert that it added as many jobs as there are users
-        # to the queue, where each job gets the tx history of that user
+        # make assertions
+        for item in eth_transfers["event"]["activity"]:
+            # assert that a Transaction was created
+            tx = Transaction.objects.get(tx_hash=item["hash"])
+
+            # assert that a Post was created for both the from and to addresses
+            from_address = w3.toChecksumAddress(item["fromAddress"])
+            self.assertEqual(1,
+                Post.objects.filter(
+                    author__user_id=from_address, refTx=tx
+                ).count()
+            )
+
+            to_address = w3.toChecksumAddress(item["toAddress"])
+            self.assertEqual(1,
+                Post.objects.filter(
+                    author__user_id=to_address, refTx=tx
+                ).count()
+            )
+
+    def test_process_erc20_transfer(self):
+        """
+        Assert that an erc20 transfer is parsed correctly.
+        Assert that a Transaction is created for the tx that
+        the erc20 transfer relates to.
+        Assert that the from and to addresses now have Posts that
+        reflect their transaction history.
+        """
+        # set up test
+        erc20_transfer = alchemy_notify_samples.erc20_transfer
+
+        # call function
+        alchemy_jobs.process_webhook_data(erc20_transfer)
+
+        # make assertions
+        # assert that a Transaction was created
+        activity = erc20_transfer["event"]["activity"][0]
+        tx = Transaction.objects.get(tx_hash=activity["hash"])
+
+        # assert that an ERC20Transfer was created
+        transfer = ERC20Transfer.objects.get(tx=tx)
         self.assertEqual(
-            self.redis_queue.count,
-            UserModel.objects.all().count()
+            transfer.from_address,
+            w3.toChecksumAddress(activity["fromAddress"])
+        )
+        self.assertEqual(
+            transfer.to_address,
+            w3.toChecksumAddress(activity["toAddress"])
+        )
+        self.assertEqual(
+            transfer.contract_address,
+            w3.toChecksumAddress(activity["rawContract"]["address"])
+        )
+        self.assertEqual(
+            transfer.amount,
+            str(w3.toInt(hexstr=activity["log"]["data"]))
+        )
+
+        # assert that a Post was created for both the from and to addresses
+        from_address = w3.toChecksumAddress(activity["fromAddress"])
+        from_post = Post.objects.get(author__user_id=from_address)
+        self.assertEqual(from_post.refTx, tx)
+
+        to_address = w3.toChecksumAddress(activity["toAddress"])
+        to_post = Post.objects.get(author__user_id=to_address)
+        self.assertEqual(to_post.refTx, tx)
+
+    def test_process_erc721_transfer(self):
+        """
+        Assert that an erc721 transfer is parsed correctly.
+        Assert that a Transaction is created for the tx that
+        the erc721 transfer relates to.
+        Assert that the from and to addresses now have Posts that
+        reflect their transaction history.
+        """
+        # set up test
+        erc721_transfer = alchemy_notify_samples.erc721_transfer
+
+        # call function
+        alchemy_jobs.process_webhook_data(erc721_transfer)
+
+        # make assertions
+        # assert that a Transaction was created
+        activity = erc721_transfer["event"]["activity"][0]
+        tx = Transaction.objects.get(tx_hash=activity["hash"])
+
+        # assert that an ERC721Transfer was created
+        transfer = ERC721Transfer.objects.get(tx=tx)
+        self.assertEqual(
+            transfer.from_address,
+            w3.toChecksumAddress(activity["fromAddress"])
+        )
+        self.assertEqual(
+            transfer.to_address,
+            w3.toChecksumAddress(activity["toAddress"])
+        )
+        self.assertEqual(
+            transfer.contract_address,
+            w3.toChecksumAddress(activity["rawContract"]["address"])
+        )
+        self.assertEqual(
+            transfer.token_id,
+            str(w3.toInt(hexstr=activity["erc721TokenId"]))
+        )
+
+        # assert that a Post was not created for the from address since
+        # the from is the zero address
+        from_address = w3.toChecksumAddress(activity["fromAddress"])
+        from_post = Post.objects.filter(author__user_id=from_address)
+        self.assertEqual(from_post.exists(), False)
+
+        # assert that a Post was created for the to address
+        to_address = w3.toChecksumAddress(activity["toAddress"])
+        to_post = Post.objects.get(author__user_id=to_address)
+        self.assertEqual(to_post.refTx, tx)
+
+    def test_reorged_transaction(self):
+        """
+        Assert that a reorged transaction is 
+        removed from the database, along with
+        any related Posts.
+        """
+        # set up test
+        erc721_transfer = alchemy_notify_samples.erc721_transfer
+        activity = erc721_transfer["event"]["activity"][0]
+
+        # process a webhook request where removed = False
+        # therefore it should create objects in the database
+        alchemy_jobs.process_webhook_data(erc721_transfer)
+
+        # assert that a Transaction, ERC721Transfer, and Post were created
+        tx = Transaction.objects.get(tx_hash=activity["hash"])
+        self.assertTrue(ERC721Transfer.objects.filter(tx=tx).exists())
+        self.assertTrue(
+            Post.objects.filter(
+                author__user_id=w3.toChecksumAddress(activity["toAddress"])
+            ).exists()
+        )
+
+        # process a follow up webhook request where removed = True 
+        # therefore it should remove all objects related to the
+        # transaction that was reorged
+        reorged_transfer = alchemy_notify_samples.reorged_erc721_transfer
+        alchemy_jobs.process_webhook_data(reorged_transfer)
+
+        # assert that the Transaction, ERC721Transfer, and Post were deleted
+        self.assertFalse(
+            Transaction.objects.filter(tx_hash=activity["hash"]).exists()
+        )
+        self.assertFalse(ERC721Transfer.objects.filter(tx=tx).exists())
+        self.assertFalse(
+            Post.objects.filter(
+                author__user_id=w3.toChecksumAddress(activity["toAddress"])
+            ).exists()
         )
 
 
@@ -1063,10 +1303,10 @@ class PostTests(BaseTest):
         # create posts using the test covalent tx history API 
         self.mock_responses.add(
             responses.GET,
-            jobs.get_tx_history_url(self.test_signer.address, 0),
+            covalent_jobs.get_tx_history_url(self.test_signer.address, 0),
             body=self.erc20_tx_resp_data
         )
-        jobs.process_address_txs(self.test_signer.address)
+        covalent_jobs.process_address_txs(self.test_signer.address)
 
         # assert that post 1 has a general reference transaction
         url = "/api/post/1/"
@@ -1089,7 +1329,9 @@ class PostTests(BaseTest):
         )
         self.assertEqual(
             resp.data["refTx"]["erc20_transfers"][0]["contract_address"],
-            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            w3.toChecksumAddress(
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            )
         )
 
     def test_get_num_comments(self):
@@ -1774,6 +2016,8 @@ class MyFeedTests(BaseTest):
         both their posts and those they follow will show up in their feed.
         """
         # set up test
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # login user 2, create a post
         self._do_login(self.test_signer_2)
         resp = self._create_post()
@@ -1831,7 +2075,7 @@ class ExploreTests(BaseTest):
         Assert that the top 8 profiles by follower count are returned.
         """
         # set up test
-        # create 10 profiles
+        self.mock_responses.add(responses.PUT, alchemy.url)
         signers = self._create_users(10)
 
         # make each user follow the remaining users
@@ -2008,6 +2252,7 @@ class NotificationTests(BaseTest):
         another user follows them.
         """
         # set up test
+        self.mock_responses.add(responses.PUT, alchemy.url)
         # create users 1 and 2
         self._do_login(self.test_signer)
         self._do_login(self.test_signer_2)
@@ -2213,3 +2458,53 @@ class NotificationTests(BaseTest):
             event["repostedBy"]["address"],
             self.test_signer_2.address
         )
+
+
+class AlchemyWebhookTests(BaseTest):
+    """
+    Tests behavior around the webhook for Alchemy Notify.
+    """
+
+    def test_unauthed_request(self):
+        """
+        Assert that an unauthenticated webhook requests fails.
+        """
+        # set up test
+        url = "/api/alchemy-notify-webhook/"
+        data={"fakekey":"fakeval"}
+        extra_headers = {"HTTP_X-Alchemy-Signature": "wrong-sig"}
+
+        # make request
+        resp = self.client.post(
+            url,
+            data=data,
+            **extra_headers
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_notify_wh_adds_job_on_rq(self):
+        """
+        Assert that a successfully authenticated webhook
+        request is added to a redis queue for
+        processing by one of the workers.
+        """
+        # set up test
+        url = "/api/alchemy-notify-webhook/"
+        data={"fakekey":"fakeval"}
+        body = json.dumps(data).replace(" ", "")
+        valid_sig = get_expected_alchemy_sig(body)
+        extra_headers = {"HTTP_X-Alchemy-Signature": valid_sig}
+
+        # make request
+        resp = self.client.post(
+            url,
+            data=data,
+            **extra_headers
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        queue = rq.Queue(connection=self.redis_backend, name="tx_processing")
+        self.assertEqual(len(queue), 1)
