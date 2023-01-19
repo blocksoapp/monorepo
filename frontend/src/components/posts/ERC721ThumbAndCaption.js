@@ -27,7 +27,7 @@ function ERC721ThumbAndCaption({
 
                 {/* minted from zero address */}
                 {(transfer.from_address === zeroAddress &&
-                    transfer.to_address === author.toLowerCase()) &&
+                    transfer.to_address.toLowerCase() === author.toLowerCase()) &&
                     <Card.Text className="fs-5">
                         Minted&nbsp;
                         <a
@@ -47,7 +47,7 @@ function ERC721ThumbAndCaption({
 
                 {/* burned to zero address */}
                 {(transfer.to_address === zeroAddress &&
-                    transfer.from_address === author.toLowerCase()) &&
+                    transfer.from_address.toLowereCase() === author.toLowerCase()) &&
                     <Card.Text className="fs-5">
                         Burned&nbsp;
                         <a
@@ -66,7 +66,7 @@ function ERC721ThumbAndCaption({
                 }
 
                 {/* sent from the post author */}
-                {(transfer.from_address === author.toLowerCase() &&
+                {(transfer.from_address.toLowerCase() === author.toLowerCase() &&
                     transfer.to_address !== zeroAddress) &&
                     <Card.Text className="fs-5">
                         Sent&nbsp;
@@ -88,7 +88,7 @@ function ERC721ThumbAndCaption({
                 }
 
                 {/* received by the post author */}
-                {(transfer.to_address === author.toLowerCase() &&
+                {(transfer.to_address.toLowerCase() === author.toLowerCase() &&
                     transfer.from_address !== zeroAddress) &&
                     <Card.Text className="fs-5">
                         Received&nbsp;
