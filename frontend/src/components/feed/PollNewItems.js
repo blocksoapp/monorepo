@@ -42,7 +42,7 @@ function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callbac
     useEffect(() => {
         // do nothing if there is nothing to compare
         if (!oldItems) return;
-        if (!items) return;
+        if (!items || items.length === 0) return;
 
         // compare new items to old items
         if (items[0].id !== oldItems[0].id) {
