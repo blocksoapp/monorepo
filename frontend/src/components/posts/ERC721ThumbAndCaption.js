@@ -47,7 +47,7 @@ function ERC721ThumbAndCaption({
 
                 {/* burned to zero address */}
                 {(transfer.to_address === zeroAddress &&
-                    transfer.from_address.toLowereCase() === author.toLowerCase()) &&
+                    transfer.from_address.toLowerCase() === author.toLowerCase()) &&
                     <Card.Text className="fs-5">
                         Burned&nbsp;
                         <a

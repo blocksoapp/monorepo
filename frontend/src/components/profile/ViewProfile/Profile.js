@@ -31,13 +31,12 @@ function Profile(props) {
     const [profileDataLoading, setProfileDataLoading] = useState(true);
     const [profileData, setProfileData] = useState({});
     const [postsLoading, setPostsLoading] = useState(true);
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState(null);
     const [postsError, setPostsError] = useState(false);
     const [activeLeftTab, setActiveLeftTab] = useState('first')
     const [postsNextPage, setPostsNextPage] = useState(null);
     const [morePostsLoading, setMorePostsLoading] = useState(false);
     const [morePostsError, setMorePostsError] = useState(false);
-    const [polledOnce, setPolledOnce] = useState(false);
  
     // functions
     const fetchPosts = async () => {
@@ -48,10 +47,10 @@ function Profile(props) {
             var data = await res.json();
             setPosts(data["results"]);
             setPostsError(false);
+            setPostsNextPage(data["next"]);
             if (data["results"].length > 0) {
                 setPostsLoading(false);
             }
-            setPostsNextPage(data["next"]);
         }
         else {
             setPostsError(true);
@@ -136,47 +135,36 @@ function Profile(props) {
             return;
         }
 
-        // reset the current profile state
-        setProfileDataLoading(true);
-        setProfileData({});
-        setPostsLoading(true);
-        setPosts([]);
-        setPostsError(false);
-        setMorePostsError(false);
-        setMorePostsLoading(false);
-        setPostsNextPage(null);
-        setPolledOnce(false);
-
         // load the new profile and its posts
         fetchProfile();
         fetchPosts();
 
+        // clean up on unmount of effect
+        return () => {
+            // reset the current profile state
+            setProfileDataLoading(true);
+            setProfileData({});
+            setPostsLoading(true);
+            setPosts(null);
+            setPostsError(false);
+            setMorePostsError(false);
+            setMorePostsLoading(false);
+            setPostsNextPage(null);
+        }
     }, [props.address])
 
     /*
-     * If fetching user tx history for the first time,
-     * poll for new posts every 10 seconds and show a
-     * feedback message if we've polled once and posts
-     * are still empty.
+     * If a user has no posts, keep polling for new posts
+     * every 6 seconds.
      */
     useEffect(() => {
-      // return if not getting tx history for the first time
-      if (posts.length !== 0 || profileData.lastLogin !== null) {
-          setPolledOnce(false);
-          return
+      // poll every 5 seconds if user does not have posts
+      if (posts !== null && posts.length === 0) {
+          const timeout = setTimeout(() => {
+              fetchPosts();
+          }, 6000)
+          return;
       }
-
-      // poll every 10 seconds for new posts
-      const timeout = setTimeout(() => {
-          fetchPosts();
-          setPolledOnce(true);
-      }, 10000)
-
-      // clean up timeout on unmount
-      return () => {
-          clearTimeout(timeout);
-      }
-
     }, [posts]);
 
     /*
@@ -199,7 +187,7 @@ function Profile(props) {
                 : <Container fluid>
 
                     {/* Poll for new posts in background */}
-                    {(posts.length !== 0 && profileData.lastLogin !== null) &&
+                    {(posts && posts.length > 0) &&
                      <PollNewItems
                         interval={30000}  // 30 seconds
                         apiFunction={apiGetPosts}
@@ -291,20 +279,11 @@ function Profile(props) {
 
             {/* Posts Section -- show placeholder or posts */}
             <Container>
-                {(polledOnce === true && posts.length === 0) &&
-                 <Row className="justify-content-center">
-                    <Col xs={6}>
-                        <p className="fs-4 mt-5 text-center">
-                            Hang on a sec...
-                        </p>
-                    </Col>
-                 </Row>
-                }
                 {postsLoading === true
                     ? <PostsPlaceholder />
                     : postsError === true
                         ? <PostsError retryAction={fetchPosts} />
-                        : posts.length === 0 && profileData.lastLogin !== null 
+                        : posts && posts.length === 0 && profileData.lastLogin !== null 
                             ? <PostsNotFound retryAction={fetchPosts} />
                             : posts.map(post => (
                                 <Post key={post.id} data={post} />
