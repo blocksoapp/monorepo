@@ -14,6 +14,7 @@ from pathlib import Path
 
 # third party imports
 from decouple import config
+import dj_database_url
 
 # our imports
 
@@ -83,15 +84,9 @@ WSGI_APPLICATION = 'blockso.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASE_URL = config('DATABASE_URL', cast=str)
 DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE', cast=str),
-        'NAME': config('DB_NAME', cast=str),
-        'USER': config('DB_USER', cast=str),
-        'PASSWORD': config('DB_PASSWORD', cast=str),
-        'HOST': config('DB_HOST', cast=str),
-        'PORT': config('DB_PORT', cast=str),
-    }
+    'default': dj_database_url.parse(DATABASE_URL)
 }
 
 
