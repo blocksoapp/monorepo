@@ -13,7 +13,7 @@ function ERC20Post({author, transfers, txHash}) {
 
             {/* card body details, shows token transfer and recipient */}
             {transfers.map((transfer, index) => (
-                <Row key={index} className="align-items-end mb-2">
+                <Row key={index} className="justify-content-center text-center my-2 fs-5">
                     {/* token image */}
                     <Col className="col-auto">
                         <Image
@@ -28,7 +28,7 @@ function ERC20Post({author, transfers, txHash}) {
 
                     {/* minted from zero address */}
                     {(transfer.from_address === zeroAddress &&
-                        transfer.to_address === author.toLowerCase()) &&
+                        transfer.to_address.toLowerCase() === author.toLowerCase()) &&
                         <Col className="col-auto">
                             <span>Minted&nbsp;
                                 {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
@@ -38,7 +38,7 @@ function ERC20Post({author, transfers, txHash}) {
 
                     {/* burned to zero address */}
                     {(transfer.to_address === zeroAddress &&
-                        transfer.from_address === author.toLowerCase()) &&
+                        transfer.from_address.toLowerCase() === author.toLowerCase()) &&
                         <Col className="col-auto">
                             <span>Burned&nbsp;
                                 {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
@@ -47,7 +47,7 @@ function ERC20Post({author, transfers, txHash}) {
                     }
 
                     {/* received by post author */}
-                    {(transfer.to_address === author.toLowerCase() &&
+                    {(transfer.to_address.toLowerCase() === author.toLowerCase() &&
                         transfer.from_address !== zeroAddress) &&
                         <Col className="col-auto">
                             <span>Received&nbsp;
@@ -59,7 +59,7 @@ function ERC20Post({author, transfers, txHash}) {
                     }
 
                     {/* sent by post author */}
-                    {(transfer.from_address === author.toLowerCase() &&
+                    {(transfer.from_address.toLowerCase() === author.toLowerCase() &&
                         transfer.to_address !== zeroAddress) &&
                         <Col className="col-auto">
                             <span>Sent&nbsp;
@@ -71,8 +71,8 @@ function ERC20Post({author, transfers, txHash}) {
                     }
 
                     {/* neither sent not received by post author */}
-                    {(transfer.from_address !== author.toLowerCase() &&
-                        transfer.to_address !== author.toLowerCase()) &&
+                    {(transfer.from_address.toLowerCase() !== author.toLowerCase() &&
+                        transfer.to_address.toLowerCase() !== author.toLowerCase()) &&
                         <Col className="col-auto">
                             <span>
                                 {formatTokenAmount(transfer.amount, transfer.decimals)} {transfer.contract_ticker}
@@ -83,19 +83,20 @@ function ERC20Post({author, transfers, txHash}) {
                             </span>
                         </Col>
                     }
+
+                    {/* link to view on etherscan */}
+                    <Row className="mt-3 fs-6">
+                        <a href={`https://etherscan.io/tx/${txHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ textDecoration: "underline 1px dotted", color: "black" }}>
+                            View on Etherscan
+                        </a>
+                    </Row>
                 </Row>
             ))}
 
             {/* show link to view on etherscan if it is a complex transaction */}
-            {transfers.length > 1 &&
-             <Row className="mt-3 text-center">
-                <a href={`https://etherscan.io/tx/${txHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: "underline 1px dotted", color: "black" }}>
-                    View on Etherscan
-                </a>
-             </Row>}
         </Card.Body>
     )
 }
