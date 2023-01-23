@@ -17,10 +17,9 @@ function MentionsInput({placeholder, text, setText, setTaggedUsers}) {
      * Calls callback with the results of the response.
      */
     const fetchSuggestedUsers = async (query, callback) => {
-        if (!query) return
         const resp = await apiGetSuggestedUsers(query);
         if (resp.ok) {
-            const results = await resp.json();
+            const results = (await resp.json()).results;
             const formatted = results.map(
                 user => ({
                     display: `0x${abbrAddress(user.address)}`,
