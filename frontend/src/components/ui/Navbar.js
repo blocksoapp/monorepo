@@ -15,7 +15,7 @@ function NavbarComponent() {
   const [searchVal, setSearchVal] = useState("");
 
   const handleSearch = () => {
-    const route = `${searchVal}/profile`;
+    const route = `${searchVal.trim()}/profile`;
     navigate(route);
     setSearchVal(""); // clear input
   };

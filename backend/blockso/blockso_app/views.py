@@ -310,6 +310,7 @@ class UserList(
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserSerializer
+    pagination_class = pagination.UserPagination
 
     def get_queryset(self):
         """
@@ -319,12 +320,8 @@ class UserList(
         # grab query param
         query = self.request.query_params.get("q", "")
 
-        # return 400 if query isn't N chars long
-        # can adjust this in the future to prevent user enumeration if needed 
-        if len(query) < 1:
-            raise ValidationError("Query must be at least 1 character.")
-
-        return UserModel.objects.filter(pk__startswith=query)
+        # grab first 20 results
+        return UserModel.objects.filter(pk__startswith=query)[:20]
 
     def get(self, request, *args, **kwargs):
         """ Return a list of users matching the query. """

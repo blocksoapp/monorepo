@@ -519,13 +519,15 @@ class ProfileTests(BaseTest):
         
         # assert 200
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.data), 1)
-        self.assertEqual(resp.data[0]["address"], self.test_signer.address)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer.address
+        )
 
-    def test_get_suggested_users_too_short(self):
+    def test_get_suggested_users_pagination(self):
         """
-        Assert that a 400 is returned when the
-        query for the users is less than the required length.
+        Assert that suggested users are paginated.
         """
         # prepare test
         self._do_login(self.test_signer)
@@ -533,12 +535,13 @@ class ProfileTests(BaseTest):
         self._do_login(self.test_signer_2)
 
         # make request
-        # query using an empty string
+        # query using an empty string to get all users
         query = ""
         resp = self.client.get(f"/api/users/?q={query}")
         
-        # assert 400
-        self.assertEqual(resp.status_code, 400)
+        # assert results are paginated
+        self.assertIn("results", resp.data)
+        self.assertIn("next", resp.data)
 
 
 class FollowTests(BaseTest):
