@@ -453,6 +453,12 @@ class PostSerializer(serializers.ModelSerializer):
         # extract any tagged users
         tagged_users = validated_data.pop("tagged_users")
 
+        # if everyone is tagged then tag all active users minus post author
+        if TaggedEveryone in tagged_users:
+            tagged_users = Profile.objects.all()\
+                .exclude(user__last_login=None)\
+                .exclude(id=author.id)
+
         # update other attributes
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -537,7 +543,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = ProfileSerializer(required=False)
     tagged_users = TaggedUsersField(
         many=True,
-        queryset=Profile.objects.all()
+        queryset=Profile.objects.all(),
+        write_only=True
     )
     numLikes = serializers.SerializerMethodField()
     likedByMe = serializers.SerializerMethodField()
@@ -576,6 +583,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
         # extract any tagged users
         tagged_users = validated_data.pop("tagged_users")
+
+        # if everyone is tagged then tag all active users minus comment author
+        if TaggedEveryone in tagged_users:
+            tagged_users = Profile.objects.all()\
+                .exclude(user__last_login=None)\
+                .exclude(id=author.id)
 
         # create Comment
         comment = Comment.objects.create(
