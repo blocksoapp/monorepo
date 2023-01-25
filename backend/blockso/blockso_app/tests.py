@@ -288,13 +288,19 @@ class BaseTest(APITestCase):
         resp = self.client.post(url)
         return resp
 
-    def _create_feed(self):
+    def _create_feed(self, name="", description="", image=""):
         """
-        Creates a Feed and adds all users to it.
+        Creates a Feed.
         """
-        feed = Feed.objects.create(name="First Users")
-        feed.profiles.set(Profile.objects.all())
-        return feed
+        url = "/api/feeds/"
+        data = {
+            "name": name,
+            "description": description,
+            "image": image
+        }
+        resp = self.client.post(url, data)
+
+        return resp
 
 
 class AuthTests(BaseTest):
@@ -2043,7 +2049,9 @@ class FeedTests(BaseTest):
         self._do_login(self.test_signer_2)
         self._create_post()
         # create a Feed and add users 1 and 2 it
-        feed = self._create_feed()
+        resp = self._create_feed()
+        feed = Feed.objects.get(id=resp.data["id"])
+        feed.following.set(Profile.objects.all())
 
         # make a request as an unauthenticated user to
         # get the posts of the created Feed
@@ -2062,6 +2070,64 @@ class FeedTests(BaseTest):
             resp.data["results"][1]["author"]["address"],
             self.test_signer.address
         )
+
+    def test_list_feeds(self):
+        """
+        Assert that any user can list all Feeds.
+        """
+        # set up test
+        # create two feeds
+        self._do_login(self.test_signer)
+        self._create_feed()
+        self._create_feed()
+
+        # make request to list feeds
+        url = "/api/feeds/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+
+    def test_create_feed(self):
+        """
+        Assert that an authenticated user can create a Feed.
+        """
+        # set up test
+        # login user
+        self._do_login(self.test_signer)
+
+        # make request to create feed
+        resp = self._create_feed(
+            name="My Feed",
+            description="An example of a feed!",
+            image=""
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.data["name"], "My Feed")
+        self.assertEqual(
+            resp.data["owner"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(resp.data["description"], "An example of a feed!")
+
+    def test_create_feed_unauthed(self):
+        """
+        Assert that an un-authenticated user cannot create a Feed.
+        """
+        # do not login
+        # make request to create feed
+        resp = self._create_feed()
+        
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    # TODO
+    # test feed list ordered by descending follower count
+    # test feed followedByMe, numFollowers, numFollowing
+
 
 
 class MyFeedTests(BaseTest):
@@ -2151,9 +2217,12 @@ class ExploreTests(BaseTest):
         """
         # set up test
         # create a feed
-        feed = self._create_feed()
-        
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(id=resp.data["id"])
+
         # make a request to the explore endpoint
+        self._do_logout()
         url = "/api/explore/"
         resp = self.client.get(url)
 

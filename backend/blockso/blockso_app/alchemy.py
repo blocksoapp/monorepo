@@ -26,7 +26,9 @@ def update_notify_webhook():
     # have followers or are part of a Feed
     logged_in = Profile.objects.all().exclude(user__last_login=None)
     have_followers = Profile.objects.all().exclude(follow_dest=None)
-    on_feed = Profile.objects.filter(feed__in=Feed.objects.all())
+    on_feed = Profile.objects.filter(
+        feeds_following_them__in=Feed.objects.all()
+    )
     profiles = logged_in | have_followers | on_feed
 
     # get addresses

@@ -177,8 +177,57 @@ class FeedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feed
-        fields = ["id", "name", "image"]
-        read_only_fields = fields
+        fields = [
+            "id", "name", "description", "image", "owner", "followedByMe",
+            "numFollowing", "numFollowers"
+        ]
+        read_only_fields = [
+            "id", "owner", "followedByMe", "numFollowers", "numFollowing"
+        ]
+
+    owner = ProfileSerializer(required=False)
+    numFollowers = serializers.SerializerMethodField("get_num_followers")
+    numFollowing = serializers.SerializerMethodField("get_num_following")
+    followedByMe = serializers.SerializerMethodField("get_followed_by_me")
+
+    def get_num_followers(self, obj):
+        """ Returns the Feed's follower count. """
+
+        return obj.followers.all().count()
+
+    def get_num_following(self, obj):
+        """ Returns the Feed's following count. """
+
+        return obj.following.all().count()
+
+    def get_followed_by_me(self, obj):
+        """ Returns whether the Feed is followed by the requestor. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return None
+
+        # get authed user
+        authed_user = request.user
+        authed_user = getattr(authed_user, "profile", None)
+
+        # check if authed user follows the Feed
+        return obj.followers.filter(id=authed_user.id).exists()
+
+    def create(self, validated_data):
+        """ Creates a Feed. """
+
+        # get user from the session
+        owner = self.context.get("request").user.profile
+
+        # create Feed
+        feed = Feed.objects.create(
+            owner=owner,
+            **validated_data
+        )
+
+        return feed
 
 
 class ERC20TransferSerializer(serializers.ModelSerializer):

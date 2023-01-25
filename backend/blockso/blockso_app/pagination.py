@@ -45,6 +45,14 @@ class PostsPagination(PageNumberPagination):
 
 class FeedPagination(PageNumberPagination):
     """
+    Pagination for listing feeds.
+    """
+    page_size = 8
+    max_page_size = 8
+
+
+class FeedItemsPagination(PageNumberPagination):
+    """
     Pagination for user's feed.
     """
     page_size = 25

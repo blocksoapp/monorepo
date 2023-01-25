@@ -39,12 +39,25 @@ class Socials(models.Model):
 
 class Feed(models.Model):
     """
-    Represents a subscription to a group of users' activity.
+    Represents a subscription to a group of profiles' activity.
     """
     name = models.CharField(blank=True, max_length=255)
+    description = models.TextField(blank=True, default="")
     image = models.URLField(blank=True, default="")
-    profiles = models.ManyToManyField(
+    owner = models.ForeignKey(
         to=Profile,
+        related_name="owned_feeds",
+        on_delete=models.CASCADE,
+        blank=False
+    )
+    following = models.ManyToManyField(
+        to=Profile,
+        related_name="feeds_following_them",
+        blank=True
+    )
+    followers = models.ManyToManyField(
+        to=Profile,
+        related_name="feeds_they_follow",
         blank=True
     )
 
@@ -223,7 +236,7 @@ class Comment(models.Model):
     class Meta:
         ordering = ["-created"]
 
-    
+
     author = models.ForeignKey(
         to=Profile,
         on_delete=models.CASCADE,

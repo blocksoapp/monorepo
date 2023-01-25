@@ -597,12 +597,31 @@ class ExploreList(views.APIView):
         return Response(status=status.HTTP_200_OK, data=body)
 
 
+class FeedCreateList(generics.ListCreateAPIView):
+    
+    """ View that supports listing feeds. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.FeedSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return a queryset of Feeds, sorted by descending follower count.
+        """
+        queryset = Feed.objects.all()\
+            .annotate(num_followers=Count('followers'))\
+            .order_by("-num_followers")
+
+        return queryset
+
+
 class FeedRetrieve(generics.ListAPIView):
 
     """ View that supports retrieving a feed. """
 
     serializer_class = serializers.PostSerializer
-    pagination_class = pagination.FeedPagination
+    pagination_class = pagination.FeedItemsPagination
 
     def get_queryset(self):
         """
@@ -610,7 +629,7 @@ class FeedRetrieve(generics.ListAPIView):
         Sort the queryset in descending chronological order.
         """
         # get profiles of feed in question
-        profiles = Feed.objects.get(pk=self.kwargs["id"]).profiles.all()
+        profiles = Feed.objects.get(pk=self.kwargs["id"]).following.all()
 
         # get all posts by those users
         queryset = Post.objects.filter(author__in=profiles)
@@ -625,7 +644,7 @@ class MyFeedList(generics.ListAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PostSerializer
-    pagination_class = pagination.FeedPagination
+    pagination_class = pagination.FeedItemsPagination
     queryset = Post.objects.all()
 
     def get_queryset(self):
