@@ -18,14 +18,14 @@ function FollowNav(props) {
   return (
     <>
       <div className="d-flex py-3 px-sm-5 justify-content-center align-items-center">
-        <div className="px-2">
+        <div className="">
           <FontAwesomeIcon
             icon={faArrowLeft}
             onClick={navigateProfile}
             className="fa-lg arrow pointer"
           />
         </div>
-        <div className="px-1">
+        <div className="">
           <PfpResolver
             address={props.address}
             imgUrl={profileData["image"]}
@@ -33,7 +33,7 @@ function FollowNav(props) {
             width="90px"
             fontSize="0.9rem"
             onClick={navigateProfile}
-            className="pointer d-flex justify-content-center mt-2"
+            className="pointer d-flex justify-content-center"
           />
           <span>
             <ClickableEnsAndAddress
