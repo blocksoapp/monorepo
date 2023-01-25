@@ -20,12 +20,17 @@ function MentionsInput({placeholder, text, setText, setTaggedUsers}) {
         const resp = await apiGetSuggestedUsers(query);
         if (resp.ok) {
             const results = (await resp.json()).results;
-            const formatted = results.map(
+            var formatted = results.map(
                 user => ({
-                    display: `0x${abbrAddress(user.address)}`,
+                    display: `@0x${abbrAddress(user.address)}`,
                     id: user.address
                 })
             );
+
+            // include @everyone when the user starts to type
+            if ("everyone".startsWith(query)) {
+                formatted.unshift({display: '@everyone', id: 'everyone'});
+            }
             return callback(formatted);
         }
     }
@@ -37,7 +42,7 @@ function MentionsInput({placeholder, text, setText, setTaggedUsers}) {
     const parseTaggedUsers = (inputText) => {
         // look for mentions pattern and capture the address
         // mentions pattern: @[__display__](__0xaddress__)
-        const regexp = /@\[[\w\.]*\]\((0x\w{40})\)/gmi;
+        const regexp = /@\[@[\w\.]*\]\((0x\w{40}|everyone)\)/gmi;
         const matches = [...inputText.matchAll(regexp)];
 
         // create array of mentioned user addresses

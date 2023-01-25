@@ -17,6 +17,7 @@ from . import alchemy
 
 
 UserModel = get_user_model()
+TaggedEveryone = "everyone"
 
 
 class SocialsSerializer(serializers.ModelSerializer):
@@ -239,6 +240,9 @@ class TaggedUsersField(serializers.RelatedField):
     def to_internal_value(self, data):
         """ Does deserialization, for writing. """
 
+        if data.lower() == TaggedEveryone:
+            return TaggedEveryone
+
         # return profile representing the tagged user
         address = Web3.toChecksumAddress(data)
         return Profile.objects.get(user_id=address)
@@ -294,7 +298,8 @@ class PostSerializer(serializers.ModelSerializer):
     )
     tagged_users = TaggedUsersField(
         many=True,
-        queryset=Profile.objects.all()
+        queryset=Profile.objects.all(),
+        write_only=True
     )
 
     def get_refTx(self, instance):
@@ -422,6 +427,12 @@ class PostSerializer(serializers.ModelSerializer):
         )
 
         # set tagged users
+        # if everyone is tagged then tag all active users minus post author
+        if TaggedEveryone in tagged_users:
+            tagged_users = Profile.objects.all()\
+                .exclude(user__last_login=None)\
+                .exclude(id=author.id)
+
         post.tagged_users.set(tagged_users)
         post.save()
 
@@ -441,6 +452,12 @@ class PostSerializer(serializers.ModelSerializer):
 
         # extract any tagged users
         tagged_users = validated_data.pop("tagged_users")
+
+        # if everyone is tagged then tag all active users minus post author
+        if TaggedEveryone in tagged_users:
+            tagged_users = Profile.objects.all()\
+                .exclude(user__last_login=None)\
+                .exclude(id=author.id)
 
         # update other attributes
         for attr, value in validated_data.items():
@@ -526,7 +543,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = ProfileSerializer(required=False)
     tagged_users = TaggedUsersField(
         many=True,
-        queryset=Profile.objects.all()
+        queryset=Profile.objects.all(),
+        write_only=True
     )
     numLikes = serializers.SerializerMethodField()
     likedByMe = serializers.SerializerMethodField()
@@ -565,6 +583,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
         # extract any tagged users
         tagged_users = validated_data.pop("tagged_users")
+
+        # if everyone is tagged then tag all active users minus comment author
+        if TaggedEveryone in tagged_users:
+            tagged_users = Profile.objects.all()\
+                .exclude(user__last_login=None)\
+                .exclude(id=author.id)
 
         # create Comment
         comment = Comment.objects.create(

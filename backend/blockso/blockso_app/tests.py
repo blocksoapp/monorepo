@@ -20,7 +20,8 @@ import rq
 # our imports
 from .jobs import alchemy_jobs, covalent_jobs
 from .models import Feed, Follow, Post, Profile, Transaction, \
-                    ERC20Transfer, ERC721Transfer
+                    ERC20Transfer, ERC721Transfer, Notification, \
+                    MentionedInCommentEvent, MentionedInPostEvent
 from .samples import alchemy_notify_samples
 from .views import get_expected_alchemy_sig
 from .web3_client import w3
@@ -1394,8 +1395,51 @@ class PostTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(
-            resp.data["tagged_users"][0]["address"],
-            tagged[0]
+            MentionedInPostEvent.objects.filter(
+                notification__user__user_id=self.test_signer.address
+            ).count(),
+            1
+        )
+
+    def test_tag_everyone_in_post(self):
+        """
+        Assert that a user can tag everyone in a post.
+        """
+        # set up test
+        # create 5 users
+        signers = self._create_users(5)
+        addresses = [signer.address for signer in signers]
+
+        # make request
+        self._do_login(signers[0])
+        tagged = ["everyone", addresses[1]]
+        resp = self._create_post(
+            tagged_users=tagged
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+
+        # assert that all users received notifications
+        notifs = Notification.objects.filter(user__user_id__in=addresses[1:])
+        self.assertEqual(notifs.count(), 4)
+        self.assertEqual(
+            MentionedInPostEvent.objects.filter(
+                notification__in=notifs
+            ).count(),
+            4
+        )
+
+        # assert that the post author did not receive a notification
+        self.assertEqual(
+            Notification.objects.filter(user__user_id=addresses[0]).count(),
+            0
+        )
+        self.assertEqual(
+            MentionedInPostEvent.objects.filter(
+                notification__user__user_id=addresses[0]
+            ).count(),
+            0
         )
 
     def test_like_unlike_post(self):
@@ -1691,7 +1735,6 @@ class CommentsTests(BaseTest):
         self.assertEqual(resp.data["id"], 1)
         self.assertEqual(resp.data["post"], 1)
         self.assertEqual(resp.data["text"], text)
-        self.assertEqual(resp.data["tagged_users"], [])
         self.assertEqual(
             resp.data["author"]["address"],
             self.test_signer.address
@@ -1734,7 +1777,53 @@ class CommentsTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.data["text"], text)
-        self.assertEqual(resp.data["tagged_users"][0]["address"], tagged[0])
+        self.assertEqual(
+            MentionedInCommentEvent.objects.filter(
+                notification__user__user_id=self.test_signer.address
+            ).count(),
+            1
+        )
+
+    def test_tag_everyone_in_comment(self):
+        """
+        Assert that a user can tag everyone in a comment.
+        """
+        # set up test
+        # create 5 users and a post
+        signers = self._create_users(5)
+        addresses = [signer.address for signer in signers]
+        self._do_login(signers[0])
+        resp = self._create_post()
+        post_id = resp.data["id"]
+
+        # make request to mention everyone in a comment
+        tagged = ["everyone", addresses[1]]
+        resp = self._create_comment(
+            post_id,
+            "hello frens",
+            tagged_users=tagged
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+
+        # assert that all users received notifications
+        notifs = Notification.objects.filter(user__user_id__in=addresses[1:])
+        self.assertEqual(notifs.count(), 4)
+        self.assertEqual(
+            MentionedInCommentEvent.objects.filter(
+                notification__in=notifs
+            ).count(),
+            4
+        )
+
+        # assert that the post author did not receive a notification
+        self.assertEqual(
+            MentionedInCommentEvent.objects.filter(
+                notification__user__user_id=addresses[0]
+            ).count(),
+            0
+        )
 
     def test_list_comments(self):
         """
