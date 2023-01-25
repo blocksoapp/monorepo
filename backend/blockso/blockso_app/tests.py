@@ -20,7 +20,8 @@ import rq
 # our imports
 from .jobs import alchemy_jobs, covalent_jobs
 from .models import Feed, Follow, Post, Profile, Transaction, \
-                    ERC20Transfer, ERC721Transfer
+                    ERC20Transfer, ERC721Transfer, Notification, \
+                    MentionedInPostEvent
 from .samples import alchemy_notify_samples
 from .views import get_expected_alchemy_sig
 from .web3_client import w3
@@ -1396,6 +1397,47 @@ class PostTests(BaseTest):
         self.assertEqual(
             resp.data["tagged_users"][0]["address"],
             tagged[0]
+        )
+
+    def test_tag_everyone_in_post(self):
+        """
+        Assert that a user can tag everyone in a post.
+        """
+        # set up test
+        # create 5 users
+        signers = self._create_users(5)
+        addresses = [signer.address for signer in signers]
+
+        # make request
+        self._do_login(signers[0])
+        tagged = ["everyone", addresses[1]]
+        resp = self._create_post(
+            tagged_users=tagged
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+
+        # assert that all users received notifications
+        notifs = Notification.objects.filter(user__user_id__in=addresses[1:])
+        self.assertEqual(notifs.count(), 4)
+        self.assertEqual(
+            MentionedInPostEvent.objects.filter(
+                notification__in=notifs
+            ).count(),
+            4
+        )
+
+        # assert that the post author did not receive a notification
+        self.assertEqual(
+            Notification.objects.filter(user__user_id=addresses[0]).count(),
+            0
+        )
+        self.assertEqual(
+            MentionedInPostEvent.objects.filter(
+                notification__user__user_id=addresses[0]
+            ).count(),
+            0
         )
 
     def test_like_unlike_post(self):
