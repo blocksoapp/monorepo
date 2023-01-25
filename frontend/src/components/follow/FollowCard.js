@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Button, Badge } from "react-bootstrap";
-import { json, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ProfileContext } from "../../contexts/ProfileContext";
 import PfpResolver from "../PfpResolver";
 import ClickableEnsAndAddress from "../ClickableEnsAndAddress";
-import { apiPostFollow, apiPostUnfollow, apiGetProfile } from "../../api";
+import { apiPostFollow, apiPostUnfollow } from "../../api";
 import "./follow-custom.css";
 
 function FollowCard(props) {

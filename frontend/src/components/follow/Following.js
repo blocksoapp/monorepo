@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import FollowNav from "./FollowNav";
 import FollowCard from "./FollowCard";
 import "./follow-custom.css";
 import { apiGetFollowing, apiGetUrl } from "../../api";
@@ -9,18 +8,18 @@ import FollowPlaceholder from "./FollowPlaceholder";
 import FollowError from "./FollowError";
 import MoreFollow from "./MoreFollow";
 
-function Following() {
+function Following({ address }) {
+  // state
   const [followingList, setFollowingList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [followingError, setFollowingError] = useState(false);
   const [followingNextPage, setFollowingNextPage] = useState(null);
   const [moreFollowingLoading, setMoreFollowingLoading] = useState(false);
   const [moreFollowingError, setMoreFollowingError] = useState(false);
-  const { urlInput } = useParams();
 
   const fetchFollowing = async () => {
     setIsLoading(true);
-    const resp = await apiGetFollowing(urlInput);
+    const resp = await apiGetFollowing(address);
     if (resp.ok) {
       const json = await resp.json();
       setFollowingList(json.results);
@@ -56,7 +55,6 @@ function Following() {
 
   return (
     <Container className="border p-0">
-      <FollowNav address={urlInput} />
       {isLoading ? (
         <FollowPlaceholder />
       ) : followingError ? (

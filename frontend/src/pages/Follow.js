@@ -45,8 +45,8 @@ function Follow() {
           <Container className="pb-5">
             <FollowNav address={urlInput} />
             <LeftTabs
-              firstTab={<Followers />}
-              secondTab={<Following />}
+              firstTab={<Followers address={urlInput} />}
+              secondTab={<Following address={urlInput} />}
               activeTab={activeLeftTab ? activeLeftTab : "first"}
             />
           </Container>
