@@ -6,9 +6,9 @@ from django.urls import path
 # our imports
 from .views import alchemy_notify_webhook, auth_nonce, auth_login, auth_logout, auth_session, \
         CommentCreateList, CommentLikeCreateListDestroy, CommentRetrieve, \
-        ExploreList, FeedCreateList, FeedRetrieve, MyFeedList, FollowCreateDestroy, \
-        FollowersList, FollowingList, NotificationListUpdate, PostCreate, \
-        PostList, PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
+        ExploreList, FeedCreateList, FeedItemsList, FeedRetrieveUpdateDestroy, MyFeedList, \
+        FollowCreateDestroy, FollowersList, FollowingList, NotificationListUpdate, \
+        PostCreate, PostList, PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
         ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
 
 
@@ -36,7 +36,8 @@ urlpatterns = [
         path("explore/", ExploreList.as_view()),
         path("feed/", MyFeedList.as_view()),
         path("feeds/", FeedCreateList.as_view()),
-        path("feeds/<int:id>/", FeedRetrieve.as_view()),
+        path("feeds/<int:id>/", FeedRetrieveUpdateDestroy.as_view()),
+        path("feeds/<int:id>/items/", FeedItemsList.as_view()),
         path("notifications/", NotificationListUpdate.as_view()),
         path("user/", UserRetrieve.as_view()),
         path("users/", UserList.as_view()),

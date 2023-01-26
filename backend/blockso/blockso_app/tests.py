@@ -2050,13 +2050,13 @@ class FeedTests(BaseTest):
         self._create_post()
         # create a Feed and add users 1 and 2 it
         resp = self._create_feed()
-        feed = Feed.objects.get(id=resp.data["id"])
+        feed = Feed.objects.get(pk=resp.data["id"])
         feed.following.set(Profile.objects.all())
 
         # make a request as an unauthenticated user to
         # get the posts of the created Feed
         self._do_logout()
-        url = f"/api/feeds/{feed.id}/"
+        url = f"/api/feeds/{feed.id}/items/"
         resp = self.client.get(url)
 
         # make assertions
@@ -2121,6 +2121,82 @@ class FeedTests(BaseTest):
         # make request to create feed
         resp = self._create_feed()
         
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_delete_feed(self):
+        """
+        Assert that the owner of a Feed can delete it.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to delete it
+        url = f"/api/feeds/{feed.id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+
+    def test_delete_feed_not_owner(self):
+        """
+        Assert that a user cannot delete a Feed they do not own.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to delete it from another user
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed.id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_update_feed(self):
+        """
+        Assert that the owner of a Feed can update its details.
+        """
+        # create a feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to update its details
+        url = f"/api/feeds/{feed.id}/"
+        data = {
+            "name": "New Name",
+            "description": "New Description",
+            "image": "https://example.com/"
+        }
+        self.client.put(url, data)
+
+        # assert that feed has updated data
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["id"], feed.id)
+        self.assertEqual(resp.data["name"], "New Name")
+        self.assertEqual(resp.data["description"], "New Description")
+        self.assertEqual(resp.data["image"], "https://example.com/")
+
+    def test_update_feed_not_owner(self):
+        """
+        Assert that a random user cannot update the details of a Feed.
+        """
+        # create a feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to update its details as another user
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed.id}/"
+        data = {"name":"", "description":"", "image":""}
+        resp = self.client.put(url, data)
+
         # make assertions
         self.assertEqual(resp.status_code, 403)
 
@@ -2219,7 +2295,7 @@ class ExploreTests(BaseTest):
         # create a feed
         self._do_login(self.test_signer)
         resp = self._create_feed()
-        feed = Feed.objects.get(id=resp.data["id"])
+        feed = Feed.objects.get(pk=resp.data["id"])
 
         # make a request to the explore endpoint
         self._do_logout()

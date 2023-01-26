@@ -616,16 +616,51 @@ class FeedCreateList(generics.ListCreateAPIView):
         return queryset
 
 
-class FeedRetrieve(generics.ListAPIView):
+class FeedRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
-    """ View that supports retrieving a feed. """
+    """ View that supports retrieving, updating, deleting a Feed. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.FeedSerializer
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def put(self, request, *args, **kwargs):
+        """ Updates a Feed with the given id. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Feed
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the Feed.")
+
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """ Deletes a Feed with the given id. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Feed
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the Feed.")
+
+        self.perform_destroy(instance)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedItemsList(generics.ListAPIView):
+
+    """ View that supports listing a Feed's items. """
 
     serializer_class = serializers.PostSerializer
     pagination_class = pagination.FeedItemsPagination
 
     def get_queryset(self):
         """
-        Return Posts of a Feed of activity for all the profiles in that feed.
+        Return Posts of a Feed for all the profiles that Feed is following.
         Sort the queryset in descending chronological order.
         """
         # get profiles of feed in question

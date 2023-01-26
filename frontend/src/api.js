@@ -92,7 +92,7 @@ export const apiGetExplore = async () => {
 
 /* Returns the response for getting the items of the given feedId. */
 export const apiGetFeed = async (feedId) => {
-  const url = `${baseAPI}/feeds/${feedId}/`;
+  const url = `${baseAPI}/feeds/${feedId}/items/`;
   const res = await fetch(url, {
     method: "GET",
     credentials: "include",
