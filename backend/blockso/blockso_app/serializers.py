@@ -178,7 +178,8 @@ class FeedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feed
         fields = [
-            "id", "name", "description", "image", "owner", "followedByMe",
+            "id", "name", "description", "image", "owner",
+            "following_editable_by_public", "followedByMe",
             "numFollowing", "numFollowers"
         ]
         read_only_fields = [
@@ -226,6 +227,7 @@ class FeedSerializer(serializers.ModelSerializer):
             owner=owner,
             **validated_data
         )
+        feed.followers.add(owner)
 
         return feed
 

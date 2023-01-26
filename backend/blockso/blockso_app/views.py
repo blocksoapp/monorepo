@@ -651,6 +651,145 @@ class FeedRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class FeedFollowCreateDestroy(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports following and unfollowing a Feed. """
+
+    permission_classes = [IsAuthenticated]
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Remove the authenticated user from the Feed's followers.
+        """
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # remove the user from the Feed's followers
+        feed.followers.remove(user)
+
+        # return 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def post(self, request, *args, **kwargs):
+        """ Signed in user follows the given Feed. """
+
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # remove the user from the Feed's followers
+        feed.followers.add(user)
+
+        # return 201 CREATED
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class FeedFollowersList(generics.ListAPIView):
+
+    """ View that supports listing the followers of a Feed. """
+
+    serializer_class = serializers.ProfileSerializer
+
+    def get_queryset(self):
+        """
+        Return Profiles that are followers of a Feed.
+        Sorts the queryset in descending chronological order.
+        """
+        # get followers of feed in question
+        queryset = Feed.objects.get(pk=self.kwargs["id"]).followers.all()
+        queryset = queryset.order_by("-id")
+
+        return queryset
+
+
+class FeedFollowingCreateDestroy(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports adding/removing a profile to/from a Feed. """
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Remove the given user from the Feed's following.
+        """
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # make sure the user is the owner, or following is editable by pulic
+        if (feed.owner != user and not feed.following_editable_by_public):
+            raise PermissionDenied(
+                "User does not own feed and feed is not editable by public."
+            )
+
+        # remove the given profile from the Feed's following
+        profile = Profile.objects.get(user_id=self.kwargs["address"])
+        feed.following.remove(profile)
+
+        # return 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def post(self, request, *args, **kwargs):
+        """ Add the given user to the Feed's following. """
+
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # make sure the user is the owner, or following is editable by pulic
+        if (feed.owner != user and not feed.following_editable_by_public):
+            raise PermissionDenied(
+                "User does not own feed and feed is not editable by public."
+            )
+
+        # add the given profile to the Feed's following
+        # create the profile if needed
+        profile_user, _ = UserModel.objects.get_or_create(
+            pk=self.kwargs["address"]
+        )
+        profile, _ = Profile.objects.get_or_create(user=profile_user)
+        feed.following.add(profile)
+
+        # return 201 CREATED
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class FeedFollowingList(generics.ListAPIView):
+
+    """ View that supports listing the following of a Feed. """
+
+    serializer_class = serializers.ProfileSerializer
+
+    def get_queryset(self):
+        """
+        Return Profiles that a Feed is following.
+        Sorts the queryset in descending chronological order.
+        """
+        # get following of feed in question
+        queryset = Feed.objects.get(pk=self.kwargs["id"]).following.all()
+        queryset = queryset.order_by("-id")
+
+        return queryset
+
+
 class FeedItemsList(generics.ListAPIView):
 
     """ View that supports listing a Feed's items. """
