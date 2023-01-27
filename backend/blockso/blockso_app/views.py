@@ -566,9 +566,11 @@ class ExploreList(views.APIView):
     def _get_feeds(self):
         """
         Return Feeds that are featured on the Explore page.
-        The current implementation returns the latest 4 feeds.
+        The current implementation returns the 4 most followed feeds.
         """
-        queryset = Feed.objects.all().order_by("-id")[:4]
+        queryset = Feed.objects.all()\
+            .annotate(num_followers=Count('followers'))\
+            .order_by("-num_followers")[:4]
 
         return serializers.FeedSerializer(queryset, many=True).data
 
@@ -607,11 +609,10 @@ class FeedCreateList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """
-        Return a queryset of Feeds, sorted by descending follower count.
+        Return a queryset of Feeds, sorted by descending chronological order.
         """
         queryset = Feed.objects.all()\
-            .annotate(num_followers=Count('followers'))\
-            .order_by("-num_followers")
+            .order_by("-id")
 
         return queryset
 
@@ -649,6 +650,26 @@ class FeedRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         self.perform_destroy(instance)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedsFollowedByMeList(generics.ListAPIView):
+    """
+    View that supports listing feeds followed by the authenticated user.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return a queryset of Feeds followed by the authenticated user,
+        sorted by descending chronological order.
+        """
+        user = self.request.user.profile
+        queryset = Feed.objects.filter(followers__in=[user]).order_by("-id")
+
+        return queryset
 
 
 class FeedFollowCreateDestroy(

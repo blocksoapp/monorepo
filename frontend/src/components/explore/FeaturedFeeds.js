@@ -1,7 +1,7 @@
 import React, { useContext, } from 'react'
 import { Container, Row } from 'react-bootstrap'
 import { UserContext } from '../../contexts/UserContext.js';
-import Feed from '../feed/Feed.js';
+import FeedThumbnail from '../feed/FeedThumbnail.js';
 
 
 function FeaturedFeeds({feeds}) {
@@ -12,14 +12,14 @@ function FeaturedFeeds({feeds}) {
     return (
         <Container>
             {feeds.map(feed => (
-                <Feed
+                <FeedThumbnail
                     key={feed.id}
-                    id={feed.id}
-                    name={feed.name}
+                    data={feed}
                 />
             ))}
         </Container>
     );
 }
+
 
 export default FeaturedFeeds;

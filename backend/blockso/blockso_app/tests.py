@@ -2111,6 +2111,34 @@ class FeedTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["count"], 2)
 
+    def test_list_feeds_followed_by_me(self):
+        """
+        Assert that an authenticated user can list feeds they follow.
+        """
+        # set up test
+        # create two feeds as user 1
+        # they are automatically followed by the creator
+        self._do_login(self.test_signer)
+        self._create_feed()
+        self._create_feed()
+
+        # create a third feed by user 2
+        self._do_login(self.test_signer_2)
+        self._create_feed()
+
+        # make request as user 1
+        self._do_login(self.test_signer)
+        url = "/api/feeds/followed-by-me/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+
+        # assert feeds are returned in descending chronological order
+        self.assertEqual(resp.data["results"][0]["id"], 2)
+        self.assertEqual(resp.data["results"][1]["id"], 1)
+
     def test_create_feed(self):
         """
         Assert that an authenticated user can create a Feed.
@@ -2403,9 +2431,9 @@ class FeedTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["count"], 2)
 
-    def test_list_feeds_ordered_by_num_followers(self):
+    def test_list_feeds_ordered_by_desc_chronological_order(self):
         """
-        Assert that listing feeds is ordered by descending follower count.
+        Assert that listing feeds is ordered by descending chronological order.
         """
         # create 2 feeds
         self._do_login(self.test_signer)
@@ -2413,11 +2441,6 @@ class FeedTests(BaseTest):
         first_id = resp.data["id"]
         resp = self._create_feed(name="Second Feed")
         second_id = resp.data["id"]
-
-        # follow second feed by another user
-        # the creator of the feed automatically follows it upon creation
-        self._do_login(self.test_signer_2)
-        self._follow_feed(second_id)
 
         # make request to list feeds
         url = f"/api/feeds/"
@@ -2564,6 +2587,35 @@ class ExploreTests(BaseTest):
                 resp.data["profiles"][i]["address"],
                 signers[9-i].address
             )
+
+    def test_explore_feeds_by_follower_count(self):
+        """
+        Assert that the 4 most followed feeds are returned.
+        """
+        # create 4 feeds
+        self._do_login(self.test_signer)
+        feeds = []
+        for i in range(4):
+            resp = self._create_feed(name=i)
+            feeds.append(resp.data["id"])
+
+        # create 4 users and follow the feeds in decreasing amounts
+        # feeds[0] gets the most follows, feeds[3] gets the least
+        signers = self._create_users(4)
+        for i in range(4):
+            self._do_login(signers[i])
+            for j in range(0, 4-i):
+                self._follow_feed(feeds[j])
+
+        # make request to explore endpoint
+        self._do_logout()
+        url = "/api/explore/"
+        resp = self.client.get(url)
+
+        # assert that the feeds are sorted
+        # from most followers to least followers
+        for i in range(4):
+            self.assertEqual(resp.data["feeds"][i]["name"], str(i))
 
 
 class NotificationTests(BaseTest):

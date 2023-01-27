@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap"
-import { apiGetFeed, apiGetMyFeed, apiGetUrl } from '../../api';
+import { apiGetFeedItems, apiGetMyFeed, apiGetUrl } from '../../api';
 import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
@@ -28,7 +28,7 @@ function Feed({ id, name }) {
     setLoadingFeedItems(true);
 
     // get feed items
-    const resp = await apiGetFeed(id);
+    const resp = await apiGetFeedItems(id);
 
     // success handling
     if (resp.status === 200) {
@@ -88,7 +88,7 @@ function Feed({ id, name }) {
             {/* Poll for new feed items in background */}
             <PollNewItems
                 interval={30000}  // 30 seconds
-                apiFunction={apiGetFeed}
+                apiFunction={apiGetFeedItems}
                 apiFunctionArgs={[id]}
                 oldItems={feedItems}
                 callback={fetchFeed}

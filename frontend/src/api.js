@@ -90,14 +90,44 @@ export const apiGetExplore = async () => {
   return res;
 };
 
-/* Returns the response for getting the items of the given feedId. */
+/* Returns the response for getting the details of the given feedId. */
 export const apiGetFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return res;
+};
+
+/* Returns the response for getting the newest feeds. */
+export const apiGetFeeds = async () => {
+  const url = `${baseAPI}/feeds/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for getting the items of the given feedId. */
+export const apiGetFeedItems = async (feedId) => {
   const url = `${baseAPI}/feeds/${feedId}/items/`;
   const res = await fetch(url, {
     method: "GET",
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response for getting the feeds the authed user follows. */
+export const apiGetFeedsFollowedByMe = async () => {
+  const url = `${baseAPI}/feeds/followed-by-me/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
 };
 
 /* Returns the response for getting the feed items of the authed user. */
@@ -221,7 +251,7 @@ export const apiPostPostLike = async (postId) => {
   return resp;
 };
 
-/* Returns the response for updating follow given an address  */
+/* Returns the response for following a given address.  */
 export const apiPostFollow = async (address) => {
   const url = `${baseAPI}/${address}/follow/`;
   const res = await fetch(url, {
@@ -232,6 +262,19 @@ export const apiPostFollow = async (address) => {
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response for following a given feed.  */
+export const apiPostFollowFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/follow/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
 };
 
 /* Returns the response for reposting an item  */
@@ -264,7 +307,7 @@ export const apiPostPost = async (data) => {
   return resp;
 };
 
-/* Returns the response for updating unfollow given an address  */
+/* Returns the response for unfollowing a given address. */
 export const apiPostUnfollow = async (address) => {
   const url = `${baseAPI}/${address}/follow/`;
   const res = await fetch(url, {
@@ -275,4 +318,17 @@ export const apiPostUnfollow = async (address) => {
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response for unfollowing a feed. */
+export const apiPostUnfollowFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/follow/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
 };

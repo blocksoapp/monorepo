@@ -73,6 +73,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         # get authed user
         authed_user = request.user
         authed_user = getattr(authed_user, "profile", None)
+        if authed_user is None:
+            return False
 
         # check if authed user follows the profile
         return Follow.objects.filter(src=authed_user, dest=obj).exists()
@@ -212,9 +214,11 @@ class FeedSerializer(serializers.ModelSerializer):
         # get authed user
         authed_user = request.user
         authed_user = getattr(authed_user, "profile", None)
+        if authed_user is None:
+            return False
 
         # check if authed user follows the Feed
-        return obj.followers.filter(id=authed_user.id).exists()
+        return obj.followers.filter(pk=authed_user.id).exists()
 
     def create(self, validated_data):
         """ Creates a Feed. """
