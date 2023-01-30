@@ -1,5 +1,5 @@
-import React, { useEffect, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { ProfileContext } from "../../contexts/ProfileContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";

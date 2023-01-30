@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
 import FollowCard from "./FollowCard";
 import "./follow-custom.css";
