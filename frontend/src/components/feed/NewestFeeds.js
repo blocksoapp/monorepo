@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Container } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { apiGetFeeds } from '../../api'
 import FeedThumbnail from "./FeedThumbnail";
+import FeedsPlaceholder from "./FeedsPlaceholder";
+import FeedError from "./FeedError";
 
 
 function NewestFeeds() {
@@ -9,7 +11,8 @@ function NewestFeeds() {
 
     // state
     const [feeds, setFeeds] = useState([]);
-    //TODO set loading and error states
+    const [feedsLoading, setFeedsLoading] = useState(true);
+    const [feedsError, setFeedsError] = useState(false);
 
     // functions
 
@@ -18,13 +21,16 @@ function NewestFeeds() {
      */
     const fetchFeeds = async () => {
         const resp = await apiGetFeeds();
-        //TODO set loading and error states
         if (resp.ok) {
             const data = await resp.json();
             setFeeds(data["results"]);
+            setFeedsLoading(false);
+            setFeedsError(false);
         }
         else {
             console.error(resp);
+            setFeedsError(true);
+            setFeedsLoading(false);
         }
     }
 
@@ -36,17 +42,33 @@ function NewestFeeds() {
      */
     useEffect(() => {
         fetchFeeds();
+
+        // clean up on component unmount
+        return () => {
+            setFeeds([]);
+            setFeedsLoading(true);
+            setFeedsError(false);
+        }
     }, [])
-    
+
 
   return (
     <Container>
-        {feeds.map(feed => (
-            <FeedThumbnail
-                key={feed.id}
-                data={feed}
-            />
-        ))}
+        {feedsLoading
+            ? <FeedsPlaceholder />
+            : feedsError
+                ? <FeedError retryAction={fetchFeeds} />
+                :   <Row>
+                        {feeds && feeds.map(feed => (
+                            <Col sm={6} key={feed.id}>
+                                <FeedThumbnail
+                                    key={feed.id}
+                                    data={feed}
+                                />
+                            </Col>
+                        ))}
+                    </Row>
+        }
     </Container>
   )
 }

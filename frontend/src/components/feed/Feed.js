@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap"
-import { apiGetFeedItems, apiGetMyFeed, apiGetUrl } from '../../api';
+import { apiGetFeedItems, apiGetUrl } from '../../api';
 import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
