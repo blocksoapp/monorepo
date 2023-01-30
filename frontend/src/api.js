@@ -14,6 +14,32 @@ export const apiDeleteCommentLike = async (postId, commentId) => {
   return resp;
 };
 
+/* Returns the response of deleting a feed.  */
+export const apiDeleteFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of making a feed unfollow a profile. */
+export const apiDeleteFeedFollowing = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for unliking the given postId by the authed user.  */
 export const apiDeletePostLike = async (postId) => {
   const url = `${baseAPI}/post/${postId}/likes/`;
@@ -251,6 +277,33 @@ export const apiPostPostLike = async (postId) => {
   return resp;
 };
 
+/* Returns the response of creating a feed.  */
+export const apiPostFeed = async (data) => {
+  const url = `${baseAPI}/feeds/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of making a feed follow a profile. */
+export const apiPostFeedFollowing = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for following a given address.  */
 export const apiPostFollow = async (address) => {
   const url = `${baseAPI}/${address}/follow/`;
@@ -326,6 +379,21 @@ export const apiPostUnfollowFeed = async (feedId) => {
   const resp = await fetch(url, {
     method: "DELETE",
     headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of updating a feed's details. */
+export const apiPutFeed = async (feedId, data) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const resp = await fetch(url, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
       "X-CSRFTOKEN": getCookie("csrftoken"),
     },
     credentials: "include",
