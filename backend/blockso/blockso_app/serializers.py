@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 # third party imports
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from rest_framework.fields import ModelField
 from rest_framework import serializers
 from web3 import Web3
 
@@ -181,7 +182,7 @@ class FeedSerializer(serializers.ModelSerializer):
         model = Feed
         fields = [
             "id", "name", "description", "image", "owner",
-            "following_editable_by_public", "followedByMe",
+            "followingEditableByPublic", "followedByMe",
             "numFollowing", "numFollowers"
         ]
         read_only_fields = [

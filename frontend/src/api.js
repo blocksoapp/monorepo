@@ -146,9 +146,30 @@ export const apiGetFeedItems = async (feedId) => {
   return res;
 };
 
+/* Returns the response for getting the profiles that a feed follows. */
+export const apiGetFeedFollowers = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/followers/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+
 /* Returns the response for getting the feeds the authed user follows. */
 export const apiGetFeedsFollowedByMe = async () => {
   const url = `${baseAPI}/feeds/followed-by-me/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for getting the profiles that a feed follows. */
+export const apiGetFeedFollowing = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/`;
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -284,6 +305,7 @@ export const apiPostFeed = async (data) => {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
+      "Content-Type": "application/json",
       "X-CSRFTOKEN": getCookie("csrftoken"),
     },
     credentials: "include",

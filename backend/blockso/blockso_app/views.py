@@ -11,7 +11,8 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ParseError, PermissionDenied, \
+    ValidationError
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -754,7 +755,7 @@ class FeedFollowingCreateDestroy(
         feed = Feed.objects.get(pk=self.kwargs["id"])
 
         # make sure the user is the owner, or following is editable by pulic
-        if (feed.owner != user and not feed.following_editable_by_public):
+        if (feed.owner != user and not feed.followingEditableByPublic):
             raise PermissionDenied(
                 "User does not own feed and feed is not editable by public."
             )
@@ -776,21 +777,25 @@ class FeedFollowingCreateDestroy(
         feed = Feed.objects.get(pk=self.kwargs["id"])
 
         # make sure the user is the owner, or following is editable by pulic
-        if (feed.owner != user and not feed.following_editable_by_public):
+        if (feed.owner != user and not feed.followingEditableByPublic):
             raise PermissionDenied(
                 "User does not own feed and feed is not editable by public."
             )
 
         # add the given profile to the Feed's following
         # create the profile if needed
-        profile_user, _ = UserModel.objects.get_or_create(
-            pk=self.kwargs["address"]
-        )
+        try:
+            address = Web3.toChecksumAddress(self.kwargs["address"])
+        except ValueError: 
+            raise ParseError("Invalid address.")
+
+        profile_user, _ = UserModel.objects.get_or_create(pk=address)
         profile, _ = Profile.objects.get_or_create(user=profile_user)
         feed.following.add(profile)
 
         # return 201 CREATED
-        return Response(status=status.HTTP_201_CREATED)
+        serializer = serializers.ProfileSerializer(profile)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
 
 class FeedFollowingList(generics.ListAPIView):
@@ -798,6 +803,7 @@ class FeedFollowingList(generics.ListAPIView):
     """ View that supports listing the following of a Feed. """
 
     serializer_class = serializers.ProfileSerializer
+    pagination_class = pagination.UserPagination
 
     def get_queryset(self):
         """

@@ -55,7 +55,7 @@ class Feed(models.Model):
         related_name="feeds_following_them",
         blank=True
     )
-    following_editable_by_public = models.BooleanField(default=False)
+    followingEditableByPublic = models.BooleanField(default=False)
     followers = models.ManyToManyField(
         to=Profile,
         related_name="feeds_they_follow",

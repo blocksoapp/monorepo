@@ -1,0 +1,7 @@
+#feed-options-dropdown::after {
+    display: none;
+}
+
+.dropdown-menu {
+    overflow: hidden!important;
+}

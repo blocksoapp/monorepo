@@ -6,6 +6,7 @@ import {
 import { UserContext } from '../../contexts/UserContext';
 import ProfilePlaceholder from '../profile/ViewProfile/ProfilePlaceholder';
 import PfpResolver from '../PfpResolver';
+import FeedOptions from './FeedOptions';
 
 
 function FeedProfile({feedId}) {
@@ -110,71 +111,79 @@ function FeedProfile({feedId}) {
                             {/* Profile picture */}
                             <Row className="justify-content-center">
                                 <Col className="col-auto">
-                                    <PfpResolver
-                                        imgUrl={profileData["image"]}
-                                        height="256px"
-                                        width="256px"
-                                        fontSize="1.75rem"
-                                    />
-                                </Col>
-                            </Row>
+                                    <Row className="justify-content-center">
+                                        <Col className="col-auto">
+                                            <PfpResolver
+                                                imgUrl={profileData["image"]}
+                                                height="256px"
+                                                width="256px"
+                                                fontSize="1.75rem"
+                                                className="justify-content-center"
+                                            />
+                                        </Col>
+                                    </Row>
 
-                            {/* feed name */}
-                            <Row className="justify-content-center mt-4">
-                                <Col className="col-auto text-center">
-                                    <h4>
-                                        {profileData["name"]}
-                                    </h4>
-                                </Col>
-                            </Row>
+                                    {/* feed name */}
+                                    <Row className="justify-content-center mt-4">
+                                        <Col className="col-auto text-center">
+                                            <h4>
+                                                {profileData["name"]}
+                                            </h4>
+                                        </Col>
+                                    </Row>
 
-                            {/* feed description */}
-                            <Row className="justify-content-center mt-3">
+                                    {/* feed description */}
+                                    <Row className="justify-content-center mt-3">
+                                        <Col className="col-auto">
+                                            <p>{profileData["description"]}</p>
+                                        </Col>
+                                    </Row>
+
+                                    {/* Follower/Following counts and Follow button */}
+                                    <Row className="justify-content-center mt-3 mb-3">
+                                        <Col className="col-auto">
+                                            <h5>
+                                                    <Badge bg="secondary" className="pointer light-hover " onClick={handleFollowerClick}>
+                                                    
+                                                        {profileData["numFollowers"]}
+                                                        {profileData["numFollowers"] === 1 ?
+                                                            " Follower" : " Followers"}
+                                                    </Badge> 
+                                            </h5>
+                                        </Col>
+                                        <Col className="col-auto">
+                                            <h5>   
+                                                    <Badge bg="secondary" className="pointer" onClick={handleFollowingClick}>
+                                                        {profileData["numFollowing"]} Following
+                                                    </Badge> 
+                                            </h5>
+                                        </Col>
+                                        <Col className="col-auto">
+                                            {user !== null && profileData["followedByMe"] === true
+                                                ? <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    onClick={handleUnfollow}
+                                                    disabled={user !== null && user["address"] === profileData["owner"] ? true : false}
+                                                >
+                                                    Unfollow
+                                                </Button> 
+                                                : <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    onClick={handleFollow}
+                                                    disabled={user !== null && user["address"] === profileData["owner"] ? true : false}
+                                                >
+                                                    Follow
+                                                </Button>
+                                            }
+                                        </Col>
+                                    </Row>
+                                </Col>
                                 <Col className="col-auto">
-                                    <p>{profileData["description"]}</p>
+                                    <FeedOptions feedId={feedId} />
                                 </Col>
                             </Row>
-
-                            {/* Follower/Following counts and Follow button */}
-                                <Row className="justify-content-center mt-3 mb-3">
-                                    <Col className="col-auto">
-                                        <h5>
-                                                <Badge bg="secondary" className="pointer light-hover " onClick={handleFollowerClick}>
-                                                
-                                                    {profileData["numFollowers"]}
-                                                    {profileData["numFollowers"] === 1 ?
-                                                        " Follower" : " Followers"}
-                                                </Badge> 
-                                        </h5>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        <h5>   
-                                                <Badge bg="secondary" className="pointer" onClick={handleFollowingClick}>
-                                                    {profileData["numFollowing"]} Following
-                                                </Badge> 
-                                        </h5>
-                                    </Col>
-                                    <Col className="col-auto">
-                                        {user !== null && profileData["followedByMe"] === true
-                                            ? <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={handleUnfollow}
-                                                disabled={user !== null && user["address"] === profileData["owner"] ? true : false}
-                                            >
-                                                Unfollow
-                                            </Button> 
-                                            : <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={handleFollow}
-                                                disabled={user !== null && user["address"] === profileData["owner"] ? true : false}
-                                            >
-                                                Follow
-                                            </Button>
-                                        }
-                                    </Col>
-                                </Row>
 
                         </Container>
                     </Container>

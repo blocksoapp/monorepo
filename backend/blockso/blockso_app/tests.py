@@ -298,7 +298,7 @@ class BaseTest(APITestCase):
             "name": name,
             "description": description,
             "image": image,
-            "following_editable_by_public": editable
+            "followingEditableByPublic": editable
         }
         resp = self.client.post(url, data)
 
@@ -2366,6 +2366,7 @@ class FeedTests(BaseTest):
         resp = self.client.post(url)
 
         # assert that the feed is now following the profile
+        self.assertEqual(resp.status_code, 201)
         self.assertTrue(
             feed.following.filter(user_id=user_3.address).exists()
         )
@@ -2377,6 +2378,45 @@ class FeedTests(BaseTest):
         self.assertFalse(
             feed.following.filter(user_id=user_3.address).exists()
         )
+
+    def test_add_remove_feed_invalid_address(self):
+        """
+        Assert that adding an invalid address to a
+        feed's following returns a 400 BAD REQUEST.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed(editable=True)
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request
+        resp = self._add_feed_following(feed.id, "invalid-address")
+
+        # make assertions
+        self.assertEqual(resp.status_code, 400)
+
+    def test_list_feed_following(self):
+        """
+        Assert that a user can list the profiles that a feed is following.
+        """
+        # create feed and make it follow user 2
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+        self._add_feed_following(feed.id, self.test_signer_2.address)
+
+        # make a request to list the profiles the feed is following
+        url = f"/api/feeds/{feed.id}/following/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer_2.address
+        )
+
 
     def test_follow_unfollow_feed(self):
         """

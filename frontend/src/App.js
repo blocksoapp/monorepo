@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import EditProfile from "./pages/EditProfile";
 import ViewProfile from "./pages/ViewProfile";
 import Feeds from "./pages/Feeds";
+import EditFeed from "./components/feed/EditFeed";
 import ViewFeed from "./components/feed/ViewFeed";
 import PostPage from "./pages/PostPage";
 import NavbarComponent from "./components/ui/Navbar";
@@ -58,6 +59,7 @@ function App(props) {
             <Route path="/home" element={<Home />}></Route>
             <Route path="/explore" element={<Explore />}></Route>
             <Route path="/edit-profile" element={<EditProfile />}></Route>
+            <Route path="/feeds/:feedId/edit" element={<EditFeed />}></Route>
             <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
             <Route path="/feeds" element={<Feeds />}></Route>
             <Route path="/:urlInput/profile/" element={<ViewProfile />}></Route>
