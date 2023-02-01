@@ -1,11 +1,3 @@
-/*
- * EditFeedFollowing is a functional react component that renders a form
- * that allows the user to edit the profiles that the feed is following.
- * The list of profiles that the feed is following is fetched from an API.
- * The user can add or remove profiles from the list.
- * Each profile in the list is stored in an input field.
- * When an input field is saved, a new input field appears below it.
- */
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Form } from "react-bootstrap";
@@ -24,7 +16,6 @@ function EditFeedFollowing() {
     // state
     const [profiles, setProfiles] = useState([]);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
 
     /*
      * Fetch the list of profiles that the feed is following.
@@ -40,8 +31,8 @@ function EditFeedFollowing() {
 
         // handle failure
         else {
-            //TODO
             console.error(resp);
+            setError("Error fetching profiles that the feed follows");
         }
     };
 
@@ -50,18 +41,26 @@ function EditFeedFollowing() {
      * Add a new profile to the list of profiles that the feed is following.
      */
     const handleSubmit = async (address) => {
+        // check if the profile is already in the list
+        if (profiles.some(profile => profile.address === address)) {
+            setError("Profile already in list");
+            return;
+        }
+
+        // add the profile to the list
         const resp = await apiPostFeedFollowing(feedId, address);
 
         // handle success
         if (resp.ok) {
             const data = await resp.json();
-            setProfiles([...profiles, data]);
+            setProfiles([data].concat(profiles));
+            setError("");
         }
 
         // handle error
         else {
-            //TODO
             console.error(resp);
+            setError("Error adding profile");
         }
     };
 
@@ -80,14 +79,19 @@ function EditFeedFollowing() {
 
         // handle error
         else {
-            //TODO
             console.error(resp);
+            setError("Error deleting profile");
         }
     };
 
     // effects
     useEffect(() => {
         fetchFeedFollowing();
+
+        return () => {
+            setProfiles([]);
+            setError("");
+        }
     }, []);
 
     // render
@@ -95,6 +99,9 @@ function EditFeedFollowing() {
         <Container>
             <h1>Edit Feed Following</h1>
             <Form>
+                {/* show error */}
+                {error && <p className="text-danger">{error}</p>}
+
                 <FeedFollowingProfileInput
                     address=""
                     handleSubmit={handleSubmit}
