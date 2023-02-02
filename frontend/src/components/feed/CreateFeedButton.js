@@ -1,11 +1,11 @@
-import React from "react";
+import { useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import CreateFeedModal from "./CreateFeedModal";
 
 
 function CreateFeedButton() {
     // show or hide modal when the button is clicked
-    const [show, setShow] = React.useState(false);
+    const [show, setShow] = useState(false);
 
 
     return (
@@ -26,4 +26,3 @@ function CreateFeedButton() {
 }
 
 export default CreateFeedButton;
-

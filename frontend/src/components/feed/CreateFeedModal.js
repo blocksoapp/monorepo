@@ -53,9 +53,3 @@ const CreateFeedModal = ({ show, setShow }) => {
 };
 
 export default CreateFeedModal;
-                    
-
-
-
-
-

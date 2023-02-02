@@ -90,8 +90,7 @@ function EditProfileForm({
     if (isSuccess === true) {
       return (
         <AlertComponent
-          isToggle={isSuccess}
-          setIsToggle={setIsSuccess}
+          show={isSuccess}
           color="success"
           heading="Success!"
           subheading="Aww yeah, you successfully made changes to your profile!

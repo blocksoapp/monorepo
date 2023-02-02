@@ -96,8 +96,8 @@ function EditFeedFollowing() {
 
     // render
     return (
-        <Container>
-            <h1>Edit Feed Following</h1>
+        <Container className="my-5">
+            <p className="fs-2 text-muted">This feed follows...</p>
             <Form>
                 {/* show error */}
                 {error && <p className="text-danger">{error}</p>}

@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, NavDropdown } from 'react-bootstrap';
+import { Button, Container, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import DeleteFeedModal from './DeleteFeedModal';
 import "./feed-option-styles.css";
 
 
 function FeedOptions({feedId}) {
     // hooks
     const navigate = useNavigate();
+
+    // state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // render
     return (
@@ -26,7 +30,14 @@ function FeedOptions({feedId}) {
             >
                 Edit Feed
             </NavDropdown.Item>
-            <NavDropdown.Item>Delete Feed</NavDropdown.Item>
+            <NavDropdown.Item onClick={() => setShowDeleteModal(true)}>
+                Delete
+            </NavDropdown.Item>
+            <DeleteFeedModal
+                feedId={feedId}
+                show={showDeleteModal}
+                setShow={setShowDeleteModal}
+            />
         </NavDropdown>
     );
 }

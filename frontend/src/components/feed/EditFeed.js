@@ -2,11 +2,12 @@ import { useEffect, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { apiGetFeed } from '../../api';
+import { UserContext } from '../../contexts/UserContext';
 import FeedDetails from './FeedDetails';
 import FeedFollowing from './FeedFollowing';
 import EditFeedDetails from './EditFeedDetails';
 import EditFeedFollowing from './EditFeedFollowing';
-import { UserContext } from '../../contexts/UserContext';
+import DeleteFeedButton from './DeleteFeedButton';
 
 
 function EditFeed() {
@@ -57,6 +58,15 @@ function EditFeed() {
                 (feed.owner.address === user.profile.address || feed.followingEditableByPublic)
                 ? <EditFeedFollowing feed={feed} />
                 : <FeedFollowing feed={feed} />
+            }
+
+            {/* Show Delete section if the user is the owner of the feed */}
+            {feed && feed.owner.address === user.profile.address &&
+                <Container>
+                    <h3>Delete Feed</h3>
+                    <p>Deleting a feed will remove it from the system. This action cannot be undone.</p>
+                    <DeleteFeedButton feedId={feed.id} />
+                </Container>
             }
         </Container>
     )

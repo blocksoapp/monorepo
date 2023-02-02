@@ -3,7 +3,7 @@ import { Button, Form, InputGroup } from 'react-bootstrap';
 import { utils as ethersUtils } from 'ethers';
 import { useEnsName, useProvider } from 'wagmi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 
 function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
@@ -151,16 +151,16 @@ function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
             </Form.Control.Feedback>
             {isChanged ? (
                 <InputGroup.Text>
-                    <Button variant="outline-secondary" onClick={handleSave}>
-                        Save
+                    <Button variant="outline-success" onClick={handleSave}>
+                        <FontAwesomeIcon icon={faCheck} />
                     </Button>
                     <Button variant="outline-secondary" onClick={handleCancel}>
-                        Cancel
+                        <FontAwesomeIcon icon={faTimes} />
                     </Button>
                 </InputGroup.Text>
             ) : (
                 <InputGroup.Text>
-                    <Button variant="outline-secondary" onClick={handleTrash}>
+                    <Button variant="outline-danger" onClick={handleTrash}>
                         <FontAwesomeIcon icon={faTrashAlt} />
                     </Button>
                 </InputGroup.Text>

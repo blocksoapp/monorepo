@@ -5,3 +5,8 @@
 .dropdown-menu {
     overflow: hidden!important;
 }
+
+.dropdown-item:active {
+    background-color: #e9ecef!important;
+}
+
