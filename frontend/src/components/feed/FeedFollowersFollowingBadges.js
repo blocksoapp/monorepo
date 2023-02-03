@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Badge, Button } from "react-bootstrap";
-import { apiPostUnfollowFeed, apiPostFollowFeed } from "../../api";
+import { apiDeleteFollowFeed, apiPostFollowFeed } from "../../api";
 
 
 function FeedFollowersFollowingBadges({ feed }) {
@@ -17,7 +17,7 @@ function FeedFollowersFollowingBadges({ feed }) {
         e.stopPropagation();
 
         // send request
-        const resp = await apiPostUnfollowFeed(feed.id);
+        const resp = await apiDeleteFollowFeed(feed.id);
 
         // handle success
         if (resp.ok) {

@@ -40,6 +40,19 @@ export const apiDeleteFeedFollowing = async (feedId, address) => {
   return resp;
 };
 
+/* Returns the response for unfollowing a feed. */
+export const apiDeleteFollowFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/follow/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for unliking the given postId by the authed user.  */
 export const apiDeletePostLike = async (postId) => {
   const url = `${baseAPI}/post/${postId}/likes/`;
@@ -136,6 +149,16 @@ export const apiGetFeeds = async () => {
   return resp;
 };
 
+/* Returns the response of getting feeds the user owns or are editable by public. */
+export const apiGetFeedsOwnedOrEditable = async () => {
+  const url = `${baseAPI}/feeds/owned-or-editable/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for getting the items of the given feedId. */
 export const apiGetFeedItems = async (feedId) => {
   const url = `${baseAPI}/feeds/${feedId}/items/`;
@@ -170,6 +193,16 @@ export const apiGetFeedsFollowedByMe = async () => {
 /* Returns the response for getting the profiles that a feed follows. */
 export const apiGetFeedFollowing = async (feedId) => {
   const url = `${baseAPI}/feeds/${feedId}/following/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of getting whether the feed follows the given address. */
+export const apiGetFeedFollowingProfile = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -393,19 +426,6 @@ export const apiPostUnfollow = async (address) => {
     credentials: "include",
   });
   return res;
-};
-
-/* Returns the response for unfollowing a feed. */
-export const apiPostUnfollowFeed = async (feedId) => {
-  const url = `${baseAPI}/feeds/${feedId}/follow/`;
-  const resp = await fetch(url, {
-    method: "DELETE",
-    headers: {
-      "X-CSRFTOKEN": getCookie("csrftoken"),
-    },
-    credentials: "include",
-  });
-  return resp;
 };
 
 /* Returns the response of updating a feed's details. */

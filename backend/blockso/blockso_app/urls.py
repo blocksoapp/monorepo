@@ -7,11 +7,12 @@ from django.urls import path
 from .views import alchemy_notify_webhook, auth_nonce, auth_login, auth_logout, auth_session, \
         CommentCreateList, CommentLikeCreateListDestroy, CommentRetrieve, \
         ExploreList, FeedCreateList, FeedsFollowedByMeList, FeedFollowersList, \
-        FeedFollowingList, FeedFollowCreateDestroy, FeedFollowingCreateDestroy, \
-        FeedItemsList, FeedRetrieveUpdateDestroy, MyFeedList, FollowCreateDestroy, \
-        FollowersList, FollowingList, NotificationListUpdate, \
-        PostCreate, PostList, PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
-        ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
+        FeedFollowingList, FeedFollowCreateDestroy, FeedFollowingCreateRetrieveDestroy, \
+        FeedsOwnedOrEditableList, FeedItemsList, FeedRetrieveUpdateDestroy, \
+        MyFeedList, FollowCreateDestroy, FollowersList, FollowingList, \
+        NotificationListUpdate, PostCreate, PostList, PostRetrieveUpdateDestroy, \
+        PostLikeCreateListDestroy, ProfileCreateRetrieveUpdate, RepostDestroy, \
+        UserList, UserRetrieve
 
 
 urlpatterns = [
@@ -39,12 +40,16 @@ urlpatterns = [
         path("feed/", MyFeedList.as_view()),
         path("feeds/", FeedCreateList.as_view()),
         path("feeds/followed-by-me/", FeedsFollowedByMeList.as_view()),
+        path("feeds/owned-or-editable/", FeedsOwnedOrEditableList.as_view()),
         path("feeds/<int:id>/", FeedRetrieveUpdateDestroy.as_view()),
         path("feeds/<int:id>/items/", FeedItemsList.as_view()),
         path("feeds/<int:id>/follow/", FeedFollowCreateDestroy.as_view()),
         path("feeds/<int:id>/followers/", FeedFollowersList.as_view()),
         path("feeds/<int:id>/following/", FeedFollowingList.as_view()),
-        path("feeds/<int:id>/following/<str:address>/", FeedFollowingCreateDestroy.as_view()),
+        path(
+            "feeds/<int:id>/following/<str:address>/",
+            FeedFollowingCreateRetrieveDestroy.as_view()
+        ),
         path("notifications/", NotificationListUpdate.as_view()),
         path("user/", UserRetrieve.as_view()),
         path("users/", UserList.as_view()),

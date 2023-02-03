@@ -14,7 +14,7 @@ function TxAddress(props) {
     // render
     return (
         <span>
-           <Link to={`/${props.address}/profile`}>
+           <Link to={`/${props.address}/profile`} onClick={(e) => e.stopPropogation()}>
                 @<EnsAndAddress address={props.address} />
            </Link>
         </span>

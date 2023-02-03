@@ -736,12 +736,15 @@ class FeedFollowersList(generics.ListAPIView):
         return queryset
 
 
-class FeedFollowingCreateDestroy(
+class FeedFollowingCreateRetrieveDestroy(
     mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     generics.GenericAPIView):
 
-    """ View that supports adding/removing a profile to/from a Feed. """
+    """
+    View that supports adding/removing/retrieving a profile to/from a Feed.
+    """
 
     permission_classes = [IsAuthenticated]
 
@@ -767,6 +770,22 @@ class FeedFollowingCreateDestroy(
 
         # return 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, *args, **kwargs):
+        """ Retrieve whether the given user is in the Feed's following. """
+    
+        feed_id = self.kwargs["id"]
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+
+        feed = Feed.objects.get(pk=feed_id)
+
+        # feed is following given address
+        if feed.following.filter(user_id=address).exists():
+            return Response(status=status.HTTP_200_OK)
+
+        # feed is not following given address
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, *args, **kwargs):
         """ Add the given user to the Feed's following. """
@@ -838,6 +857,29 @@ class FeedItemsList(generics.ListAPIView):
         queryset = queryset.order_by("-created")
 
         return queryset
+
+
+class FeedsOwnedOrEditableList(generics.ListAPIView):
+    """
+    View that supports listing feeds that are owned by
+    the authenticated user, or that are editable by public.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return a queryset of Feeds followed by the authenticated user,
+        sorted by descending chronological order.
+        """
+        user = self.request.user.profile
+        owned = Feed.objects.filter(owner=user)
+        editable = Feed.objects.filter(followingEditableByPublic=True)
+        union = owned | editable
+
+        return union
 
 
 class MyFeedList(generics.ListAPIView):

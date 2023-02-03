@@ -19,6 +19,7 @@ import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import PfpResolver from '../../PfpResolver';
 import PollNewItems from '../../feed/PollNewItems';
+import ProfileOptions from './ProfileOptions';
 
 
 function Profile(props) {
@@ -210,6 +211,9 @@ function Profile(props) {
                                     width="256px"
                                     fontSize="1.75rem"
                                 />
+                            </Col>
+                            <Col className="col-auto">
+                                <ProfileOptions profile={profileData} />
                             </Col>
                         </Row>
 

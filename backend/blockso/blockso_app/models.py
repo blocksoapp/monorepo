@@ -41,6 +41,9 @@ class Feed(models.Model):
     """
     Represents a subscription to a group of profiles' activity.
     """
+    class Meta:
+        ordering = ["-id"]
+
     name = models.CharField(blank=True, max_length=255)
     description = models.TextField(blank=True, default="")
     image = models.URLField(blank=True, default="")

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Badge, Button, Col, Container, Image, Row } from 'react-bootstrap'
-import {
-    apiGetFeed, apiPostFollowFeed, apiPostUnfollowFeed
-} from '../../api';
+import { apiGetFeed } from '../../api';
 import { UserContext } from '../../contexts/UserContext';
 import ProfilePlaceholder from '../profile/ViewProfile/ProfilePlaceholder';
 import PfpResolver from '../PfpResolver';

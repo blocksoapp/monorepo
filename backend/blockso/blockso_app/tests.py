@@ -2438,6 +2438,45 @@ class FeedTests(BaseTest):
             self.test_signer.address
         )
 
+    def test_list_feeds_owned_or_editable(self):
+        """
+        Assert that an authenticated user can list feeds they own,
+        or that are editable by public.
+        """
+        # set up test
+        # create two feeds as user 2
+        # one of them is editably by public
+        self._do_login(self.test_signer_2)
+        self._create_feed(editable=True)
+        self._create_feed(editable=False)
+
+        # create a feed owned by user 1
+        self._do_login(self.test_signer)
+        self._create_feed()
+
+        # make request as user 1 to list feeds that are owned or editable
+        url = f"/api/feeds/owned-or-editable/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["count"], 2)
+        self.assertEqual(
+            resp.data["results"][0]["owner"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(
+            resp.data["results"][0]["followingEditableByPublic"],
+            False
+        )
+        self.assertEqual(
+            resp.data["results"][1]["owner"]["address"],
+            self.test_signer_2.address
+        )
+        self.assertEqual(
+            resp.data["results"][1]["followingEditableByPublic"],
+            True
+        )
+
     def test_follow_unfollow_feed(self):
         """
         Assert that any user can follow a Feed.
@@ -2509,6 +2548,35 @@ class FeedTests(BaseTest):
         # assert that the ordering is correct
         self.assertEqual(resp.data["results"][0]["name"], "Second Feed")
         self.assertEqual(resp.data["results"][1]["name"], "First Feed")
+
+    def test_feed_following_includes_user(self):
+        """
+        Assert that a 200 is returned if the feed follows the given user.
+        Assert that a 404 if returned if the feed does not follow the user.
+        """
+        # setup
+        # create a feed and add a user to the profiles it follows
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._add_feed_following(feed_id, self.test_signer_2.address)
+
+        # make request
+        url = f"/api/feeds/{feed_id}/following/{self.test_signer_2.address}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+
+        # remove the user from the feed's following
+        self.client.delete(url)
+
+        # make request
+        url = f"/api/feeds/{feed_id}/following/{self.test_signer_2.address}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 404)
 
 
 class MyFeedTests(BaseTest):

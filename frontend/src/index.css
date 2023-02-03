@@ -43,13 +43,12 @@ code {
 .link-style:hover {
   color:#4285F4;
   text-decoration: underline;
-  text-decoration-thickness: 15%;
 }
 
 .link-active {
   text-decoration: underline;
   text-decoration-color:#00A8E8;
-  text-decoration-thickness: 20%;
+  text-decoration-thickness: 1%;
 }
 
 .arrow:hover {
