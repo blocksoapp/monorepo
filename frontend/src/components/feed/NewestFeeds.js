@@ -58,16 +58,18 @@ function NewestFeeds() {
             ? <FeedsPlaceholder />
             : feedsError
                 ? <FeedError retryAction={fetchFeeds} />
-                :   <Row>
-                        {feeds && feeds.map(feed => (
-                            <Col sm={6} key={feed.id}>
-                                <FeedThumbnail
-                                    key={feed.id}
-                                    data={feed}
-                                />
-                            </Col>
-                        ))}
-                    </Row>
+                :   <Container>
+                        <Row>
+                            {feeds && feeds.map(feed => (
+                                <Col key={feed.id} xs={12} md={6}>
+                                    <FeedThumbnail
+                                        key={feed.id}
+                                        data={feed}
+                                    />
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
         }
     </Container>
   )

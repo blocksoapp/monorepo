@@ -46,30 +46,33 @@ function EditFeed() {
 
     // render
     return (
-        <Container>
-            {/* Show EditFeedDetails if the user is the owner of the feed */}
-            {feed && feed.owner.address === user.profile.address
-                ? <EditFeedDetails feed={feed} />
-                : <FeedDetails feed={feed} />
-            }
-
-            {/* Show EditFeedFollowing if the user is the owner of the feed or the feed is editable by public */}
-            {feed && 
-                (feed.owner.address === user.profile.address || feed.followingEditableByPublic)
-                ? <EditFeedFollowing feed={feed} />
-                : <FeedFollowing feed={feed} />
-            }
-
-            {/* Show Delete section if the user is the owner of the feed */}
-            {feed && feed.owner.address === user.profile.address &&
+        !feed
+            ? (<></>)
+            : (
                 <Container>
-                    <h3>Delete Feed</h3>
-                    <p>Deleting a feed will remove it from the system. This action cannot be undone.</p>
-                    <DeleteFeedButton feedId={feed.id} />
+                    {/* Show EditFeedDetails if the user is the owner of the feed */}
+                    {feed.owner.address === user.profile.address
+                        ? <EditFeedDetails feed={feed} />
+                        : <FeedDetails feed={feed} />
+                    }
+
+                    {/* Show EditFeedFollowing if the user is the owner of the feed or the feed is editable by public */}
+                    {feed.owner.address === user.profile.address || feed.followingEditableByPublic
+                        ? <EditFeedFollowing feed={feed} />
+                        : <p className="mt-5 px-4 py-5 f-2 text-muted">Only the feed owner can choose who this feed follows.</p>
+                    }
+
+                    {/* Show Delete section if the user is the owner of the feed */}
+                    {feed.owner.address === user.profile.address &&
+                        <Container>
+                            <h3>Delete Feed</h3>
+                            <p>Deleting a feed will remove it from the system. This action cannot be undone.</p>
+                            <DeleteFeedButton feedId={feed.id} />
+                        </Container>
+                    }
                 </Container>
-            }
-        </Container>
-    )
+            )
+    );
 }
 
 
