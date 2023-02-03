@@ -1,23 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from "react-router-dom"; 
 import { Container } from "react-bootstrap";
+import BackToFeedsButton from "./BackToFeedsButton";
 import FeedProfile from "./FeedProfile";
 import Feed from "./Feed";
 
 
 function ViewFeed() {
-    // constants
+    // hooks
     const { feedId } = useParams();
 
-    // state
- 
-    // functions
-
-    // effects
-
-
+    // render
     return (
         <Container>
+            <BackToFeedsButton />
             <FeedProfile feedId={feedId} />
             <Feed id={feedId} />
         </Container>

@@ -722,6 +722,7 @@ class FeedFollowersList(generics.ListAPIView):
     """ View that supports listing the followers of a Feed. """
 
     serializer_class = serializers.ProfileSerializer
+    pagination_class = pagination.UserPagination
 
     def get_queryset(self):
         """

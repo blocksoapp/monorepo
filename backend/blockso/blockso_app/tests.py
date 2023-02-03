@@ -2417,6 +2417,26 @@ class FeedTests(BaseTest):
             self.test_signer_2.address
         )
 
+    def test_list_feed_followers(self):
+        """
+        Assert that a user can list the profiles that follow a feed.
+        """
+        # create feed, it is followed automatically by the creator
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make a request to list the profiles that follow the feed
+        url = f"/api/feeds/{feed.id}/followers/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer.address
+        )
 
     def test_follow_unfollow_feed(self):
         """

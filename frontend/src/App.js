@@ -10,6 +10,7 @@ import ViewFeed from "./components/feed/ViewFeed";
 import PostPage from "./pages/PostPage";
 import NavbarComponent from "./components/ui/Navbar";
 import { UserContext } from "./contexts/UserContext";
+import FeedFollow from "./pages/FeedFollow";
 import Follow from "./pages/Follow";
 import { useEffect } from "react";
 import { apiGetUser } from "./api";
@@ -60,6 +61,7 @@ function App(props) {
             <Route path="/explore" element={<Explore />}></Route>
             <Route path="/edit-profile" element={<EditProfile />}></Route>
             <Route path="/feeds/:feedId/edit" element={<EditFeed />}></Route>
+            <Route path="/feeds/:feedId/follow" element={<FeedFollow />}></Route>
             <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
             <Route path="/feeds" element={<Feeds />}></Route>
             <Route path="/:urlInput/profile/" element={<ViewProfile />}></Route>
