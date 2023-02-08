@@ -4,9 +4,11 @@ import { Container, Form } from "react-bootstrap";
 import {
     apiDeleteFeedFollowing,
     apiGetFeedFollowing,
+    apiGetUrl,
     apiPostFeedFollowing
 } from "../../api";
 import FeedFollowingProfileInput from "./FeedFollowingProfileInput";
+import MoreProfilesButton from "./MoreProfilesButton";
 
 
 function EditFeedFollowing() {
@@ -16,6 +18,9 @@ function EditFeedFollowing() {
     // state
     const [profiles, setProfiles] = useState([]);
     const [error, setError] = useState("");
+    const [profilesNextPage, setProfilesNextPage] = useState(null);
+    const [moreProfilesLoading, setMoreProfilesLoading] = useState(false);
+    const [moreProfilesError, setMoreProfilesError] = useState("");
 
     /*
      * Fetch the list of profiles that the feed is following.
@@ -27,6 +32,7 @@ function EditFeedFollowing() {
         if (resp.ok) {
             const data = await resp.json();
             setProfiles(data["results"]);
+            setProfilesNextPage(data["next"]);
         }
 
         // handle failure
@@ -36,6 +42,28 @@ function EditFeedFollowing() {
         }
     };
 
+    /*
+     * Paginate through the profiles that the feed is following.
+     */
+    const fetchMoreFeedFollowing = async () => {
+        const resp = await apiGetUrl(profilesNextPage);
+
+        // handle success
+        if (resp.ok) {
+            const data = await resp.json();
+            setProfiles(profiles.concat(data["results"]));
+            setProfilesNextPage(data["next"]);
+            setMoreProfilesLoading(false);
+            setMoreProfilesError("");
+        }
+
+        // handle failure
+        else {
+            console.error(resp);
+            setMoreProfilesError("Error fetching profiles that the feed follows");
+            setMoreProfilesLoading(false);
+        }
+    };
 
     /*
      * Add a new profile to the list of profiles that the feed is following.
@@ -116,6 +144,17 @@ function EditFeedFollowing() {
                         handleDelete={handleDelete}
                     />
                 ))}
+
+                {/* show more profiles button */}
+                {profilesNextPage === null
+                    ? <></>
+                    : moreProfilesLoading === true
+                        ? <p>Loading...</p>
+                        : moreProfilesError !== ""
+                            ? <p className="text-danger">{moreProfilesError}</p>
+                            : <MoreProfilesButton retryAction={fetchMoreFeedFollowing} />
+                }
+
             </Form>
         </Container>
     );

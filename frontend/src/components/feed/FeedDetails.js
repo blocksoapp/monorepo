@@ -6,7 +6,7 @@ import FeedFollowersFollowingBadges from './FeedFollowersFollowingBadges';
 import FeedOptions from './FeedOptions';
 
 
-function FeedDetails({feed}) {
+function FeedDetails({feed, inEditFeed}) {
     // hooks
     const breakpoint = useBreakpoint();
 
@@ -14,9 +14,12 @@ function FeedDetails({feed}) {
     return (
         <Container>
             <Row
-                className={ (breakpoint === "lg" || breakpoint === "xl" || breakpoint === "xxl")
-                    ? "justify-content-center align-items-center"
-                    : "align-items-center"
+                className={ (breakpoint === "xs" || breakpoint === "sm" || breakpoint === "md")
+                    ? "align-items-center"
+                    : inEditFeed
+                        ? "justify-content-start align-items-center"
+                        : "justify-content-center align-items-center"
+
                 }
             >
 
@@ -39,16 +42,17 @@ function FeedDetails({feed}) {
 
                 {/* Feed Details */}
                 <Col xs="auto p-3" sm="auto px-3">
-                    <Row>
+                    <Row className="align-items-center">
                         {/* Feed Name */}
                         <Col xs="auto">
                             <p className="fs-2 mb-0">{feed.name}</p>
                         </Col>
 
                         {/* Feed Options */}
-                        <Col className="col-auto">
-                            <FeedOptions feed={feed} />
-                        </Col>
+                        {!inEditFeed &&
+                            <Col className="col-auto">
+                                <FeedOptions feed={feed} />
+                            </Col>}
                     </Row>
 
                     {/* Feed Owner */}

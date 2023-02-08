@@ -203,7 +203,7 @@ function Profile(props) {
 
                         {/* Profile picture */}
                         <Row className="justify-content-center">
-                            <Col className="col-auto">
+                            <Col className="col-auto pe-0">
                                 <PfpResolver
                                     address={props.address}
                                     imgUrl={profileData["image"]}
@@ -212,7 +212,7 @@ function Profile(props) {
                                     fontSize="1.75rem"
                                 />
                             </Col>
-                            <Col className="col-auto">
+                            <Col className="col-auto ps-0">
                                 <ProfileOptions profile={profileData} />
                             </Col>
                         </Row>

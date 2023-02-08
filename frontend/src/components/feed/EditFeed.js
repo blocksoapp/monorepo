@@ -52,7 +52,7 @@ function EditFeed() {
                     {/* Show EditFeedDetails if the user is the owner of the feed */}
                     {feed.owner.address === user.profile.address
                         ? <EditFeedDetails feed={feed} />
-                        : <FeedDetails feed={feed} />
+                        : <FeedDetails feed={feed} inEditFeed={true} />
                     }
 
                     {/* Show EditFeedFollowing if the user is the owner of the feed or the feed is editable by public */}
