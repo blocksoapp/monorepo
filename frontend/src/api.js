@@ -40,6 +40,19 @@ export const apiDeleteFeedFollowing = async (feedId, address) => {
   return resp;
 };
 
+/* Returns the response of deleting a feed's image. */
+export const apiDeleteFeedImage = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/image/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for unfollowing a feed. */
 export const apiDeleteFollowFeed = async (feedId) => {
   const url = `${baseAPI}/feeds/${feedId}/follow/`;
@@ -436,6 +449,20 @@ export const apiPutFeed = async (feedId, data) => {
     body: JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of updating a feed's image. */
+export const apiPutFeedImage = async (feedId, formData) => {
+  const url = `${baseAPI}/feeds/${feedId}/image/`;
+  const resp = await fetch(url, {
+    method: "PUT",
+    body: formData,
+    headers: {
       "X-CSRFTOKEN": getCookie("csrftoken"),
     },
     credentials: "include",

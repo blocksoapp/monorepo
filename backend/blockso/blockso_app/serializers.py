@@ -175,6 +175,15 @@ class FollowSerializer(serializers.ModelSerializer):
         return follow
 
 
+class FeedImageSerializer(serializers.Serializer):
+    """ Feed image serializer. """
+
+    class Meta:
+        fields = ["image"]
+
+    image = serializers.FileField()
+
+
 class FeedSerializer(serializers.ModelSerializer):
     """ Feed model serializer. """
 
@@ -186,7 +195,7 @@ class FeedSerializer(serializers.ModelSerializer):
             "numFollowing", "numFollowers"
         ]
         read_only_fields = [
-            "id", "owner", "followedByMe", "numFollowers", "numFollowing"
+            "id", "owner", "image", "followedByMe", "numFollowers", "numFollowing"
         ]
 
     owner = ProfileSerializer(required=False)

@@ -55,7 +55,7 @@ function EditFeedDetails({feed}) {
     // render
     return (
         <Container>
-            <h1>Edit Feed Details</h1>
+            <h1 className="mb-4">Edit Feed Details</h1>
             {success && <AlertComponent show={true} color="success" subheading="Feed updated successfully." />}
             {error && <AlertComponent show={true} color="danger" subheading="There was an error updating the feed." />}
             <FeedForm

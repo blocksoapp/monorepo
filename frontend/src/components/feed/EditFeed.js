@@ -32,7 +32,6 @@ function EditFeed() {
 
         // handle failure
         else {
-            //TODO
             console.error(resp);
         }
     }
@@ -64,7 +63,7 @@ function EditFeed() {
 
                     {/* Show Delete section if the user is the owner of the feed */}
                     {feed.owner.address === user.profile.address &&
-                        <Container>
+                        <Container className="mb-3">
                             <h3>Delete Feed</h3>
                             <p>Deleting a feed will remove it from the system. This action cannot be undone.</p>
                             <DeleteFeedButton feedId={feed.id} />

@@ -46,7 +46,7 @@ class Feed(models.Model):
 
     name = models.CharField(blank=True, max_length=255)
     description = models.TextField(blank=True, default="")
-    image = models.URLField(blank=True, default="")
+    image = models.FileField()
     owner = models.ForeignKey(
         to=Profile,
         related_name="owned_feeds",

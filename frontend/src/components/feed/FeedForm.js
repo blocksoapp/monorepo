@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import { apiPutFeedImage } from '../../api';
 import AlertComponent from '../ui/AlertComponent';
+import FIleUpload from '../profile/EditProfile/FileUpload';
+import EditFeedPfp from './EditFeedPfp';
 
 
 function FeedForm({feed, handleSubmit, handleCancel}) {
@@ -11,16 +14,15 @@ function FeedForm({feed, handleSubmit, handleCancel}) {
     const [followingEditableByPublic, setFollowingEditableByPublic] = useState(feed?.followingEditableByPublic);
     const [image, setImage] = useState(feed?.image);
 
+
+    // render
     return (
         <Form>
             {/* Image */}
-            <Form.Group className="my-2" controlId="formImage">
-                <Form.Label>Image</Form.Label>
-                <Form.Control type="text" placeholder="Enter image" value={image} onChange={(e) => setImage(e.target.value)} />
-            </Form.Group>
+            <EditFeedPfp feed={feed} image={image} setImage={setImage} />
 
             {/* Name */}
-            <Form.Group className="my-2" controlId="formName">
+            <Form.Group className="mt-4 mb-2" controlId="formName">
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" placeholder="Enter name" value={name} onChange={(e) => setName(e.target.value)} />
             </Form.Group>

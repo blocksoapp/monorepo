@@ -8,11 +8,11 @@ from .views import alchemy_notify_webhook, auth_nonce, auth_login, auth_logout, 
         CommentCreateList, CommentLikeCreateListDestroy, CommentRetrieve, \
         ExploreList, FeedCreateList, FeedsFollowedByMeList, FeedFollowersList, \
         FeedFollowingList, FeedFollowCreateDestroy, FeedFollowingCreateRetrieveDestroy, \
-        FeedsOwnedOrEditableList, FeedItemsList, FeedRetrieveUpdateDestroy, \
-        MyFeedList, FollowCreateDestroy, FollowersList, FollowingList, \
-        NotificationListUpdate, PostCreate, PostList, PostRetrieveUpdateDestroy, \
-        PostLikeCreateListDestroy, ProfileCreateRetrieveUpdate, RepostDestroy, \
-        UserList, UserRetrieve
+        FeedsOwnedOrEditableList, FeedImageUpdateDestroy, FeedItemsList, \
+        FeedRetrieveUpdateDestroy, MyFeedList, FollowCreateDestroy, \
+        FollowersList, FollowingList, NotificationListUpdate, PostCreate, \
+        PostList, PostRetrieveUpdateDestroy, PostLikeCreateListDestroy, \
+        ProfileCreateRetrieveUpdate, RepostDestroy, UserList, UserRetrieve
 
 
 urlpatterns = [
@@ -42,6 +42,7 @@ urlpatterns = [
         path("feeds/followed-by-me/", FeedsFollowedByMeList.as_view()),
         path("feeds/owned-or-editable/", FeedsOwnedOrEditableList.as_view()),
         path("feeds/<int:id>/", FeedRetrieveUpdateDestroy.as_view()),
+        path("feeds/<int:id>/image/", FeedImageUpdateDestroy.as_view()),
         path("feeds/<int:id>/items/", FeedItemsList.as_view()),
         path("feeds/<int:id>/follow/", FeedFollowCreateDestroy.as_view()),
         path("feeds/<int:id>/followers/", FeedFollowersList.as_view()),

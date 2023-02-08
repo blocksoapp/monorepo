@@ -13,6 +13,7 @@ from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, PermissionDenied, \
     ValidationError
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -651,6 +652,51 @@ class FeedRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         self.perform_destroy(instance)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedImageUpdateDestroy(
+        mixins.DestroyModelMixin,
+        mixins.UpdateModelMixin,
+        generics.GenericAPIView):
+
+    """ View that supports updating and deleting a Feed image. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedImageSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def delete(self, request, *args, **kwargs):
+        """ Removes the Feed's image. """
+
+        instance = self.get_object()
+
+        # check permissions
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the feed.")
+
+        instance.image = None
+        instance.save()
+
+        return Response(status=204)
+
+    def put(self, request, *args, **kwargs):
+        """ Updates the Feed's image with the given image data. """
+
+        file_obj = request.data["image"]
+        instance = self.get_object()
+
+        # check permissions
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the feed.")
+
+        instance.image = file_obj
+        instance.save()
+        serializer = serializers.FeedImageSerializer(instance)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class FeedsFollowedByMeList(generics.ListAPIView):

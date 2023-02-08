@@ -288,7 +288,7 @@ class BaseTest(APITestCase):
         resp = self.client.post(url)
         return resp
 
-    def _create_feed(self, name="", description="", image="", editable=False):
+    def _create_feed(self, name="", description="", editable=False):
         """
         Utility function to create a Feed.
         Returns the response of creating the feed.
@@ -297,7 +297,6 @@ class BaseTest(APITestCase):
         data = {
             "name": name,
             "description": description,
-            "image": image,
             "followingEditableByPublic": editable
         }
         resp = self.client.post(url, data)
@@ -2152,7 +2151,6 @@ class FeedTests(BaseTest):
         resp = self._create_feed(
             name="My Feed",
             description="An example of a feed!",
-            image=""
         )
 
         # make assertions
@@ -2232,7 +2230,6 @@ class FeedTests(BaseTest):
         self.assertEqual(resp.data["id"], feed.id)
         self.assertEqual(resp.data["name"], "New Name")
         self.assertEqual(resp.data["description"], "New Description")
-        self.assertEqual(resp.data["image"], "https://example.com/")
 
     def test_update_feed_not_owner(self):
         """
@@ -2578,6 +2575,9 @@ class FeedTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 404)
 
+    # TODO
+    # test creating, deleting feed images, unauthed
+
 
 class MyFeedTests(BaseTest):
     """
@@ -2678,7 +2678,7 @@ class ExploreTests(BaseTest):
         # assert that the created feed is in the featured feeds
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["feeds"][0]["name"], feed.name)
-        self.assertEqual(resp.data["feeds"][0]["image"], feed.image)
+        self.assertEqual(resp.data["feeds"][0]["image"], None)
 
     def test_explore_profiles_by_follower_count(self):
         """
