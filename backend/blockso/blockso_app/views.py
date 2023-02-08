@@ -13,7 +13,7 @@ from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, PermissionDenied, \
     ValidationError
-from rest_framework.parsers import FileUploadParser, MultiPartParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -677,8 +677,7 @@ class FeedImageUpdateDestroy(
         if instance.owner != request.user.profile:
             raise PermissionDenied("User does not own the feed.")
 
-        instance.image = None
-        instance.save()
+        instance.image.delete()
 
         return Response(status=204)
 

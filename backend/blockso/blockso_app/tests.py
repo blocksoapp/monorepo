@@ -8,6 +8,8 @@ import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
 from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
@@ -300,6 +302,22 @@ class BaseTest(APITestCase):
             "followingEditableByPublic": editable
         }
         resp = self.client.post(url, data)
+
+        return resp
+
+    def _create_feed_image(self, feed_id):
+        """
+        Utility function to create a Feed.
+        Returns the response of creating the feed.
+        """
+        url = f"/api/feeds/{feed_id}/image/"
+        fake_img = SimpleUploadedFile("test.jpg", b"", content_type="image/jpeg")
+        data = encode_multipart(data={"image": fake_img}, boundary=BOUNDARY)
+        resp = self.client.put(
+            url,
+            data,
+            content_type=MULTIPART_CONTENT
+        )
 
         return resp
 
@@ -2575,8 +2593,99 @@ class FeedTests(BaseTest):
         # make assertions
         self.assertEqual(resp.status_code, 404)
 
-    # TODO
-    # test creating, deleting feed images, unauthed
+    def test_update_feed_image(self):
+        """
+        Assert that the owner of a feed can update its image.
+        """
+        # set up test
+        self.mock_responses.add(
+            responses.POST,
+            f"{settings.NFT_STORAGE_API_URL}/upload",
+            body=json.dumps({"value": {"cid": "fakecid"}})
+        )
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data['id']
+
+        # make request to upload image
+        url = f"/api/feeds/{feed_id}/image/"
+        fake_img = SimpleUploadedFile("test.jpg", b"", content_type="image/jpeg")
+        data = encode_multipart(data={"image": fake_img}, boundary=BOUNDARY)
+        resp = self.client.put(
+            url,
+            data,
+            content_type=MULTIPART_CONTENT
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertIn("fakecid", resp.data["image"]) 
+
+    def test_update_feed_image_not_owned(self):
+        """
+        Assert that a user cannot delete another user's feed image.
+        """
+        # create feed as user 1
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+
+        # make request to update feed image as user 2
+        self._do_login(self.test_signer_2)
+        resp = self._create_feed_image(feed_id)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+        
+    def test_delete_feed_image(self):
+        """
+        Assert that deleting a feed owner can delete its image.
+        """
+        # set up test
+        self.mock_responses.add(
+            responses.POST,
+            f"{settings.NFT_STORAGE_API_URL}/upload",
+            body=json.dumps({"value": {"cid": "fakecid"}})
+        )
+        self.mock_responses.add(
+            responses.DELETE,
+            f"{settings.NFT_STORAGE_API_URL}/fakecid",
+        )
+
+        # create feed and image
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._create_feed_image(feed_id)
+
+        # make request to delete feed image
+        url = f"/api/feeds/{feed_id}/image/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+        url = f"/api/feeds/{feed_id}/"
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["image"], None)
+
+    def test_delete_feed_image_not_owned(self):
+        """
+        Assert that deleting a feed owner can delete its image.
+        """
+        # create feed as user 1
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+
+        # delete feed image as user 2
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed_id}/image/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
 
 
 class MyFeedTests(BaseTest):
