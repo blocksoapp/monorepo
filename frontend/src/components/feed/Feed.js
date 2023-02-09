@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap"
+import { Col, Container, Row } from "react-bootstrap"
 import { apiGetFeedItems, apiGetUrl } from '../../api';
+import PaginateScroll from '../ui/PaginateScroll';
 import NewPost from '../posts/NewPost.js';
 import Post from '../posts/Post.js'; 
 import PostsError from '../posts/PostsError';
@@ -111,14 +112,15 @@ function Feed({ id, name }) {
             }
 
             {/* More Feed Items Link (pagination) */}
-            {feedItemsNextPage === null || loadingFeedItems
-                ? <></>
-                : moreFeedItemsLoading === true
-                    ? <PostsPlaceholder />
-                    : moreFeedItemsError === true
-                        ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <MoreFeedItems action={fetchMoreFeedItems} />
-            }
+            <Row className="justify-content-center">
+                <Col className="col-auto">
+                    <PaginateScroll
+                        url={feedItemsNextPage}
+                        items={feedItems}
+                        callback={setFeedItems}
+                    />
+                </Col>
+            </Row>
 
         </Container>
     );
