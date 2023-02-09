@@ -58,7 +58,7 @@ function EditFeed() {
                     {/* Show EditFeedFollowing if the user is the owner of the feed or the feed is editable by public */}
                     {feed.owner.address === user.profile.address || feed.followingEditableByPublic
                         ? <EditFeedFollowing feed={feed} />
-                        : <p className="mt-5 px-4 py-5 f-2 text-muted">Only the feed owner can choose who this feed follows.</p>
+                        : <p className="mt-5 px-4 py-5 f-2 text-muted">The feed creator does not allow the public to edit this feed.</p>
                     }
 
                     {/* Show Delete section if the user is the owner of the feed */}
