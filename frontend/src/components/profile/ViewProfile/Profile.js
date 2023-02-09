@@ -49,9 +49,7 @@ function Profile(props) {
             setPosts(data["results"]);
             setPostsError(false);
             setPostsNextPage(data["next"]);
-            if (data["results"].length > 0) {
-                setPostsLoading(false);
-            }
+            setPostsLoading(false);
         }
         else {
             setPostsError(true);

@@ -6,7 +6,7 @@ import FIleUpload from '../profile/EditProfile/FileUpload';
 import EditFeedPfp from './EditFeedPfp';
 
 
-function FeedForm({feed, handleSubmit, handleCancel}) {
+function FeedForm({feed, handleSubmit, handleCancel, isCreate}) {
 
     // state
     const [name, setName] = useState(feed?.name);
@@ -18,8 +18,8 @@ function FeedForm({feed, handleSubmit, handleCancel}) {
     // render
     return (
         <Form>
-            {/* Image */}
-            <EditFeedPfp feed={feed} image={image} setImage={setImage} />
+            {/* Image only shown in Edit Mode */}
+            {!isCreate && <EditFeedPfp feed={feed} image={image} setImage={setImage} />}
 
             {/* Name */}
             <Form.Group className="mt-4 mb-2" controlId="formName">

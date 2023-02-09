@@ -6,7 +6,7 @@ import FeedFollowersFollowingBadges from './FeedFollowersFollowingBadges';
 import FeedOptions from './FeedOptions';
 
 
-function FeedDetails({feed, inEditFeed}) {
+function FeedDetails({feed, inEditFeed, inThumbnail}) {
     // hooks
     const breakpoint = useBreakpoint();
 
@@ -45,7 +45,13 @@ function FeedDetails({feed, inEditFeed}) {
                     <Row className="align-items-center">
                         {/* Feed Name */}
                         <Col xs="auto">
-                            <p className="fs-2 mb-0">{feed.name}</p>
+                            <p className="fs-2 mb-0">
+                                {inThumbnail
+                                    ? feed.name.length > 14
+                                        ? `${feed.name.substring(0, 14)}...`
+                                        : feed.name
+                                    : feed.name}
+                            </p>
                         </Col>
 
                         {/* Feed Options */}
@@ -61,7 +67,13 @@ function FeedDetails({feed, inEditFeed}) {
                     </p>
 
                     {/* Feed Description */}
-                    <p className="my-3">{feed.description}</p>
+                    <p className="my-3">
+                        {inThumbnail
+                            ? feed.description.length > 40
+                                ? `${feed.description.substring(0, 40)}...`
+                                : feed.description
+                            : feed.description}&nbsp;
+                    </p>
 
                     {/* Feed followers/following */}
                     <FeedFollowersFollowingBadges feed={feed} />

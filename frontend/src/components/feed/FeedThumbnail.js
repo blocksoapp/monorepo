@@ -27,7 +27,7 @@ function FeedThumbnail({data}) {
         onClick={handleClick}
         style={{ cursor: "pointer"}} 
     >
-        <FeedDetails feed={data} />
+        <FeedDetails feed={data} inThumbnail={true} />
     </div>
   )
 }

@@ -10,6 +10,7 @@ import PostsPlaceholder from '../posts/PostsPlaceholder';
 import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
+import NoFeedItems from './NoFeedItems';
 
 
 function Feed({ id, name }) {
@@ -101,14 +102,13 @@ function Feed({ id, name }) {
             ? <PostsPlaceholder />
             : feedItemsError === true
                 ? <FeedError retryAction={fetchFeed} />
-                : <Container>
-                    <p className="display-5 text-center mb-5">
-                        {name}
-                    </p>
-                    {feedItems && feedItems.map(post => (
-                        <Post key={post.id} data={post} />
-                    ))}
-                </Container>
+                : feedItems.length === 0
+                    ? <NoFeedItems feedId={id} />
+                    : <Container className="py-4">
+                        {feedItems.map(post => (
+                            <Post key={post.id} data={post} />
+                        ))}
+                      </Container>
             }
 
             {/* More Feed Items Link (pagination) */}

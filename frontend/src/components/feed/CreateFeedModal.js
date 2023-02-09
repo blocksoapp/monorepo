@@ -45,6 +45,7 @@ const CreateFeedModal = ({ show, setShow }) => {
                 <FeedForm
                     handleSubmit={handleSubmit}
                     handleCancel={handleCancel}
+                    isCreate={true}
                 />
             </Modal.Body>
 
