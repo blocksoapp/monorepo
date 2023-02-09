@@ -9,6 +9,7 @@ import {
 } from "../../api";
 import FeedFollowingProfileInput from "./FeedFollowingProfileInput";
 import MoreProfilesButton from "./MoreProfilesButton";
+import PaginateButton from "../ui/PaginateButton";
 
 
 function EditFeedFollowing() {
@@ -17,10 +18,8 @@ function EditFeedFollowing() {
 
     // state
     const [profiles, setProfiles] = useState([]);
-    const [error, setError] = useState("");
     const [profilesNextPage, setProfilesNextPage] = useState(null);
-    const [moreProfilesLoading, setMoreProfilesLoading] = useState(false);
-    const [moreProfilesError, setMoreProfilesError] = useState("");
+    const [error, setError] = useState("");
 
     /*
      * Fetch the list of profiles that the feed is following.
@@ -39,29 +38,6 @@ function EditFeedFollowing() {
         else {
             console.error(resp);
             setError("Error fetching profiles that the feed follows");
-        }
-    };
-
-    /*
-     * Paginate through the profiles that the feed is following.
-     */
-    const fetchMoreFeedFollowing = async () => {
-        const resp = await apiGetUrl(profilesNextPage);
-
-        // handle success
-        if (resp.ok) {
-            const data = await resp.json();
-            setProfiles(profiles.concat(data["results"]));
-            setProfilesNextPage(data["next"]);
-            setMoreProfilesLoading(false);
-            setMoreProfilesError("");
-        }
-
-        // handle failure
-        else {
-            console.error(resp);
-            setMoreProfilesError("Error fetching profiles that the feed follows");
-            setMoreProfilesLoading(false);
         }
     };
 
@@ -118,9 +94,11 @@ function EditFeedFollowing() {
 
         return () => {
             setProfiles([]);
+            setProfilesNextPage(null);
             setError("");
         }
     }, []);
+
 
     // render
     return (
@@ -146,14 +124,13 @@ function EditFeedFollowing() {
                 ))}
 
                 {/* show more profiles button */}
-                {profilesNextPage === null
-                    ? <></>
-                    : moreProfilesLoading === true
-                        ? <p>Loading...</p>
-                        : moreProfilesError !== ""
-                            ? <p className="text-danger">{moreProfilesError}</p>
-                            : <MoreProfilesButton retryAction={fetchMoreFeedFollowing} />
-                }
+                <PaginateButton
+                    url={profilesNextPage}
+                    items={profiles}
+                    callback={setProfiles}
+                    text="Show More"
+                    variant="outline-primary"
+                />
 
             </Form>
         </Container>
