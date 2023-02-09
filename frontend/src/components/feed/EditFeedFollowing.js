@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Form } from "react-bootstrap";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import {
     apiDeleteFeedFollowing,
     apiGetFeedFollowing,
@@ -124,14 +124,17 @@ function EditFeedFollowing() {
                 ))}
 
                 {/* show more profiles button */}
-                <PaginateButton
-                    url={profilesNextPage}
-                    items={profiles}
-                    callback={setProfiles}
-                    text="Show More"
-                    variant="outline-primary"
-                />
-
+                <Row className="justify-content-start mb-3">
+                    <Col className="col-auto">
+                        <PaginateButton
+                            url={profilesNextPage}
+                            items={profiles}
+                            callback={setProfiles}
+                            text="Show More"
+                            variant="outline-primary"
+                        />
+                    </Col>
+                </Row>
             </Form>
         </Container>
     );
