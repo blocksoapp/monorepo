@@ -21,6 +21,8 @@ const DeleteFeedModal = ({ feedId, show, setShow }) => {
         if (resp.ok) {
             // take user back to the feeds page
             navigate(`/feeds`);
+            setShow(false);
+            setError("");
         }
         
         // handle error
@@ -50,7 +52,7 @@ const DeleteFeedModal = ({ feedId, show, setShow }) => {
 
                 <Form>
                     {error && <Alert variant="danger">{error}</Alert>}
-                    <Button variant="danger" className="me-1" onClick={handleDelete}>Delete</Button>
+                    <Button variant="danger" className="me-2" onClick={handleDelete}>Delete</Button>
                     <Button variant="outline-secondary" onClick={handleCancel}>Cancel</Button>
                 </Form>
             </Modal.Body>

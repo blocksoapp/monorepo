@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from "react-router-dom";
 import { Col, Container, Row } from "react-bootstrap";
 import { apiGetFeeds } from '../../../api'
 import PaginateButton from "../../ui/PaginateButton";
@@ -8,7 +9,8 @@ import FeedError from "./FeedError";
 
 
 function NewestFeeds() {
-    // constants
+    // hooks
+    const routerLocation = useLocation();
 
     // state
     const [feeds, setFeeds] = useState([]);
@@ -53,7 +55,7 @@ function NewestFeeds() {
             setFeedsLoading(true);
             setFeedsError(false);
         }
-    }, [])
+    }, [routerLocation.key])
 
 
   return (

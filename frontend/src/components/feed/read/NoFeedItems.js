@@ -16,7 +16,7 @@ function NoFeedItems({feedId}) {
                         <Row className="align-items-center">
                             <Col>
                                 <p>
-                                    This feed isn't following anyone yet. Click "Edit Feed" to add users to the feed.
+                                    Click "Edit Feed" to add users to the feed.
                                 </p>
                             </Col>
                             <Col className="col-auto">

@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom';
 import { Col, Container, Row } from "react-bootstrap";
 import { ConnectKitButton, SIWEButton } from "connectkit";
 import { apiGetFeedsFollowedByMe } from '../../../api'
@@ -12,6 +13,7 @@ import FeedError from "./FeedError";
 function FeedsFollowedByMe() {
     // hooks
     const { user } = useContext(UserContext);
+    const routerLocation = useLocation();
 
     // state
     const [feeds, setFeeds] = useState([]);
@@ -59,7 +61,7 @@ function FeedsFollowedByMe() {
             setFeedsLoading(true);
             setFeedsError(false);
         }
-    }, [])
+    }, [routerLocation.key])
     
 
   return (

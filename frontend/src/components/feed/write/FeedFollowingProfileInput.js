@@ -151,7 +151,7 @@ function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
             </Form.Control.Feedback>
             {isChanged ? (
                 <InputGroup.Text>
-                    <Button variant="outline-success" onClick={handleSave}>
+                    <Button variant="outline-success" className="me-2" onClick={handleSave}>
                         <FontAwesomeIcon icon={faCheck} />
                     </Button>
                     <Button variant="outline-secondary" onClick={handleCancel}>
