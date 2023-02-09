@@ -20,7 +20,7 @@ function SignInButton({ buttonText }) {
         heading="Session Expired"
         body="Your session has timed out. Please sign in again."
       />
-      <ConnectKitButton>
+      <ConnectKitButton label="Sign In">
         <SIWEButton />
       </ConnectKitButton>
     </div>

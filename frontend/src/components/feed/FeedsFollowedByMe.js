@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { Col, Container, Row } from "react-bootstrap";
+import { ConnectKitButton, SIWEButton } from "connectkit";
 import { apiGetFeedsFollowedByMe } from '../../api'
+import { UserContext } from "../../contexts/UserContext";
 import FeedThumbnail from "./FeedThumbnail";
 import FeedsPlaceholder from "./FeedsPlaceholder";
 import FeedError from "./FeedError";
@@ -8,7 +10,8 @@ import PaginateButton from "../ui/PaginateButton";
 
 
 function FeedsFollowedByMe() {
-    // constants
+    // hooks
+    const { user } = useContext(UserContext);
 
     // state
     const [feeds, setFeeds] = useState([]);
@@ -29,6 +32,9 @@ function FeedsFollowedByMe() {
             setFeedsNextPage(data["next"]);
             setFeedsLoading(false);
             setFeedsError(false);
+        }
+        else if (resp.status === 403) {
+            setFeedsLoading(false);
         }
         else {
             console.error(resp);
@@ -60,20 +66,34 @@ function FeedsFollowedByMe() {
     <Container>
         {feedsLoading
             ? <FeedsPlaceholder />
-            : feedsError
-                ? <FeedError retryAction={fetchFeedsFollowedByMe} />
-                :   <Container>
-                        <Row>
-                            {feeds && feeds.map(feed => (
-                                <Col xs={12} md={6} key={feed.id}>
-                                    <FeedThumbnail
-                                        key={feed.id}
-                                        data={feed}
-                                    />
-                                </Col>
-                            ))}
-                        </Row>
-                    </Container>
+            : user === null
+                ?   <Row className="justify-content-center text-center">
+                        <p className="text-muted">You are not signed in.</p>
+                        <ConnectKitButton label="Sign In">
+                            <SIWEButton />
+                        </ConnectKitButton>
+                    </Row>
+                : feedsError
+                    ? <FeedError retryAction={fetchFeedsFollowedByMe} />
+                    :   <Container>
+                            <Row>
+                                {feeds
+                                    ? feeds.length === 0
+                                        ?   <Col className="text-center">
+                                                <p className="text-muted">You are not following any feeds.</p>
+                                            </Col>
+                                        : feeds.map(feed => (
+                                            <Col xs={12} md={6} key={feed.id}>
+                                                <FeedThumbnail
+                                                    key={feed.id}
+                                                    data={feed}
+                                                />
+                                            </Col>
+                                        ))
+                                    : <></>
+                                }
+                            </Row>
+                        </Container>
         }
 
         {/* Paginate Button */}

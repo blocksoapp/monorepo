@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Badge, Button } from "react-bootstrap";
 import { apiDeleteFollowFeed, apiPostFollowFeed } from "../../api";
+import { UserContext } from "../../contexts/UserContext";
 
 
 function FeedFollowersFollowingBadges({ feed }) {
     // hooks
     const navigate = useNavigate();
+    const { user } = useContext(UserContext);
 
     // state
     const [feedData, setFeedData] = useState(feed);
@@ -106,24 +108,26 @@ function FeedFollowersFollowingBadges({ feed }) {
                 </Col>
 
                 {/* Follow / Unfollow Button */}
-                <Col className="col-auto">
-                    {feedData.followedByMe === true
-                        ?   <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={handleUnfollow}
-                            >
-                                Unfollow
-                            </Button> 
-                        :   <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={handleFollow}
-                            >
-                                Follow
-                            </Button>
-                    }
-                </Col>
+                {user !== null &&
+                    <Col className="col-auto">
+                        {feedData.followedByMe === true
+                            ?   <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleUnfollow}
+                                >
+                                    Unfollow
+                                </Button> 
+                            :   <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleFollow}
+                                >
+                                    Follow
+                                </Button>
+                        }
+                    </Col>
+                }
             </Row>
         </>
     );
