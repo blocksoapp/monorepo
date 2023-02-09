@@ -2076,7 +2076,7 @@ class FeedTests(BaseTest):
     """
     Test behavior around Feeds.
     """
-    
+
     def test_get_feed(self):
         """
         Assert that any user can get a specific feed.
@@ -2273,6 +2273,9 @@ class FeedTests(BaseTest):
         including number of followers, number of following, and
         whether it is followed by the requesting user.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create feed
         self._do_login(self.test_signer)
         resp = self._create_feed()
@@ -2304,6 +2307,9 @@ class FeedTests(BaseTest):
         Assert that a Feed owner can make the Feed follow a profile.
         Assert that a Feed owner can make the Feed unfollow a profile.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create feed
         self._do_login(self.test_signer)
         resp = self._create_feed()
@@ -2331,6 +2337,9 @@ class FeedTests(BaseTest):
         Assert that non-owners of Feeds cannot make the
         Feed follow/unfollow a profile.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create feed
         self._do_login(self.test_signer)
         resp = self._create_feed()
@@ -2369,6 +2378,9 @@ class FeedTests(BaseTest):
         Assert that any authed user can make the Feed unfollow a profile,
         if the feed is open to editing by the public.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create feed
         self._do_login(self.test_signer)
         resp = self._create_feed(editable=True)
@@ -2414,6 +2426,9 @@ class FeedTests(BaseTest):
         """
         Assert that a user can list the profiles that a feed is following.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create feed and make it follow user 2
         self._do_login(self.test_signer)
         resp = self._create_feed()
@@ -2524,6 +2539,9 @@ class FeedTests(BaseTest):
         """
         Assert that any user can list a Feed's items.
         """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create 2 users and make them create 1 post each
         self._do_login(self.test_signer)
         self._create_post()
@@ -2570,6 +2588,9 @@ class FeedTests(BaseTest):
         Assert that a 404 if returned if the feed does not follow the user.
         """
         # setup
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
         # create a feed and add a user to the profiles it follows
         self._do_login(self.test_signer)
         resp = self._create_feed()

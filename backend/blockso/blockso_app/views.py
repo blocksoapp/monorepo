@@ -27,7 +27,7 @@ import rq
 from .jobs import alchemy_jobs, covalent_jobs
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import pagination, redis_client, serializers
+from . import alchemy, pagination, redis_client, serializers
 
 
 UserModel = get_user_model()
@@ -857,6 +857,9 @@ class FeedFollowingCreateRetrieveDestroy(
         profile_user, _ = UserModel.objects.get_or_create(pk=address)
         profile, _ = Profile.objects.get_or_create(user=profile_user)
         feed.following.add(profile)
+
+        # make a request to Alchemy to update the Notify webhook
+        alchemy.update_notify_webhook()
 
         # return 201 CREATED
         serializer = serializers.ProfileSerializer(profile)
