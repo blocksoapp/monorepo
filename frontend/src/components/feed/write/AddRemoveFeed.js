@@ -11,9 +11,9 @@ import {
     apiGetFeedFollowingProfile,
     apiPostFeedFollowing,
     apiDeleteFeedFollowing
-} from '../../api';
-import FeedPfp from './FeedPfp';
-import TxAddress from '../TxAddress';
+} from '../../../api';
+import FeedPfp from '../read/FeedPfp';
+import TxAddress from '../../TxAddress';
 
 
 function AddRemoveFeed({feed, profile}) {

@@ -1,10 +1,10 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../../contexts/UserContext';
 import { Button, Container, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-import DeleteFeedModal from './DeleteFeedModal';
+import { UserContext } from '../../../contexts/UserContext';
+import DeleteFeedModal from '../write/DeleteFeedModal';
 import "./feed-option-styles.css";
 
 

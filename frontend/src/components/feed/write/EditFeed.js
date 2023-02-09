@@ -1,10 +1,10 @@
 import { useEffect, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
-import { apiGetFeed } from '../../api';
-import { UserContext } from '../../contexts/UserContext';
-import FeedDetails from './FeedDetails';
-import FeedFollowing from './FeedFollowing';
+import { apiGetFeed } from '../../../api';
+import { UserContext } from '../../../contexts/UserContext';
+import FeedDetails from '../read/FeedDetails';
+import FeedFollowing from '../read//FeedFollowing';
 import EditFeedDetails from './EditFeedDetails';
 import EditFeedFollowing from './EditFeedFollowing';
 import DeleteFeedButton from './DeleteFeedButton';

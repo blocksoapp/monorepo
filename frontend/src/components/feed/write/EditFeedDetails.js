@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import { apiPutFeed } from '../../api';
-import AlertComponent from '../ui/AlertComponent';
+import { apiPutFeed } from '../../../api';
+import AlertComponent from '../../ui/AlertComponent';
 import DeleteFeedButton from './DeleteFeedButton';
 import FeedForm from './FeedForm';
 

@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { UserContext } from "../../contexts/UserContext";
+import { UserContext } from "../../../contexts/UserContext";
 import CreateFeedModal from "./CreateFeedModal";
 
 

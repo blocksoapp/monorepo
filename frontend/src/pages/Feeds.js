@@ -1,7 +1,7 @@
 import { Col, Container, Button, Row } from "react-bootstrap";
-import CreateFeedButton from "../components/feed/CreateFeedButton";
-import FeedsFollowedByMe from "../components/feed/FeedsFollowedByMe";
-import NewestFeeds from "../components/feed/NewestFeeds";
+import CreateFeedButton from "../components/feed/write/CreateFeedButton";
+import FeedsFollowedByMe from "../components/feed/read/FeedsFollowedByMe";
+import NewestFeeds from "../components/feed/read/NewestFeeds";
 
 
 function Feeds() {

@@ -3,8 +3,8 @@ import { Button, Container, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from '../../../contexts/UserContext';
-import AddToFeedModal from '../../feed/AddToFeedModal';
-import "../../feed/feed-option-styles.css";
+import AddToFeedModal from '../../feed/write/AddToFeedModal';
+import "../../feed/read/feed-option-styles.css";
 
 
 function ProfileOptions({profile}) {

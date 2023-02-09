@@ -1,6 +1,6 @@
 import { Badge, Container, Row, Col } from 'react-bootstrap';
-import useBreakpoint from "../../hooks/useBreakpoint";
-import TxAddress from '../TxAddress';
+import useBreakpoint from "../../../hooks/useBreakpoint";
+import TxAddress from '../../TxAddress';
 import FeedPfp from './FeedPfp';
 import FeedFollowersFollowingBadges from './FeedFollowersFollowingBadges';
 import FeedOptions from './FeedOptions';

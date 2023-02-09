@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 import LeftTabs from '../components/ui/LeftTabs'
-import FeedFollowers from '../components/feed/FeedFollowers'
-import FeedFollowing from '../components/feed/FeedFollowing'
+import FeedFollowers from '../components/feed/read/FeedFollowers'
+import FeedFollowing from '../components/feed/read/FeedFollowing'
 
 
 function FeedFollow() {

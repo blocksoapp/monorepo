@@ -1,18 +1,17 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Explore from "./pages/Explore";
 import Home from "./pages/Home";
 import EditProfile from "./pages/EditProfile";
 import ViewProfile from "./pages/ViewProfile";
 import Feeds from "./pages/Feeds";
-import EditFeed from "./components/feed/EditFeed";
-import ViewFeed from "./components/feed/ViewFeed";
+import EditFeed from "./components/feed/write/EditFeed";
+import ViewFeed from "./components/feed/read/ViewFeed";
 import PostPage from "./pages/PostPage";
 import NavbarComponent from "./components/ui/Navbar";
 import { UserContext } from "./contexts/UserContext";
 import FeedFollow from "./pages/FeedFollow";
 import Follow from "./pages/Follow";
-import { useEffect } from "react";
 import { apiGetUser } from "./api";
 import { useSIWE } from "connectkit";
 

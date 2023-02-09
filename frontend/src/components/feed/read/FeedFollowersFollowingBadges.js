@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Badge, Button } from "react-bootstrap";
-import { apiDeleteFollowFeed, apiPostFollowFeed } from "../../api";
-import { UserContext } from "../../contexts/UserContext";
+import { apiDeleteFollowFeed, apiPostFollowFeed } from "../../../api";
+import { UserContext } from "../../../contexts/UserContext";
 
 
 function FeedFollowersFollowingBadges({ feed }) {

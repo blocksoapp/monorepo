@@ -6,10 +6,9 @@ import {
     apiGetFeedFollowing,
     apiGetUrl,
     apiPostFeedFollowing
-} from "../../api";
+} from "../../../api";
 import FeedFollowingProfileInput from "./FeedFollowingProfileInput";
-import MoreProfilesButton from "./MoreProfilesButton";
-import PaginateButton from "../ui/PaginateButton";
+import PaginateButton from "../../ui/PaginateButton";
 
 
 function EditFeedFollowing() {

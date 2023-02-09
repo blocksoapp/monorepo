@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
-import { apiDeleteFeed } from '../../api';
+import { apiDeleteFeed } from '../../../api';
 
 
 

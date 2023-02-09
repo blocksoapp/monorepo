@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
-import { apiPostFeed } from '../../api';
+import { apiPostFeed } from '../../../api';
 import FeedForm from './FeedForm';
 
 

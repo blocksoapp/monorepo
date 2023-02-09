@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Col, Container, Row } from "react-bootstrap";
-import { apiGetFeeds } from '../../api'
+import { apiGetFeeds } from '../../../api'
+import PaginateButton from "../../ui/PaginateButton";
 import FeedThumbnail from "./FeedThumbnail";
 import FeedsPlaceholder from "./FeedsPlaceholder";
 import FeedError from "./FeedError";
-import PaginateButton from "../ui/PaginateButton";
 
 
 function NewestFeeds() {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { apiPutFeedImage } from '../../api';
-import AlertComponent from '../ui/AlertComponent';
-import FIleUpload from '../profile/EditProfile/FileUpload';
+import { apiPutFeedImage } from '../../../api';
+import AlertComponent from '../../ui/AlertComponent';
+import FIleUpload from '../../profile/EditProfile/FileUpload';
 import EditFeedPfp from './EditFeedPfp';
 
 

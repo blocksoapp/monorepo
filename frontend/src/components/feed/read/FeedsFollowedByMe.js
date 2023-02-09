@@ -1,12 +1,12 @@
 import { useContext, useState, useEffect } from 'react'
 import { Col, Container, Row } from "react-bootstrap";
 import { ConnectKitButton, SIWEButton } from "connectkit";
-import { apiGetFeedsFollowedByMe } from '../../api'
-import { UserContext } from "../../contexts/UserContext";
+import { apiGetFeedsFollowedByMe } from '../../../api'
+import { UserContext } from "../../../contexts/UserContext";
+import PaginateButton from "../../ui/PaginateButton";
 import FeedThumbnail from "./FeedThumbnail";
 import FeedsPlaceholder from "./FeedsPlaceholder";
 import FeedError from "./FeedError";
-import PaginateButton from "../ui/PaginateButton";
 
 
 function FeedsFollowedByMe() {

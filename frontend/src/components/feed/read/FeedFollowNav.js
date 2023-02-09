@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import EnsAndAddress from '../EnsAndAddress'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import EnsAndAddress from '../../EnsAndAddress'
 
 
 function FeedFollowNav({feedId}) {

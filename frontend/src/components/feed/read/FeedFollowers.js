@@ -1,13 +1,13 @@
 import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
+import FollowCard from '../../follow/FollowCard'
+import { apiGetFeedFollowers, apiGetUrl } from '../../../api'
+import FollowPlaceholder from '../../follow/FollowPlaceholder'
+import FollowError from '../../follow/FollowError'
 import FeedFollowNav from './FeedFollowNav'
-import FollowCard from '../follow/FollowCard'
-import "../follow/follow-custom.css"
-import { apiGetFeedFollowers, apiGetUrl } from '../../api'
-import FollowPlaceholder from '../follow/FollowPlaceholder'
-import FollowError from '../follow/FollowError'
-import MoreFollow from '../follow/MoreFollow'
+import MoreFollow from '../../follow/MoreFollow'
+import "../../follow/follow-custom.css"
 
 
 function FeedFollowers() {

@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react';
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { apiDeleteFeedImage, apiPutFeedImage } from '../../api';
-import useBreakpoint from "../../hooks/useBreakpoint";
-import FeedPfp from './FeedPfp';
+import { apiDeleteFeedImage, apiPutFeedImage } from '../../../api';
+import useBreakpoint from "../../../hooks/useBreakpoint";
+import FeedPfp from '../read/FeedPfp';
 
 
 

@@ -18,7 +18,7 @@ import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import PfpResolver from '../../PfpResolver';
-import PollNewItems from '../../feed/PollNewItems';
+import PollNewItems from '../../feed/read/PollNewItems';
 import ProfileOptions from './ProfileOptions';
 
 

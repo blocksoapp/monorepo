@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap"
-import { apiGetMyFeed, apiGetUrl } from '../../api';
-import { usePageBottom } from '../../hooks/usePageBottom';
-import NewPost from '../posts/NewPost.js';
-import Post from '../posts/Post.js'; 
-import PostsError from '../posts/PostsError';
-import PostsPlaceholder from '../posts/PostsPlaceholder';
+import { Col, Container, Row } from "react-bootstrap"
+import { apiGetFeedItems, apiGetUrl } from '../../../api';
+import PaginateScroll from '../../ui/PaginateScroll';
+import NewPost from '../../posts/NewPost.js';
+import Post from '../../posts/Post.js'; 
+import PostsError from '../../posts/PostsError';
+import PostsPlaceholder from '../../posts/PostsPlaceholder';
+import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
+import NoFeedItems from './NoFeedItems';
 
 
-function MyFeed({ profileData }) {
+function Feed({ id, name }) {
   // constants
-  const routerLocation = useLocation();
-  const reachedPageBottom = usePageBottom();
 
   // state
   const [loadingFeedItems, setLoadingFeedItems] = useState(true);
@@ -25,17 +25,16 @@ function MyFeed({ profileData }) {
   const [moreFeedItemsError, setMorePostsError] = useState(false);
 
   // functions
-  const submitPostCallback = (newPost) => {
-    setFeedItems([newPost].concat(feedItems));
-  };
 
   const fetchFeed = async () => {
     setLoadingFeedItems(true);
-    const res = await apiGetMyFeed();
+
+    // get feed items
+    const resp = await apiGetFeedItems(id);
 
     // success handling
-    if (res.status === 200) {
-      var data = await res.json();
+    if (resp.status === 200) {
+      var data = await resp.json();
       setFeedItems(data["results"]);
       setFeedItemsError(false);
       setLoadingFeedItems(false);
@@ -45,7 +44,7 @@ function MyFeed({ profileData }) {
     else {
       setFeedItemsError(true);
       setLoadingFeedItems(false);
-      console.error(res);
+      console.error(resp);
     }
   };
 
@@ -83,19 +82,7 @@ function MyFeed({ profileData }) {
 
     // load the new feed items
     fetchFeed();
-  }, [routerLocation.key]);
-
-  /*
-   * Paginate once user scrolls to bottom.
-   */
-  useEffect(() => {
-    if (!reachedPageBottom) return
-    if (!feedItemsNextPage) return
-
-    // paginate the feed items
-    fetchMoreFeedItems();
-  }, [reachedPageBottom]);
-
+  }, [id]);
 
     return (
         <Container>
@@ -103,17 +90,11 @@ function MyFeed({ profileData }) {
             {/* Poll for new feed items in background */}
             <PollNewItems
                 interval={30000}  // 30 seconds
-                apiFunction={apiGetMyFeed}
-                apiFunctionArgs={[]}
+                apiFunction={apiGetFeedItems}
+                apiFunctionArgs={[id]}
                 oldItems={feedItems}
                 callback={fetchFeed}
-                text="There are new items in your feed!"
-            />
-
-            {/* New Post Form */}
-            <NewPost
-                profileData={profileData}
-                submitPostCallback={submitPostCallback}
+                text="There are new items in the feed!"
             />
 
             {/* Feed or Placeholder */}
@@ -121,25 +102,28 @@ function MyFeed({ profileData }) {
             ? <PostsPlaceholder />
             : feedItemsError === true
                 ? <FeedError retryAction={fetchFeed} />
-                : <Container>
-                    {feedItems && feedItems.map(post => (
-                        <Post key={post.id} data={post} />
-                    ))}
-                </Container>
+                : feedItems.length === 0
+                    ? <NoFeedItems feedId={id} />
+                    : <Container className="py-4">
+                        {feedItems.map(post => (
+                            <Post key={post.id} data={post} />
+                        ))}
+                      </Container>
             }
 
-            {/* Pagination loading placeholder or error*/}
-            {feedItemsNextPage === null || loadingFeedItems
-                ? <></>
-                : moreFeedItemsLoading === true
-                    ? <PostsPlaceholder />
-                    : moreFeedItemsError === true
-                        ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <></>
-            }
+            {/* More Feed Items Link (pagination) */}
+            <Row className="justify-content-center">
+                <Col className="col-auto">
+                    <PaginateScroll
+                        url={feedItemsNextPage}
+                        items={feedItems}
+                        callback={setFeedItems}
+                    />
+                </Col>
+            </Row>
 
         </Container>
     );
 }
 
-export default MyFeed;
+export default Feed;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, Container, Modal } from 'react-bootstrap';
-import { apiGetFeedsOwnedOrEditable, apiGetUrl } from '../../api';
-import { usePageBottom } from '../../hooks/usePageBottom';
+import { apiGetFeedsOwnedOrEditable, apiGetUrl } from '../../../api';
+import { usePageBottom } from '../../../hooks/usePageBottom';
 import AddRemoveFeed from './AddRemoveFeed';
 
 
