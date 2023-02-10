@@ -42,6 +42,14 @@ function NavbarComponent() {
                 My Feed
               </Nav.Link>
             )}
+            {user !== null && signedIn && (
+              <Nav.Link
+                as={Link}
+                to={`/feeds`}
+                eventKey={`/feeds`}>
+                Feeds
+              </Nav.Link>
+            )}
             <Nav.Link as={Link} to="/explore" eventKey="/explore">
               Explore
             </Nav.Link>

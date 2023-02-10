@@ -121,6 +121,10 @@ USE_I18N = True
 USE_TZ = True
 
 
+# File Storage Backend
+DEFAULT_FILE_STORAGE = 'blockso_app.backends.ipfs_nft_storage.InterPlanetaryFileSystemStorage'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -187,3 +191,9 @@ ALCHEMY_HTTPS_URL = config("ALCHEMY_HTTPS_URL", cast=str)
 ALCHEMY_WH_SIGNING_KEY = config("ALCHEMY_WH_SIGNING_KEY", cast=str)
 ALCHEMY_WH_ID = config("ALCHEMY_WH_ID", cast=str)
 ALCHEMY_NOTIFY_TOKEN = config("ALCHEMY_NOTIFY_TOKEN", cast=str)
+
+
+# nft.storage configuration
+NFT_STORAGE_API_KEY = config("NFT_STORAGE_API_KEY", cast=str)
+NFT_STORAGE_API_URL = config("NFT_STORAGE_API_URL", cast=str)
+NFT_STORAGE_GATEWAY_SUFFIX = config("NFT_STORAGE_GATEWAY_SUFFIX", cast=str)

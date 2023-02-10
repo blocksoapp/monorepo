@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 # third party imports
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from rest_framework.fields import ModelField
 from rest_framework import serializers
 from web3 import Web3
 
@@ -73,6 +74,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         # get authed user
         authed_user = request.user
         authed_user = getattr(authed_user, "profile", None)
+        if authed_user is None:
+            return False
 
         # check if authed user follows the profile
         return Follow.objects.filter(src=authed_user, dest=obj).exists()
@@ -172,13 +175,75 @@ class FollowSerializer(serializers.ModelSerializer):
         return follow
 
 
+class FeedImageSerializer(serializers.Serializer):
+    """ Feed image serializer. """
+
+    class Meta:
+        fields = ["image"]
+
+    image = serializers.FileField()
+
+
 class FeedSerializer(serializers.ModelSerializer):
     """ Feed model serializer. """
 
     class Meta:
         model = Feed
-        fields = ["id", "name", "image"]
-        read_only_fields = fields
+        fields = [
+            "id", "name", "description", "image", "owner",
+            "followingEditableByPublic", "followedByMe",
+            "numFollowing", "numFollowers"
+        ]
+        read_only_fields = [
+            "id", "owner", "image", "followedByMe", "numFollowers", "numFollowing"
+        ]
+
+    owner = ProfileSerializer(required=False)
+    numFollowers = serializers.SerializerMethodField("get_num_followers")
+    numFollowing = serializers.SerializerMethodField("get_num_following")
+    followedByMe = serializers.SerializerMethodField("get_followed_by_me")
+
+    def get_num_followers(self, obj):
+        """ Returns the Feed's follower count. """
+
+        return obj.followers.all().count()
+
+    def get_num_following(self, obj):
+        """ Returns the Feed's following count. """
+
+        return obj.following.all().count()
+
+    def get_followed_by_me(self, obj):
+        """ Returns whether the Feed is followed by the requestor. """
+
+        # handle using serializer outside of a request
+        request = self.context.get("request")
+        if request is None:
+            return None
+
+        # get authed user
+        authed_user = request.user
+        authed_user = getattr(authed_user, "profile", None)
+        if authed_user is None:
+            return False
+
+        # check if authed user follows the Feed
+        return obj.followers.filter(pk=authed_user.id).exists()
+
+    def create(self, validated_data):
+        """ Creates a Feed. """
+
+        # get user from the session
+        owner = self.context.get("request").user.profile
+
+        # create Feed
+        feed = Feed.objects.create(
+            owner=owner,
+            **validated_data
+        )
+        feed.followers.add(owner)
+
+        return feed
 
 
 class ERC20TransferSerializer(serializers.ModelSerializer):

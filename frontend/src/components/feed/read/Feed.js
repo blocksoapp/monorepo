@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap"
-import { apiGetFeed, apiGetMyFeed, apiGetUrl } from '../../api';
-import NewPost from '../posts/NewPost.js';
-import Post from '../posts/Post.js'; 
-import PostsError from '../posts/PostsError';
-import PostsPlaceholder from '../posts/PostsPlaceholder';
+import { Col, Container, Row } from "react-bootstrap"
+import { apiGetFeedItems, apiGetUrl } from '../../../api';
+import PaginateScroll from '../../ui/PaginateScroll';
+import NewPost from '../../posts/NewPost.js';
+import Post from '../../posts/Post.js'; 
+import PostsError from '../../posts/PostsError';
+import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import MoreFeedItems from './MoreFeedItems';
 import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
+import NoFeedItems from './NoFeedItems';
 
 
 function Feed({ id, name }) {
@@ -28,7 +30,7 @@ function Feed({ id, name }) {
     setLoadingFeedItems(true);
 
     // get feed items
-    const resp = await apiGetFeed(id);
+    const resp = await apiGetFeedItems(id);
 
     // success handling
     if (resp.status === 200) {
@@ -88,7 +90,7 @@ function Feed({ id, name }) {
             {/* Poll for new feed items in background */}
             <PollNewItems
                 interval={30000}  // 30 seconds
-                apiFunction={apiGetFeed}
+                apiFunction={apiGetFeedItems}
                 apiFunctionArgs={[id]}
                 oldItems={feedItems}
                 callback={fetchFeed}
@@ -100,25 +102,25 @@ function Feed({ id, name }) {
             ? <PostsPlaceholder />
             : feedItemsError === true
                 ? <FeedError retryAction={fetchFeed} />
-                : <Container>
-                    <p className="display-5 text-center mb-5">
-                        {name}
-                    </p>
-                    {feedItems && feedItems.map(post => (
-                        <Post key={post.id} data={post} />
-                    ))}
-                </Container>
+                : feedItems.length === 0
+                    ? <NoFeedItems feedId={id} />
+                    : <Container className="py-4">
+                        {feedItems.map(post => (
+                            <Post key={post.id} data={post} />
+                        ))}
+                      </Container>
             }
 
             {/* More Feed Items Link (pagination) */}
-            {feedItemsNextPage === null || loadingFeedItems
-                ? <></>
-                : moreFeedItemsLoading === true
-                    ? <PostsPlaceholder />
-                    : moreFeedItemsError === true
-                        ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <MoreFeedItems action={fetchMoreFeedItems} />
-            }
+            <Row className="justify-content-center">
+                <Col className="col-auto">
+                    <PaginateScroll
+                        url={feedItemsNextPage}
+                        items={feedItems}
+                        callback={setFeedItems}
+                    />
+                </Col>
+            </Row>
 
         </Container>
     );

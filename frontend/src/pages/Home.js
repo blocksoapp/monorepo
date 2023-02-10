@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Container } from "react-bootstrap";
-import MyFeed from "../components/feed/MyFeed";
+import MyFeed from "../components/feed/read/MyFeed";
 import { UserContext } from "../contexts/UserContext";
 import { useSIWE } from "connectkit";
 

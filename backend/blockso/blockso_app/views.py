@@ -11,7 +11,9 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ParseError, PermissionDenied, \
+    ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -25,7 +27,7 @@ import rq
 from .jobs import alchemy_jobs, covalent_jobs
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import pagination, redis_client, serializers
+from . import alchemy, pagination, redis_client, serializers
 
 
 UserModel = get_user_model()
@@ -566,9 +568,11 @@ class ExploreList(views.APIView):
     def _get_feeds(self):
         """
         Return Feeds that are featured on the Explore page.
-        The current implementation returns the latest 4 feeds.
+        The current implementation returns the 4 most followed feeds.
         """
-        queryset = Feed.objects.all().order_by("-id")[:4]
+        queryset = Feed.objects.all()\
+            .annotate(num_followers=Count('followers'))\
+            .order_by("-num_followers")[:4]
 
         return serializers.FeedSerializer(queryset, many=True).data
 
@@ -597,20 +601,304 @@ class ExploreList(views.APIView):
         return Response(status=status.HTTP_200_OK, data=body)
 
 
-class FeedRetrieve(generics.ListAPIView):
+class FeedCreateList(generics.ListCreateAPIView):
+    
+    """ View that supports listing feeds. """
 
-    """ View that supports retrieving a feed. """
-
-    serializer_class = serializers.PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.FeedSerializer
     pagination_class = pagination.FeedPagination
 
     def get_queryset(self):
         """
-        Return Posts of a Feed of activity for all the profiles in that feed.
+        Return a queryset of Feeds, sorted by descending chronological order.
+        """
+        queryset = Feed.objects.all()\
+            .order_by("-id")
+
+        return queryset
+
+
+class FeedRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """ View that supports retrieving, updating, deleting a Feed. """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = serializers.FeedSerializer
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def put(self, request, *args, **kwargs):
+        """ Updates a Feed with the given id. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Feed
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the Feed.")
+
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """ Deletes a Feed with the given id. """
+
+        instance = self.get_object()
+
+        # return 403 if user does not own the Feed
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the Feed.")
+
+        self.perform_destroy(instance)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedImageUpdateDestroy(
+        mixins.DestroyModelMixin,
+        mixins.UpdateModelMixin,
+        generics.GenericAPIView):
+
+    """ View that supports updating and deleting a Feed image. """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedImageSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def delete(self, request, *args, **kwargs):
+        """ Removes the Feed's image. """
+
+        instance = self.get_object()
+
+        # check permissions
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the feed.")
+
+        instance.image.delete()
+
+        return Response(status=204)
+
+    def put(self, request, *args, **kwargs):
+        """ Updates the Feed's image with the given image data. """
+
+        file_obj = request.data["image"]
+        instance = self.get_object()
+
+        # check permissions
+        if instance.owner != request.user.profile:
+            raise PermissionDenied("User does not own the feed.")
+
+        instance.image = file_obj
+        instance.save()
+        serializer = serializers.FeedImageSerializer(instance)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class FeedsFollowedByMeList(generics.ListAPIView):
+    """
+    View that supports listing feeds followed by the authenticated user.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return a queryset of Feeds followed by the authenticated user,
+        sorted by descending chronological order.
+        """
+        user = self.request.user.profile
+        queryset = Feed.objects.filter(followers__in=[user]).order_by("-id")
+
+        return queryset
+
+
+class FeedFollowCreateDestroy(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """ View that supports following and unfollowing a Feed. """
+
+    permission_classes = [IsAuthenticated]
+    queryset = Feed.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Remove the authenticated user from the Feed's followers.
+        """
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # remove the user from the Feed's followers
+        feed.followers.remove(user)
+
+        # return 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def post(self, request, *args, **kwargs):
+        """ Signed in user follows the given Feed. """
+
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # remove the user from the Feed's followers
+        feed.followers.add(user)
+
+        # return 201 CREATED
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class FeedFollowersList(generics.ListAPIView):
+
+    """ View that supports listing the followers of a Feed. """
+
+    serializer_class = serializers.ProfileSerializer
+    pagination_class = pagination.UserPagination
+
+    def get_queryset(self):
+        """
+        Return Profiles that are followers of a Feed.
+        Sorts the queryset in descending chronological order.
+        """
+        # get followers of feed in question
+        queryset = Feed.objects.get(pk=self.kwargs["id"]).followers.all()
+        queryset = queryset.order_by("-id")
+
+        return queryset
+
+
+class FeedFollowingCreateRetrieveDestroy(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView):
+
+    """
+    View that supports adding/removing/retrieving a profile to/from a Feed.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Remove the given user from the Feed's following.
+        """
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # make sure the user is the owner, or following is editable by pulic
+        if (feed.owner != user and not feed.followingEditableByPublic):
+            raise PermissionDenied(
+                "User does not own feed and feed is not editable by public."
+            )
+
+        # remove the given profile from the Feed's following
+        profile = Profile.objects.get(user_id=self.kwargs["address"])
+        feed.following.remove(profile)
+
+        # return 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, *args, **kwargs):
+        """ Retrieve whether the given user is in the Feed's following. """
+    
+        feed_id = self.kwargs["id"]
+        address = Web3.toChecksumAddress(self.kwargs["address"])
+
+        feed = Feed.objects.get(pk=feed_id)
+
+        # feed is following given address
+        if feed.following.filter(user_id=address).exists():
+            return Response(status=status.HTTP_200_OK)
+
+        # feed is not following given address
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, *args, **kwargs):
+        """ Add the given user to the Feed's following. """
+
+        # get the authenticated user
+        user = self.request.user.profile
+
+        # get the Feed
+        feed = Feed.objects.get(pk=self.kwargs["id"])
+
+        # make sure the user is the owner, or following is editable by pulic
+        if (feed.owner != user and not feed.followingEditableByPublic):
+            raise PermissionDenied(
+                "User does not own feed and feed is not editable by public."
+            )
+
+        # add the given profile to the Feed's following
+        # create the profile if needed
+        try:
+            address = Web3.toChecksumAddress(self.kwargs["address"])
+        except ValueError: 
+            raise ParseError("Invalid address.")
+
+        profile_user, _ = UserModel.objects.get_or_create(pk=address)
+        profile, _ = Profile.objects.get_or_create(user=profile_user)
+        feed.following.add(profile)
+
+        # make a request to Alchemy to update the Notify webhook
+        alchemy.update_notify_webhook()
+
+        # return 201 CREATED
+        serializer = serializers.ProfileSerializer(profile)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+
+class FeedFollowingList(generics.ListAPIView):
+
+    """ View that supports listing the following of a Feed. """
+
+    serializer_class = serializers.ProfileSerializer
+    pagination_class = pagination.UserPagination
+
+    def get_queryset(self):
+        """
+        Return Profiles that a Feed is following.
+        Sorts the queryset in descending chronological order.
+        """
+        # get following of feed in question
+        queryset = Feed.objects.get(pk=self.kwargs["id"]).following.all()
+        queryset = queryset.order_by("-id")
+
+        return queryset
+
+
+class FeedItemsList(generics.ListAPIView):
+
+    """ View that supports listing a Feed's items. """
+
+    serializer_class = serializers.PostSerializer
+    pagination_class = pagination.FeedItemsPagination
+
+    def get_queryset(self):
+        """
+        Return Posts of a Feed for all the profiles that Feed is following.
         Sort the queryset in descending chronological order.
         """
         # get profiles of feed in question
-        profiles = Feed.objects.get(pk=self.kwargs["id"]).profiles.all()
+        profiles = Feed.objects.get(pk=self.kwargs["id"]).following.all()
 
         # get all posts by those users
         queryset = Post.objects.filter(author__in=profiles)
@@ -619,13 +907,36 @@ class FeedRetrieve(generics.ListAPIView):
         return queryset
 
 
+class FeedsOwnedOrEditableList(generics.ListAPIView):
+    """
+    View that supports listing feeds that are owned by
+    the authenticated user, or that are editable by public.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FeedSerializer
+    pagination_class = pagination.FeedPagination
+
+    def get_queryset(self):
+        """
+        Return a queryset of Feeds followed by the authenticated user,
+        sorted by descending chronological order.
+        """
+        user = self.request.user.profile
+        owned = Feed.objects.filter(owner=user)
+        editable = Feed.objects.filter(followingEditableByPublic=True)
+        union = owned | editable
+
+        return union
+
+
 class MyFeedList(generics.ListAPIView):
 
     """ View that supports retrieving the feed of the logged in user. """
 
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PostSerializer
-    pagination_class = pagination.FeedPagination
+    pagination_class = pagination.FeedItemsPagination
     queryset = Post.objects.all()
 
     def get_queryset(self):

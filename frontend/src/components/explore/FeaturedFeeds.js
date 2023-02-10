@@ -1,25 +1,44 @@
-import React, { useContext, } from 'react'
-import { Container, Row } from 'react-bootstrap'
+import React, { useContext, } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Col, Container, Row } from 'react-bootstrap';
 import { UserContext } from '../../contexts/UserContext.js';
-import Feed from '../feed/Feed.js';
+import FeedThumbnail from '../feed/read/FeedThumbnail.js';
 
 
 function FeaturedFeeds({feeds}) {
+    // hooks
     const { user, setUser, isAuthenticated } = useContext(UserContext)
+    const navigate = useNavigate();
     
-    // functions
 
+    // render
     return (
         <Container>
-            {feeds.map(feed => (
-                <Feed
-                    key={feed.id}
-                    id={feed.id}
-                    name={feed.name}
-                />
-            ))}
+            <Row>
+                {feeds.map(feed => (
+                    <Col xs={6}>
+                        <FeedThumbnail
+                            key={feed.id}
+                            data={feed}
+                        />
+                    </Col>
+                ))}
+            </Row>
+            <Row className="justify-content-center">
+                <Col className="col-auto">
+                    <Button
+                        className="my-4"
+                        variant="outline-primary"
+                        size="lg"
+                        onClick={() => navigate('/feeds')}
+                    >
+                        View All
+                    </Button>
+                </Col>
+            </Row>
         </Container>
     );
 }
+
 
 export default FeaturedFeeds;

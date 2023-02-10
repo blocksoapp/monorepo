@@ -8,6 +8,8 @@ import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
 from rest_framework.test import APITestCase
 from siwe_auth.models import Nonce
 from siwe.siwe import SiweMessage
@@ -288,13 +290,56 @@ class BaseTest(APITestCase):
         resp = self.client.post(url)
         return resp
 
-    def _create_feed(self):
+    def _create_feed(self, name="", description="", editable=False):
         """
-        Creates a Feed and adds all users to it.
+        Utility function to create a Feed.
+        Returns the response of creating the feed.
         """
-        feed = Feed.objects.create(name="First Users")
-        feed.profiles.set(Profile.objects.all())
-        return feed
+        url = "/api/feeds/"
+        data = {
+            "name": name,
+            "description": description,
+            "followingEditableByPublic": editable
+        }
+        resp = self.client.post(url, data)
+
+        return resp
+
+    def _create_feed_image(self, feed_id):
+        """
+        Utility function to create a Feed.
+        Returns the response of creating the feed.
+        """
+        url = f"/api/feeds/{feed_id}/image/"
+        fake_img = SimpleUploadedFile("test.jpg", b"", content_type="image/jpeg")
+        data = encode_multipart(data={"image": fake_img}, boundary=BOUNDARY)
+        resp = self.client.put(
+            url,
+            data,
+            content_type=MULTIPART_CONTENT
+        )
+
+        return resp
+
+    def _follow_feed(self, feed_id):
+        """
+        Utility function to follow the given feed.
+        Returns the response of following the user.
+        """
+        url = f"/api/feeds/{feed_id}/follow/"
+        resp = self.client.post(url)
+
+        return resp
+
+    def _add_feed_following(self, feed_id, address):
+        """
+        Utility function to follow the given address by the given feed.
+        Returns the response of following the user by the feed.
+        """
+        url = f"/api/feeds/{feed_id}/following/{address}/"
+        resp = self.client.post(url)
+
+        return resp
 
 
 class AuthTests(BaseTest):
@@ -2031,7 +2076,7 @@ class FeedTests(BaseTest):
     """
     Test behavior around Feeds.
     """
-    
+
     def test_get_feed(self):
         """
         Assert that any user can get a specific feed.
@@ -2043,12 +2088,14 @@ class FeedTests(BaseTest):
         self._do_login(self.test_signer_2)
         self._create_post()
         # create a Feed and add users 1 and 2 it
-        feed = self._create_feed()
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+        feed.following.set(Profile.objects.all())
 
         # make a request as an unauthenticated user to
         # get the posts of the created Feed
         self._do_logout()
-        url = f"/api/feeds/{feed.id}/"
+        url = f"/api/feeds/{feed.id}/items/"
         resp = self.client.get(url)
 
         # make assertions
@@ -2062,6 +2109,604 @@ class FeedTests(BaseTest):
             resp.data["results"][1]["author"]["address"],
             self.test_signer.address
         )
+
+    def test_list_feeds(self):
+        """
+        Assert that any user can list all Feeds.
+        """
+        # set up test
+        # create two feeds
+        self._do_login(self.test_signer)
+        self._create_feed()
+        self._create_feed()
+
+        # make request to list feeds
+        url = "/api/feeds/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+
+    def test_list_feeds_followed_by_me(self):
+        """
+        Assert that an authenticated user can list feeds they follow.
+        """
+        # set up test
+        # create two feeds as user 1
+        # they are automatically followed by the creator
+        self._do_login(self.test_signer)
+        self._create_feed()
+        self._create_feed()
+
+        # create a third feed by user 2
+        self._do_login(self.test_signer_2)
+        self._create_feed()
+
+        # make request as user 1
+        self._do_login(self.test_signer)
+        url = "/api/feeds/followed-by-me/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+
+        # assert feeds are returned in descending chronological order
+        self.assertEqual(resp.data["results"][0]["id"], 2)
+        self.assertEqual(resp.data["results"][1]["id"], 1)
+
+    def test_create_feed(self):
+        """
+        Assert that an authenticated user can create a Feed.
+        Assert that the feed is automatically followed by the creator.
+        """
+        # set up test
+        # login user
+        self._do_login(self.test_signer)
+
+        # make request to create feed
+        resp = self._create_feed(
+            name="My Feed",
+            description="An example of a feed!",
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.data["name"], "My Feed")
+        self.assertEqual(
+            resp.data["owner"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(resp.data["description"], "An example of a feed!")
+        self.assertEqual(resp.data["numFollowers"], 1)
+
+    def test_create_feed_unauthed(self):
+        """
+        Assert that an un-authenticated user cannot create a Feed.
+        """
+        # do not login
+        # make request to create feed
+        resp = self._create_feed()
+        
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_delete_feed(self):
+        """
+        Assert that the owner of a Feed can delete it.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to delete it
+        url = f"/api/feeds/{feed.id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+
+    def test_delete_feed_not_owner(self):
+        """
+        Assert that a user cannot delete a Feed they do not own.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to delete it from another user
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed.id}/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_update_feed(self):
+        """
+        Assert that the owner of a Feed can update its details.
+        """
+        # create a feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to update its details
+        url = f"/api/feeds/{feed.id}/"
+        data = {
+            "name": "New Name",
+            "description": "New Description",
+            "image": "https://example.com/"
+        }
+        self.client.put(url, data)
+
+        # assert that feed has updated data
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["id"], feed.id)
+        self.assertEqual(resp.data["name"], "New Name")
+        self.assertEqual(resp.data["description"], "New Description")
+
+    def test_update_feed_not_owner(self):
+        """
+        Assert that a random user cannot update the details of a Feed.
+        """
+        # create a feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to update its details as another user
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed.id}/"
+        data = {"name":"", "description":"", "image":""}
+        resp = self.client.put(url, data)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+
+    def test_retrieve_feed(self):
+        """
+        Assert that retrieving a feed returns the correct data,
+        including number of followers, number of following, and
+        whether it is followed by the requesting user.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+
+        # make feed follow a profile
+        self._add_feed_following(feed_id, self.test_signer_2.address) 
+
+        # make request to retrieve feed by the creator
+        url = f"/api/feeds/{feed_id}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["numFollowing"], 1)
+        # feed is automatically followed by its creator
+        self.assertEqual(resp.data["numFollowers"], 1)
+        self.assertEqual(resp.data["followedByMe"], True)
+
+        # make request to retrieve feed by non-follower
+        self._do_login(self.test_signer_2)
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["followedByMe"], False)
+
+    def test_add_remove_feed_following(self):
+        """
+        Assert that a Feed owner can make the Feed follow a profile.
+        Assert that a Feed owner can make the Feed unfollow a profile.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to add user 2 to the feed's following
+        url = f"/api/feeds/{feed.id}/following/{self.test_signer_2.address}/"
+        resp = self.client.post(url)
+
+        # assert that the feed is now following the profile
+        self.assertTrue(
+            feed.following.filter(user_id=self.test_signer_2.address).exists()
+        )
+
+        # make request to remove user 2 from the feed's following
+        resp = self.client.delete(url)
+
+        # assert that the feed is no longer following the profile
+        self.assertFalse(
+            feed.following.filter(user_id=self.test_signer_2.address).exists()
+        )
+
+    def test_add_remove_feed_following_not_owner(self):
+        """
+        Assert that non-owners of Feeds cannot make the
+        Feed follow/unfollow a profile.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request as a random user to add user 3 to the feed's following
+        self._do_login(self.test_signer_2)
+        user_3 = eth_account.Account.create()
+        url = f"/api/feeds/{feed.id}/following/{user_3.address}/"
+        resp = self.client.post(url)
+
+        # assert that the request failed and the feed is not following user3
+        self.assertEqual(resp.status_code, 403)
+        self.assertFalse(
+            feed.following.filter(user_id=user_3.address).exists()
+        )
+
+        # sign in as the feed owner and add user3 to the feed's following
+        self._do_login(self.test_signer)
+        self.client.post(url)
+
+        # sign in as non-owner and remove user3 from the feed's following
+        self._do_login(self.test_signer_2)
+        resp = self.client.delete(url)
+
+        # assert that the request failed and the feed is still following user3
+        self.assertEqual(resp.status_code, 403)
+        self.assertTrue(
+            feed.following.filter(user_id=user_3.address).exists()
+        )
+
+    def test_add_remove_feed_following_open_feed(self):
+        """
+        Assert that any authed user can make the Feed follow a profile,
+        if the feed is open to editing by the public.
+        Assert that any authed user can make the Feed unfollow a profile,
+        if the feed is open to editing by the public.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed(editable=True)
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request as a random user to add user 3 to the feed's following
+        self._do_login(self.test_signer_2)
+        user_3 = eth_account.Account.create()
+        url = f"/api/feeds/{feed.id}/following/{user_3.address}/"
+        resp = self.client.post(url)
+
+        # assert that the feed is now following the profile
+        self.assertEqual(resp.status_code, 201)
+        self.assertTrue(
+            feed.following.filter(user_id=user_3.address).exists()
+        )
+
+        # make request to remove user 3 from the feed's following
+        resp = self.client.delete(url)
+
+        # assert that the feed is no longer following the profile
+        self.assertFalse(
+            feed.following.filter(user_id=user_3.address).exists()
+        )
+
+    def test_add_remove_feed_invalid_address(self):
+        """
+        Assert that adding an invalid address to a
+        feed's following returns a 400 BAD REQUEST.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed(editable=True)
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request
+        resp = self._add_feed_following(feed.id, "invalid-address")
+
+        # make assertions
+        self.assertEqual(resp.status_code, 400)
+
+    def test_list_feed_following(self):
+        """
+        Assert that a user can list the profiles that a feed is following.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create feed and make it follow user 2
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+        self._add_feed_following(feed.id, self.test_signer_2.address)
+
+        # make a request to list the profiles the feed is following
+        url = f"/api/feeds/{feed.id}/following/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer_2.address
+        )
+
+    def test_list_feed_followers(self):
+        """
+        Assert that a user can list the profiles that follow a feed.
+        """
+        # create feed, it is followed automatically by the creator
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make a request to list the profiles that follow the feed
+        url = f"/api/feeds/{feed.id}/followers/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["address"],
+            self.test_signer.address
+        )
+
+    def test_list_feeds_owned_or_editable(self):
+        """
+        Assert that an authenticated user can list feeds they own,
+        or that are editable by public.
+        """
+        # set up test
+        # create two feeds as user 2
+        # one of them is editably by public
+        self._do_login(self.test_signer_2)
+        self._create_feed(editable=True)
+        self._create_feed(editable=False)
+
+        # create a feed owned by user 1
+        self._do_login(self.test_signer)
+        self._create_feed()
+
+        # make request as user 1 to list feeds that are owned or editable
+        url = f"/api/feeds/owned-or-editable/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.data["count"], 2)
+        self.assertEqual(
+            resp.data["results"][0]["owner"]["address"],
+            self.test_signer.address
+        )
+        self.assertEqual(
+            resp.data["results"][0]["followingEditableByPublic"],
+            False
+        )
+        self.assertEqual(
+            resp.data["results"][1]["owner"]["address"],
+            self.test_signer_2.address
+        )
+        self.assertEqual(
+            resp.data["results"][1]["followingEditableByPublic"],
+            True
+        )
+
+    def test_follow_unfollow_feed(self):
+        """
+        Assert that any user can follow a Feed.
+        Assert that any user can unfollow a Feed.
+        """
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
+        # make request to follow it as another user
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed.id}/follow/"
+        resp = self.client.post(url)
+
+        # assert that the user is now following the feed 
+        self.assertTrue(
+            feed.followers.filter(user_id=self.test_signer_2.address).exists()
+        )
+
+        # make request to unfollow the feed
+        resp = self.client.delete(url)
+
+        # assert that the user is no longer following the feed 
+        self.assertFalse(
+            feed.followers.filter(user_id=self.test_signer_2.address).exists()
+        )
+
+    def test_list_feed_items(self):
+        """
+        Assert that any user can list a Feed's items.
+        """
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create 2 users and make them create 1 post each
+        self._do_login(self.test_signer)
+        self._create_post()
+        self._do_login(self.test_signer_2)
+        self._create_post()
+
+        # create a feed and make it follow users 1 and 2
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._add_feed_following(feed_id, self.test_signer.address)
+        self._add_feed_following(feed_id, self.test_signer_2.address)
+
+        # make a request as an anonymous user to list the items of the feed
+        url = f"/api/feeds/{feed_id}/items/"
+        self._do_logout()
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data["count"], 2)
+
+    def test_list_feeds_ordered_by_desc_chronological_order(self):
+        """
+        Assert that listing feeds is ordered by descending chronological order.
+        """
+        # create 2 feeds
+        self._do_login(self.test_signer)
+        resp = self._create_feed(name="First Feed")
+        first_id = resp.data["id"]
+        resp = self._create_feed(name="Second Feed")
+        second_id = resp.data["id"]
+
+        # make request to list feeds
+        url = f"/api/feeds/"
+        resp = self.client.get(url)
+
+        # assert that the ordering is correct
+        self.assertEqual(resp.data["results"][0]["name"], "Second Feed")
+        self.assertEqual(resp.data["results"][1]["name"], "First Feed")
+
+    def test_feed_following_includes_user(self):
+        """
+        Assert that a 200 is returned if the feed follows the given user.
+        Assert that a 404 if returned if the feed does not follow the user.
+        """
+        # setup
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create a feed and add a user to the profiles it follows
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._add_feed_following(feed_id, self.test_signer_2.address)
+
+        # make request
+        url = f"/api/feeds/{feed_id}/following/{self.test_signer_2.address}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 200)
+
+        # remove the user from the feed's following
+        self.client.delete(url)
+
+        # make request
+        url = f"/api/feeds/{feed_id}/following/{self.test_signer_2.address}/"
+        resp = self.client.get(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 404)
+
+    def test_update_feed_image(self):
+        """
+        Assert that the owner of a feed can update its image.
+        """
+        # set up test
+        self.mock_responses.add(
+            responses.POST,
+            f"{settings.NFT_STORAGE_API_URL}/upload",
+            body=json.dumps({"value": {"cid": "fakecid"}})
+        )
+
+        # create feed
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data['id']
+
+        # make request to upload image
+        url = f"/api/feeds/{feed_id}/image/"
+        fake_img = SimpleUploadedFile("test.jpg", b"", content_type="image/jpeg")
+        data = encode_multipart(data={"image": fake_img}, boundary=BOUNDARY)
+        resp = self.client.put(
+            url,
+            data,
+            content_type=MULTIPART_CONTENT
+        )
+
+        # make assertions
+        self.assertEqual(resp.status_code, 201)
+        self.assertIn("fakecid", resp.data["image"]) 
+
+    def test_update_feed_image_not_owned(self):
+        """
+        Assert that a user cannot delete another user's feed image.
+        """
+        # create feed as user 1
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+
+        # make request to update feed image as user 2
+        self._do_login(self.test_signer_2)
+        resp = self._create_feed_image(feed_id)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
+        
+    def test_delete_feed_image(self):
+        """
+        Assert that deleting a feed owner can delete its image.
+        """
+        # set up test
+        self.mock_responses.add(
+            responses.POST,
+            f"{settings.NFT_STORAGE_API_URL}/upload",
+            body=json.dumps({"value": {"cid": "fakecid"}})
+        )
+        self.mock_responses.add(
+            responses.DELETE,
+            f"{settings.NFT_STORAGE_API_URL}/fakecid",
+        )
+
+        # create feed and image
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._create_feed_image(feed_id)
+
+        # make request to delete feed image
+        url = f"/api/feeds/{feed_id}/image/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 204)
+        url = f"/api/feeds/{feed_id}/"
+        resp = self.client.get(url)
+        self.assertEqual(resp.data["image"], None)
+
+    def test_delete_feed_image_not_owned(self):
+        """
+        Assert that deleting a feed owner can delete its image.
+        """
+        # create feed as user 1
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+
+        # delete feed image as user 2
+        self._do_login(self.test_signer_2)
+        url = f"/api/feeds/{feed_id}/image/"
+        resp = self.client.delete(url)
+
+        # make assertions
+        self.assertEqual(resp.status_code, 403)
 
 
 class MyFeedTests(BaseTest):
@@ -2151,16 +2796,19 @@ class ExploreTests(BaseTest):
         """
         # set up test
         # create a feed
-        feed = self._create_feed()
-        
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed = Feed.objects.get(pk=resp.data["id"])
+
         # make a request to the explore endpoint
+        self._do_logout()
         url = "/api/explore/"
         resp = self.client.get(url)
 
         # assert that the created feed is in the featured feeds
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["feeds"][0]["name"], feed.name)
-        self.assertEqual(resp.data["feeds"][0]["image"], feed.image)
+        self.assertEqual(resp.data["feeds"][0]["image"], None)
 
     def test_explore_profiles_by_follower_count(self):
         """
@@ -2197,6 +2845,35 @@ class ExploreTests(BaseTest):
                 resp.data["profiles"][i]["address"],
                 signers[9-i].address
             )
+
+    def test_explore_feeds_by_follower_count(self):
+        """
+        Assert that the 4 most followed feeds are returned.
+        """
+        # create 4 feeds
+        self._do_login(self.test_signer)
+        feeds = []
+        for i in range(4):
+            resp = self._create_feed(name=i)
+            feeds.append(resp.data["id"])
+
+        # create 4 users and follow the feeds in decreasing amounts
+        # feeds[0] gets the most follows, feeds[3] gets the least
+        signers = self._create_users(4)
+        for i in range(4):
+            self._do_login(signers[i])
+            for j in range(0, 4-i):
+                self._follow_feed(feeds[j])
+
+        # make request to explore endpoint
+        self._do_logout()
+        url = "/api/explore/"
+        resp = self.client.get(url)
+
+        # assert that the feeds are sorted
+        # from most followers to least followers
+        for i in range(4):
+            self.assertEqual(resp.data["feeds"][i]["name"], str(i))
 
 
 class NotificationTests(BaseTest):

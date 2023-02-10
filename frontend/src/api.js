@@ -14,6 +14,58 @@ export const apiDeleteCommentLike = async (postId, commentId) => {
   return resp;
 };
 
+/* Returns the response of deleting a feed.  */
+export const apiDeleteFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of making a feed unfollow a profile. */
+export const apiDeleteFeedFollowing = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of deleting a feed's image. */
+export const apiDeleteFeedImage = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/image/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for unfollowing a feed. */
+export const apiDeleteFollowFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/follow/`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for unliking the given postId by the authed user.  */
 export const apiDeletePostLike = async (postId) => {
   const url = `${baseAPI}/post/${postId}/likes/`;
@@ -90,7 +142,7 @@ export const apiGetExplore = async () => {
   return res;
 };
 
-/* Returns the response for getting the items of the given feedId. */
+/* Returns the response for getting the details of the given feedId. */
 export const apiGetFeed = async (feedId) => {
   const url = `${baseAPI}/feeds/${feedId}/`;
   const res = await fetch(url, {
@@ -98,6 +150,77 @@ export const apiGetFeed = async (feedId) => {
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response for getting the newest feeds. */
+export const apiGetFeeds = async () => {
+  const url = `${baseAPI}/feeds/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of getting feeds the user owns or are editable by public. */
+export const apiGetFeedsOwnedOrEditable = async () => {
+  const url = `${baseAPI}/feeds/owned-or-editable/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for getting the items of the given feedId. */
+export const apiGetFeedItems = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/items/`;
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return res;
+};
+
+/* Returns the response for getting the profiles that a feed follows. */
+export const apiGetFeedFollowers = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/followers/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+
+/* Returns the response for getting the feeds the authed user follows. */
+export const apiGetFeedsFollowedByMe = async () => {
+  const url = `${baseAPI}/feeds/followed-by-me/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for getting the profiles that a feed follows. */
+export const apiGetFeedFollowing = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of getting whether the feed follows the given address. */
+export const apiGetFeedFollowingProfile = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  return resp;
 };
 
 /* Returns the response for getting the feed items of the authed user. */
@@ -221,7 +344,35 @@ export const apiPostPostLike = async (postId) => {
   return resp;
 };
 
-/* Returns the response for updating follow given an address  */
+/* Returns the response of creating a feed.  */
+export const apiPostFeed = async (data) => {
+  const url = `${baseAPI}/feeds/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of making a feed follow a profile. */
+export const apiPostFeedFollowing = async (feedId, address) => {
+  const url = `${baseAPI}/feeds/${feedId}/following/${address}/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response for following a given address.  */
 export const apiPostFollow = async (address) => {
   const url = `${baseAPI}/${address}/follow/`;
   const res = await fetch(url, {
@@ -232,6 +383,19 @@ export const apiPostFollow = async (address) => {
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response for following a given feed.  */
+export const apiPostFollowFeed = async (feedId) => {
+  const url = `${baseAPI}/feeds/${feedId}/follow/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
 };
 
 /* Returns the response for reposting an item  */
@@ -264,7 +428,7 @@ export const apiPostPost = async (data) => {
   return resp;
 };
 
-/* Returns the response for updating unfollow given an address  */
+/* Returns the response for unfollowing a given address. */
 export const apiPostUnfollow = async (address) => {
   const url = `${baseAPI}/${address}/follow/`;
   const res = await fetch(url, {
@@ -275,4 +439,33 @@ export const apiPostUnfollow = async (address) => {
     credentials: "include",
   });
   return res;
+};
+
+/* Returns the response of updating a feed's details. */
+export const apiPutFeed = async (feedId, data) => {
+  const url = `${baseAPI}/feeds/${feedId}/`;
+  const resp = await fetch(url, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
+/* Returns the response of updating a feed's image. */
+export const apiPutFeedImage = async (feedId, formData) => {
+  const url = `${baseAPI}/feeds/${feedId}/image/`;
+  const resp = await fetch(url, {
+    method: "PUT",
+    body: formData,
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
 };

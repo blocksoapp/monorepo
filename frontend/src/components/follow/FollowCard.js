@@ -11,8 +11,7 @@ function FollowCard(props) {
 
     const navigate = useNavigate()
     const [buttonMsg, setButtonMsg] = useState('Following')
-    const [profileData, setProfileData] = useState({})
-    const [profileDataLoading, setProfileDataLoading] = useState(false)
+    const [profileData, setProfileData] = useState(props)
     const [readMore, setReadMore] = useState(false)
 
     const handleFollow = async () => {
@@ -38,20 +37,6 @@ function FollowCard(props) {
             });
         } else if (!resp.ok) {
             console.error(resp.error)
-        }
-    }
-
-    const fetchProfile = async () => {
-        setProfileDataLoading(true);
-        const resp = await apiGetProfile(props.address)
-        if (resp.ok) {
-            var data = await resp.json();
-            setProfileData(data);
-            setProfileDataLoading(false);
-        }
-        else {
-            console.error(resp);
-            setProfileDataLoading(false);
         }
     }
 
@@ -98,13 +83,6 @@ function FollowCard(props) {
             }
         } else return bio
 }
-
-    // Fetch profile data
-    useEffect(() => {
-
-        fetchProfile()
-       
-    }, [])
 
   return (
         <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-sm-2 px-lg-5 light-hover">

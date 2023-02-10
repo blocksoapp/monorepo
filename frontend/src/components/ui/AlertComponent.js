@@ -1,21 +1,28 @@
+import { useEffect, useState } from "react";
 import { Alert, Button } from "react-bootstrap";
-import React from "react";
 
 function AlertComponent(props) {
+    const [show, setShow] = useState(props.show ? props.show : false);
+
+    useEffect(() => {
+        return () => {
+            setShow(props.show ? props.show : false);
+        }
+    }, []);
+
   return (
     <>
-      {props.isToggle ? (
-        <Alert variant={props.color} isOpen={props.isToggle}>
-          <Alert.Heading className="d-flex justify-content-between">
-            {props.heading}
-            <Button variant="light" onClick={() => props.setIsToggle(false)}>
-              x
-            </Button>
-          </Alert.Heading>
-          <p>{props.subheading}</p>
+      {show && (
+        <Alert variant={props.color} onClose={() => setShow(false)} dismissible>
+          {props.heading && 
+              <Alert.Heading className="d-flex justify-content-between">
+                {props.heading}
+              </Alert.Heading>
+          }
+          {props.subheading &&
+              <p className="mb-0">{props.subheading}</p>
+          }
         </Alert>
-      ) : (
-        ""
       )}
     </>
   );

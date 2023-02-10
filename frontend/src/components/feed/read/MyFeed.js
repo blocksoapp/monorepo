@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap"
-import { apiGetMyFeed, apiGetUrl } from '../../api';
-import { usePageBottom } from '../../hooks/usePageBottom';
-import NewPost from '../posts/NewPost.js';
-import Post from '../posts/Post.js'; 
-import PostsError from '../posts/PostsError';
-import PostsPlaceholder from '../posts/PostsPlaceholder';
+import { apiGetMyFeed, apiGetUrl } from '../../../api';
+import { usePageBottom } from '../../../hooks/usePageBottom';
+import NewPost from '../../posts/NewPost.js';
+import Post from '../../posts/Post.js'; 
+import PostsError from '../../posts/PostsError';
+import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import FeedError from './FeedError';
 import PollNewItems from './PollNewItems';
 

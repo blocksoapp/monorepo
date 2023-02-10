@@ -18,7 +18,8 @@ import ProfilePlaceholder from './ProfilePlaceholder';
 import ProfileInvalid from './ProfileInvalid';
 import ProfileEnsAndAddress from './ProfileEnsAndAddress';
 import PfpResolver from '../../PfpResolver';
-import PollNewItems from '../../feed/PollNewItems';
+import PollNewItems from '../../feed/read/PollNewItems';
+import ProfileOptions from './ProfileOptions';
 
 
 function Profile(props) {
@@ -48,9 +49,7 @@ function Profile(props) {
             setPosts(data["results"]);
             setPostsError(false);
             setPostsNextPage(data["next"]);
-            if (data["results"].length > 0) {
-                setPostsLoading(false);
-            }
+            setPostsLoading(false);
         }
         else {
             setPostsError(true);
@@ -202,7 +201,7 @@ function Profile(props) {
 
                         {/* Profile picture */}
                         <Row className="justify-content-center">
-                            <Col className="col-auto">
+                            <Col className="col-auto pe-0">
                                 <PfpResolver
                                     address={props.address}
                                     imgUrl={profileData["image"]}
@@ -210,6 +209,9 @@ function Profile(props) {
                                     width="256px"
                                     fontSize="1.75rem"
                                 />
+                            </Col>
+                            <Col className="col-auto ps-0">
+                                <ProfileOptions profile={profileData} />
                             </Col>
                         </Row>
 

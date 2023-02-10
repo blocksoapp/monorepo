@@ -21,8 +21,6 @@ To run a worker that will fetch new transactions in the background for all users
 2. Run `python manage.py heroku-worker`
 
 ## Tech Debt & Notes  
-1. Make sure the authed user can only create profiles for themselves.  
-2. Revisit when users' tx history should be fetched and transformed to posts.  
-3. Add business logic checks for Posts that are quoted, shared, or refer to a tx.
-4. Add a job queueing system for fetching the user's tx history.
-5. Fix broken tests due to creating a Profile on user sign in.
+1. Revisit when users' tx history should be fetched and transformed to posts.  
+2. Add business logic checks for Posts that are quoted, shared, or refer to a tx.
+3. Migration `0011_remove_feed_profiles...` sets Profile id 1 as the owner of all pre-existing Feeds. Be mindful of this -- shouldn't be a problem for Production on the date of this commit, but it's good to keep this in mind for redeployments or running migrations on an existing environment.
