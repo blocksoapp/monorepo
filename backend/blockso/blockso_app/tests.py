@@ -105,15 +105,6 @@ class BaseTest(APITestCase):
         )
         redis_patcher.start()
 
-        # create redis queue and scheduled jobs registry for use in tests
-        self.redis_queue = rq.Queue(
-            connection=self.redis_backend,
-            is_async=False
-        )
-        self.scheduled_job_registry = rq.registry.ScheduledJobRegistry(
-            queue=self.redis_queue
-        )
-
         # fake requests/responses
         self.mock_responses = responses.RequestsMock()
         self.mock_responses.start()
@@ -1234,21 +1225,13 @@ class PostTests(BaseTest):
         order from most recent to least recent.
         """
         # set up test
-        self._do_login(self.test_signer)
-
         # create 25 posts
-        user = UserModel.objects.get(pk=self.test_signer.address)
-        created_time = datetime.now(tz=pytz.UTC)
+        self._do_login(self.test_signer)
         for i in range(25):
-            created_time = created_time + timedelta(hours=1)
-            Post.objects.create(
-                author=user.profile,
-                created=created_time,
-                isQuote=False,
-                isShare=False
-            )
+            self._create_post()
 
         # make request
+        self._do_logout()
         url = f"/api/{self.test_signer.address}/posts/"
         resp = self.client.get(url)
 
@@ -1265,22 +1248,20 @@ class PostTests(BaseTest):
                 datetime.fromisoformat(results[i]["created"][:-1])
             )
 
-        # assert job to fetch tx history was added to the high queue
-        queue = redis_client.RedisConnection().get_high_queue()
-        jobs = queue.get_job_ids()
-        self.assertEqual(len(jobs), 1)
-        self.assertEqual(jobs[0], self.test_signer.address)
-
     def test_get_posts_queue_job(self):
         """
         Assert that a job is queued to fetch
-        the tx history of the user when
+        the tx history of a profile when
         fetching their posts.
+        Assert that jobs are only queued for profiles
+        that aren't being watched by Alchemy.
+        This means the profile has not logged in before
+        and is not on anybody's feed.
         """
         # set up test
-        self._do_login(self.test_signer)
-
         # make request
+        # note that test_signer never logged in here and
+        # therefore is not a user in the system
         url = f"/api/{self.test_signer.address}/posts/"
         resp = self.client.get(url)
 
@@ -1288,7 +1269,7 @@ class PostTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
 
         # assert job to fetch tx history was added to the high queue
-        queue = redis_client.RedisConnection().get_high_queue()
+        queue = rq.Queue(connection=self.redis_backend, name="high")
         jobs = queue.get_job_ids()
         self.assertEqual(len(jobs), 1)
         self.assertEqual(jobs[0], self.test_signer.address)
@@ -2323,6 +2304,12 @@ class FeedTests(BaseTest):
         self.assertTrue(
             feed.following.filter(user_id=self.test_signer_2.address).exists()
         )
+
+        # assert that a job was enqueued to fetch user 2's tx history
+        queue = rq.Queue(connection=self.redis_backend, name="high")
+        jobs = queue.get_job_ids()
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0], self.test_signer_2.address)
 
         # make request to remove user 2 from the feed's following
         resp = self.client.delete(url)

@@ -24,10 +24,10 @@ from web3 import Web3
 import rq
 
 # our imports
-from .jobs import alchemy_jobs, covalent_jobs
+from .jobs import alchemy_jobs
 from .models import Comment, CommentLike, Feed, Follow, Notification, Post, \
         PostLike, Profile, Socials
-from . import alchemy, pagination, redis_client, serializers
+from . import alchemy, covalent, pagination, redis_client, serializers, utils
 
 
 UserModel = get_user_model()
@@ -395,16 +395,7 @@ class PostList(generics.ListAPIView):
         profile, _ = Profile.objects.get_or_create(user=user)
 
         # queue a job to fetch the profile's transaction history
-        client = redis_client.RedisConnection()
-        queue = client.get_high_queue()
-        if address not in queue.get_job_ids() and \
-           address not in rq.registry.FinishedJobRegistry(queue=queue):
-            queue.enqueue(
-                covalent_jobs.process_address_txs,
-                address,
-                100,
-                job_id=address
-            )
+        covalent.enqueue_fetch_tx_history(profile)
 
         return self.list(request, *args, **kwargs)
 
@@ -847,7 +838,6 @@ class FeedFollowingCreateRetrieveDestroy(
                 "User does not own feed and feed is not editable by public."
             )
 
-        # add the given profile to the Feed's following
         # create the profile if needed
         try:
             address = Web3.toChecksumAddress(self.kwargs["address"])
@@ -856,6 +846,11 @@ class FeedFollowingCreateRetrieveDestroy(
 
         profile_user, _ = UserModel.objects.get_or_create(pk=address)
         profile, _ = Profile.objects.get_or_create(user=profile_user)
+
+        # queue a job to fetch the profile's transaction history
+        covalent.enqueue_fetch_tx_history(profile)
+
+        # add the given profile to the Feed's following
         feed.following.add(profile)
 
         # make a request to Alchemy to update the Notify webhook

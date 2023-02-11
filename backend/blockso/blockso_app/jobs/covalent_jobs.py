@@ -39,7 +39,7 @@ def get_tx_history_url(address, page_number):
     url = f"{base_url}/{chain_id}/address/{address}/"\
           f"transactions_v2/?key={api_key}"\
           f"&quote-currency=USD&format=JSON&block-signed-at-asc=false"\
-          f"&no-logs=false&page-number={page_number}&page-size=100"
+          f"&no-logs=false&page-number={page_number}&page-size=1000"
 
     return url
 

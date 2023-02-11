@@ -9,6 +9,7 @@ import requests
 
 # our imports
 from blockso_app.models import Feed, Profile
+from blockso_app import utils
 
 
 url = "https://dashboard.alchemy.com/api/update-webhook-addresses"
@@ -22,16 +23,7 @@ def update_notify_webhook():
     Updates the Notify webhook with the current list
     of addresses that should be watched.
     """
-    # fetch the union of:
-    # - users that have logged in
-    logged_in = Profile.objects.all().exclude(user__last_login=None)
-    # - users that have have followers
-    have_followers = Profile.objects.all().exclude(follow_dest=None)
-    # - users that are on a feed that has followers
-    on_feed = Profile.objects.filter(
-        feeds_following_them__in=Feed.objects.all().exclude(followers=None)
-    )
-    profiles = logged_in | have_followers | on_feed
+    profiles = utils.get_profiles_to_watch()
 
     # get addresses
     addresses = list(profiles.values_list("user_id", flat=True))

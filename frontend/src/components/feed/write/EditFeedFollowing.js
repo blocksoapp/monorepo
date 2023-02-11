@@ -19,6 +19,7 @@ function EditFeedFollowing() {
     const [profiles, setProfiles] = useState([]);
     const [profilesNextPage, setProfilesNextPage] = useState(null);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     /*
      * Fetch the list of profiles that the feed is following.
@@ -44,6 +45,9 @@ function EditFeedFollowing() {
      * Add a new profile to the list of profiles that the feed is following.
      */
     const handleSubmit = async (address) => {
+        setError("");
+        setSuccess("");
+
         // check if the profile is already in the list
         if (profiles.some(profile => profile.address === address)) {
             setError("Profile already in list");
@@ -58,12 +62,14 @@ function EditFeedFollowing() {
             const data = await resp.json();
             setProfiles([data].concat(profiles));
             setError("");
+            setSuccess("Profile added");
         }
 
         // handle error
         else {
             console.error(resp);
             setError("Error adding profile");
+            setSuccess("");
         }
     };
 
@@ -71,6 +77,9 @@ function EditFeedFollowing() {
      * Remove a profile from the list of profiles that the feed is following.
      */
     const handleDelete = async (address) => {
+        setError("");
+        setSuccess("");
+
         const resp = await apiDeleteFeedFollowing(feedId, address);
 
         // handle success
@@ -78,12 +87,15 @@ function EditFeedFollowing() {
             setProfiles(
                 profiles.filter(profile => profile.address !== address)
             );
+            setError("");
+            setSuccess("Profile deleted");
         }
 
         // handle error
         else {
             console.error(resp);
             setError("Error deleting profile");
+            setSuccess("");
         }
     };
 
@@ -104,8 +116,9 @@ function EditFeedFollowing() {
         <Container className="my-5">
             <p className="fs-2 text-muted">This feed follows...</p>
             <Form>
-                {/* show error */}
+                {/* show error/success */}
                 {error && <p className="text-danger">{error}</p>}
+                {success && <p className="text-success">{success}</p>}
 
                 <FeedFollowingProfileInput
                     address=""
