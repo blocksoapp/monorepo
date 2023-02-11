@@ -76,14 +76,14 @@ function PollNewItems({apiFunction, apiFunctionArgs, interval, oldItems, callbac
                     className="position-fixed"
                     style={{
                         zIndex: 1,
-                        marginTop: "-2%",
                         left: "50%",
-                        transform: "translate(-50%, 0)"
+                        top: "10%",
+                        transform: "translate(-50%, 0)",
                     }}
                 >
                     <Row className="justify-content-center">
                         <Col xs={8} sm={10} md={8} lg={5} xl={4}>
-                            <Alert variant="primary">
+                            <Alert variant="primary" className="shadow-lg">
                                 <Row>
                                     <Col xs={12}>
                                         <span>{text}</span>
