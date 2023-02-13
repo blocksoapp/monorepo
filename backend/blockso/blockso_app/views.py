@@ -941,15 +941,19 @@ class MyFeedList(generics.ListAPIView):
         """
         # get user
         user = self.request.user
-        profile_queryset = Profile.objects.filter(
+        profile = Profile.objects.filter(
             user=user
         )
-        # get users they follow
+        # get profiles the user follows
         follow_src = Follow.objects.filter(src=user.profile)
         profiles_followed = Profile.objects.filter(follow_dest__in=follow_src)
 
-        # combine the two querysets
-        profiles = profile_queryset | profiles_followed
+        # get profiles of feeds the user follows
+        feeds = Feed.objects.filter(followers__in=profile)
+        feed_profiles = Profile.objects.filter(feeds_following_them__in=feeds)
+
+        # combine the three querysets
+        profiles = profile | profiles_followed | feed_profiles
 
         # get all posts by those users
         queryset = Post.objects.filter(author__in=profiles)
