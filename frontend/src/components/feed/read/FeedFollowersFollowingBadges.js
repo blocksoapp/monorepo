@@ -12,6 +12,7 @@ function FeedFollowersFollowingBadges({ feed }) {
 
     // state
     const [feedData, setFeedData] = useState(feed);
+    const [followLoading, setFollowLoading] = useState(false);
 
     // functions
     const handleUnfollow = async (e) => {
@@ -19,6 +20,7 @@ function FeedFollowersFollowingBadges({ feed }) {
         e.stopPropagation();
 
         // send request
+        setFollowLoading(true);
         const resp = await apiDeleteFollowFeed(feed.id);
 
         // handle success
@@ -35,6 +37,8 @@ function FeedFollowersFollowingBadges({ feed }) {
             // TODO handle unauhtenticated user
             console.error(resp);
         }
+
+        setFollowLoading(false);
     }
 
     const handleFollow = async (e) => {
@@ -42,6 +46,7 @@ function FeedFollowersFollowingBadges({ feed }) {
         e.stopPropagation();
 
         // send request
+        setFollowLoading(true);
         const resp = await apiPostFollowFeed(feed.id);
 
         // handle success
@@ -58,6 +63,8 @@ function FeedFollowersFollowingBadges({ feed }) {
             // TODO handle unauhtenticated user
             console.error(resp);
         }
+
+        setFollowLoading(false);
     }
 
     const handleFollowerClick = (e) => {
@@ -115,6 +122,7 @@ function FeedFollowersFollowingBadges({ feed }) {
                                     variant="primary"
                                     size="sm"
                                     onClick={handleUnfollow}
+                                    disabled={followLoading}
                                 >
                                     Unfollow
                                 </Button> 
@@ -122,6 +130,7 @@ function FeedFollowersFollowingBadges({ feed }) {
                                     variant="primary"
                                     size="sm"
                                     onClick={handleFollow}
+                                    disabled={followLoading}
                                 >
                                     Follow
                                 </Button>

@@ -1,8 +1,10 @@
 import { Card, Image } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { abbrAddress } from "../utils";
 
 function Pfp(props) {
-  // constants
+  // hooks
+  const navigate = useNavigate();
 
   // state
 
@@ -20,7 +22,7 @@ function Pfp(props) {
 
   // render
   return (
-    <div className={props.className} onClick={props.onClick}>
+    <div className={props.className + " pointer"} onClick={() => navigate(`/${props.address}/profile`)}>
       {/* Show grey placeholder image if address is null */}
       {!props.address ? (
         <Card
