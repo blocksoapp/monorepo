@@ -2771,6 +2771,37 @@ class MyFeedTests(BaseTest):
             self.test_signer_2.address
         )
 
+    def test_get_feed_follows_feeds(self):
+        """
+        Assert that if a user is following feeds,
+        the user's feed will include posts from the feeds they follow.
+        """
+        # set up test
+        # mock out the request to alchemy
+        self.mock_responses.add(responses.PUT, alchemy.url)
+
+        # create a feed by user 1 and make the feed follow user 1
+        self._do_login(self.test_signer)
+        resp = self._create_feed()
+        feed_id = resp.data["id"]
+        self._add_feed_following(feed_id, self.test_signer.address)
+
+        # create a post by user 1
+        self._create_post()
+
+        # make request by user 2 to follow the feed
+        self._do_login(self.test_signer_2)
+        self._follow_feed(feed_id)
+
+        # assert that user 1's post shows up in user 2' My Feed
+        url = f"/api/feed/"
+        resp = self.client.get(url) 
+        self.assertEqual(resp.data["count"], 1)
+        self.assertEqual(
+            resp.data["results"][0]["author"]["address"],
+            self.test_signer.address
+        )
+
 
 class ExploreTests(BaseTest):
     """
