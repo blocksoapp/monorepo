@@ -9,6 +9,7 @@ import {
 } from '../../../api';
 import { UserContext } from '../../../contexts/UserContext';
 import { usePageBottom } from '../../../hooks/usePageBottom';
+import NewPost from '../../posts/NewPost.js';
 import Post from '../../posts/Post.js'; 
 import PostsPlaceholder from '../../posts/PostsPlaceholder';
 import PostsError from '../../posts/PostsError';
@@ -38,6 +39,7 @@ function Profile(props) {
     const [postsNextPage, setPostsNextPage] = useState(null);
     const [morePostsLoading, setMorePostsLoading] = useState(false);
     const [morePostsError, setMorePostsError] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
  
     // functions
     const fetchPosts = async () => {
@@ -93,6 +95,8 @@ function Profile(props) {
     }
 
     const handleUnfollow = async () => {
+        setFollowLoading(true);
+
         const res = await apiPostUnfollow(props.address)
         if (res.ok) {
             setProfileData({
@@ -101,9 +105,13 @@ function Profile(props) {
                 followedByMe: false
             });
         }
+
+        setFollowLoading(false);
     }
 
     const handleFollow = async () => {
+        setFollowLoading(true);
+
         const res = await apiPostFollow(props.address)
         if (res.ok) {
             setProfileData({
@@ -112,6 +120,8 @@ function Profile(props) {
                 followedByMe: true
             });
         }
+
+        setFollowLoading(false);
     }
     
     // Navigate to user's followers
@@ -149,6 +159,7 @@ function Profile(props) {
             setMorePostsError(false);
             setMorePostsLoading(false);
             setPostsNextPage(null);
+            setFollowLoading(false);
         }
     }, [props.address])
 
@@ -258,7 +269,7 @@ function Profile(props) {
                                             variant="primary"
                                             size="sm"
                                             onClick={handleUnfollow}
-                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                            disabled={(user !== null && user["address"] === props.address) || followLoading ? true : false}
                                         >
                                             Unfollow
                                         </Button> 
@@ -266,7 +277,7 @@ function Profile(props) {
                                             variant="primary"
                                             size="sm"
                                             onClick={handleFollow}
-                                            disabled={user !== null && user["address"] === props.address ? true : false}
+                                            disabled={(user !== null && user["address"] === props.address) || followLoading ? true : false}
                                         >
                                             Follow
                                         </Button>
@@ -279,8 +290,13 @@ function Profile(props) {
             }
 
 
-            {/* Posts Section -- show placeholder or posts */}
             <Container>
+                {/* New Post if profile is the current user */}
+                {user !== null && user["address"] === props.address &&
+                    <NewPost submitPostCallback={(post) => setPosts([post, ...posts])} />
+                }
+                
+                {/* Posts Section -- show placeholder or posts */}
                 {postsLoading === true
                     ? <PostsPlaceholder />
                     : postsError === true

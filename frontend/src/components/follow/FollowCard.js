@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Button, Badge } from 'react-bootstrap'
 import { json, useNavigate } from 'react-router-dom'
 import PfpResolver from '../PfpResolver'
@@ -13,8 +13,11 @@ function FollowCard(props) {
     const [buttonMsg, setButtonMsg] = useState('Following')
     const [profileData, setProfileData] = useState(props)
     const [readMore, setReadMore] = useState(false)
+    const [loading, setLoading] = useState(false);
 
     const handleFollow = async () => {
+        setLoading(true);
+
         const resp = await apiPostFollow(props.address)
         if (resp.ok) {
             setButtonMsg('Following')
@@ -24,9 +27,13 @@ function FollowCard(props) {
                 followedByMe: true
             });
         }
+
+        setLoading(false);
     }
 
     const handleUnfollow = async () => {
+        setLoading(true);
+
         const resp = await apiPostUnfollow(props.address)
         if (resp.ok) {
             setButtonMsg('Follow')
@@ -38,6 +45,8 @@ function FollowCard(props) {
         } else if (!resp.ok) {
             console.error(resp.error)
         }
+
+        setLoading(false);
     }
 
     const navigateProfile = () => {
@@ -62,9 +71,10 @@ function FollowCard(props) {
             onClick={handleUnfollow}
             onMouseEnter={handleHoverOn}
             onMouseLeave={handleHoverOff}
+            disabled={loading}
             >{buttonMsg}</Button>
         } else  {
-            return <Button onClick={handleFollow} className='btn-primary'>Follow</Button>
+            return <Button onClick={handleFollow} className='btn-primary' disabled={loading}>Follow</Button>
         }
     }
 
