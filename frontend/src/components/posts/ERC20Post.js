@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp, faArrowDown, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatTokenAmount, zeroAddress } from "../../utils";
 import TxAddress from "../TxAddress";
-import EtherscanLogo from "../../assets/etherscan.svg";
+import EtherscanLogo from "../../assets/img/etherscan.svg";
 
 
 function ERC20Post({author, transfers, txHash}) {
