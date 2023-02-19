@@ -66,13 +66,10 @@ code {
 }
 
 .info-container h1 {
-  font-family: Montserrat, sans-serif;
-  font-size: 60px;
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: -3px;
-  line-height: 72px;
-  text-transform: none;
+  font-family: Luckiest Guy, sans-serif;
+  font-size: 5rem;
+  word-break: break-word;
+  word-wrap: break-word;
 }
 
 .info-container p {
@@ -140,4 +137,17 @@ code {
   min-height: 100vh;
 }
 
+/* luckiest-guy-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Luckiest Guy';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot'); /* IE9 Compat Modes */
+  src: url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.svg#LuckiestGuy') format('svg'); /* Legacy iOS */
+}
 
