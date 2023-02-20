@@ -13,6 +13,7 @@ import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
 import { useEnsAvatar } from "wagmi";
 import { apiPostPost } from '../../api';
 import { UserContext } from '../../contexts/UserContext';
+import useBreakpoint from '../../hooks/useBreakpoint';
 import SignInButton from '../authentication/SignInButton';
 import MentionsInput from "./MentionsInput";
 import PfpResolver from '../PfpResolver';
@@ -21,6 +22,7 @@ import PfpResolver from '../PfpResolver';
 function NewPost({ submitPostCallback }) {
     // hooks
     const { user } = useContext(UserContext);
+    const breakpoint = useBreakpoint();
 
     // state
     const { address, image } = {...user?.profile}
@@ -83,38 +85,59 @@ function NewPost({ submitPostCallback }) {
                                 
                                 {/* user is logged in */}
                                 {user !== null &&
-                                    <Row className="align-items-center">
-                                        <Col className="col-auto">
-                                            <PfpResolver
-                                                address={address}
-                                                imgUrl={image}
-                                                height="100px"
-                                                width="100px"
-                                                fontSize="1rem"
-                                            />
-                                        </Col>
-                                        <Col>
-                                            <Form onSubmit={handleSubmit}>
-                                                <Row>
-                                                    <Col>
-                                                        <InputGroup>
-                                                            <MentionsInput
-                                                                placeholder="What's on your mind?"
-                                                                text={postText}
-                                                                setText={setPostText}
-                                                                setTaggedUsers={setTaggedUsers}
-                                                            />
-                                                        </InputGroup>
-                                                    </Col>
-                                                    <Col className="col-auto align-self-center">
-                                                        <Button variant="primary" type="submit">
-                                                            Submit
-                                                        </Button>
-                                                    </Col>
-                                                </Row>
-                                            </Form>
-                                        </Col>
-                                    </Row>
+                                    <div>
+
+                                        {/* profile picture on small devices */}
+                                        <Row className="d-xs-block d-md-none mb-2">
+                                            <Col className="col-auto">
+                                                <PfpResolver
+                                                    address={address}
+                                                    imgUrl={image}
+                                                    height="35px"
+                                                    width="35px"
+                                                    fontSize="0.33rem"
+                                                />
+                                            </Col>
+                                        </Row>
+
+                                        <Row className="align-items-center">
+
+                                            {/* profile picture on large devices */}
+                                            <Col className="col-auto d-none d-md-block">
+                                                <PfpResolver
+                                                    address={address}
+                                                    imgUrl={image}
+                                                    height="100px"
+                                                    width="100px"
+                                                    fontSize="1rem"
+                                                />
+                                            </Col>
+                                            <Col>
+                                                <Form onSubmit={handleSubmit}>
+                                                    <Row>
+                                                        <Col className="pe-0">
+                                                            <InputGroup>
+                                                                <MentionsInput
+                                                                    placeholder="What's on your mind?"
+                                                                    text={postText}
+                                                                    setText={setPostText}
+                                                                    setTaggedUsers={setTaggedUsers}
+                                                                />
+                                                            </InputGroup>
+                                                        </Col>
+                                                        <Col className="col-auto align-self-center">
+                                                            <Button
+                                                                variant="primary"
+                                                                type="submit"
+                                                                size={breakpoint === "xs" || breakpoint === "sm" ? "sm" : ""}>
+                                                                Submit
+                                                            </Button>
+                                                        </Col>
+                                                    </Row>
+                                                </Form>
+                                            </Col>
+                                        </Row>
+                                    </div>
                                 }
                         </Card.Body>
                     </Card>
