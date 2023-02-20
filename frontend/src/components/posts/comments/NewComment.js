@@ -1,22 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { 
-    Button,
-    Container,
-    Card,
-    Col,
-    Form,
-    InputGroup,
-    Row 
-} from "react-bootstrap"
-import { useEnsAvatar } from "wagmi";
+import { useState } from 'react'
 import { baseAPI, getCookie } from '../../../utils'
-import PfpResolver from '../../PfpResolver';
-import MentionsInput from '../MentionsInput';
+import PostForm from '../write/PostForm';
 
-function NewComment({ authedUser, submitCommentCallback, postId }) {
 
+function NewComment({ submitCommentCallback, postId }) {
     // state
-    const { address, image } = {...authedUser.profile}
     const [commentText, setCommentText] = useState("");
     const [taggedUsers, setTaggedUsers] = useState([]);
 
@@ -56,49 +44,13 @@ function NewComment({ authedUser, submitCommentCallback, postId }) {
 
 
     return (
-        <Container>
-            <Row className="justify-content-center">
-                <Col xs={12} lg={6}>
-                    <Card style={{ backgroundColor: "#fffff0" }}>
-                        {/* Card body that includes the comment form details. */}
-                        <Card.Body>
-                            <Row className="align-items-center">
-                                <Col className="col-auto">
-                                    <PfpResolver
-                                        address={address}
-                                        imgUrl={image}
-                                        height="75px"
-                                        width="75px"
-                                        fontSize="0.75rem"
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form onSubmit={handleSubmit}>
-                                        <Row>
-                                            <Col>
-                                                <InputGroup> 
-                                                    <MentionsInput
-                                                        placeholder="What's on your mind?"
-                                                        text={commentText}
-                                                        setText={setCommentText}
-                                                        setTaggedUsers={setTaggedUsers}
-                                                    />
-                                                </InputGroup>
-                                            </Col>
-                                            <Col className="col-auto align-self-center">
-                                                <Button variant="primary" type="submit">
-                                                    Submit
-                                                </Button>
-                                            </Col>
-                                        </Row>
-                                    </Form>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </Container>
+        <PostForm
+            handleSubmit={handleSubmit}
+            text={commentText}
+            setText={setCommentText}
+            taggedUsers={taggedUsers}
+            setTaggedUsers={setTaggedUsers}
+        />
     )
 }
 
