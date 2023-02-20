@@ -184,7 +184,7 @@ function Post({data, bgColor}) {
         // error handling
         else {
             console.error(resp);
-        }        
+        }
     }
 
     /*
@@ -204,7 +204,7 @@ function Post({data, bgColor}) {
         // error handling
         else {
             console.error(resp);
-        }        
+        }
     }
 
     /* 
@@ -343,15 +343,12 @@ function Post({data, bgColor}) {
                                     <Col className="col-auto">
                                         <Button
                                             size="sm"
-                                            variant={
+                                            className={
                                                 postData["likedByMe"] === true
-                                                    ? "outline-danger"
-                                                    : "light"
+                                                    ? "liked-by-me"
+                                                    : "not-liked-by-me"
                                             }
                                             onClick={() => handleLikeClick()}
-                                            style={{
-                                                color: postData.numLikes > 0 ? "#dc3545" : ""
-                                            }}
                                         >
                                             {postData.numLikes}&nbsp;&nbsp;
                                             <FontAwesomeIcon icon={faHeart} />
