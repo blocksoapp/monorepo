@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Col, Container, Row } from "react-bootstrap"
 import { apiGetFeedItems, apiGetUrl } from '../../../api';
+import PaginateButton from '../../ui/PaginateButton';
 import PaginateScroll from '../../ui/PaginateScroll';
 import NewPost from '../../posts/NewPost.js';
 import Post from '../../posts/Post.js'; 
@@ -13,7 +14,7 @@ import PollNewItems from './PollNewItems';
 import NoFeedItems from './NoFeedItems';
 
 
-function Feed({ id, name }) {
+function Feed({ id, name, paginateByButton }) {
   // constants
 
   // state
@@ -114,11 +115,20 @@ function Feed({ id, name }) {
             {/* More Feed Items Link (pagination) */}
             <Row className="justify-content-center">
                 <Col className="col-auto">
-                    <PaginateScroll
-                        url={feedItemsNextPage}
-                        items={feedItems}
-                        callback={setFeedItems}
-                    />
+                    {paginateByButton
+                        ?   <PaginateButton
+                                url={feedItemsNextPage}
+                                items={feedItems}
+                                callback={setFeedItems}
+                                text="Load More"
+                                variant="outline-primary"
+                            />
+                        :   <PaginateScroll
+                                url={feedItemsNextPage}
+                                items={feedItems}
+                                callback={setFeedItems}
+                            />
+                    }
                 </Col>
             </Row>
 

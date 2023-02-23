@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { apiGetExplore } from '../../api'
 import FeaturedProfiles from './FeaturedProfiles';
 import FeaturedFeeds from './FeaturedFeeds';
+import FeaturedFeed from './FeaturedFeed';
 
 
 function ExploreSection() {
@@ -30,11 +31,21 @@ function ExploreSection() {
 
   return (
     <div>
+        {/* show activity for a random feed */}
         <h3 className="display-6 my-5 text-center text-muted">Latest activity from...</h3>
-        <FeaturedFeeds feeds={featuredFeedItems} />
+        {featuredFeedItems.length > 0 && 
+            <FeaturedFeed
+                feedId={featuredFeedItems[
+                    Math.floor(
+                        Math.random()*featuredFeedItems.length
+                    )
+                ].id
+                }
+            />
+        }
 
-        <h3 className="display-4 my-5 text-center text-muted">Featured Profiles</h3>
-        <FeaturedProfiles profiles={featuredProfileItems} />
+        <h3 className="display-6 my-5 text-center text-muted">Discover Feeds</h3>
+        <FeaturedFeeds feeds={featuredFeedItems} />
   </div>
   )
 }
