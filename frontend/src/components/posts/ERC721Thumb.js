@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import { Image, Spinner } from "react-bootstrap";
+import { apiGetAsset, fetchWithRateLimitRetry, tokenBucket } from "../../clients/opensea";
 import ERC721ThumbError from "./ERC721ThumbError";
 
 
@@ -21,7 +22,6 @@ function ERC721Thumb({
     // used to abort pending requests on component unmount
     const fetchController = new AbortController();
 
-
     /*
      * Fetch URL of token image using Opensea API.
      * Set the state of the parent components on success.
@@ -34,8 +34,17 @@ function ERC721Thumb({
         setIsLoading(true);
 
         // get asset url from opensea
-        var url = `https://api.opensea.io/api/v1/asset/${transfer.contract_address}/${transfer.token_id}/`
-        var resp = await fetch(url, {signal: fetchController.signal});
+        const resp = await fetchWithRateLimitRetry(
+            () => (
+                tokenBucket.acquireToken(
+                    () => apiGetAsset(
+                        transfer.contract_address,
+                        transfer.token_id,
+                        fetchController.signal
+                    )
+                )
+            )
+        );
 
         // give the user option to retry in case of error
         if (!resp.ok) {
@@ -43,13 +52,14 @@ function ERC721Thumb({
             setIsLoading(false);
             throw new Error(resp);
         }
-        resp = await resp.json();
+
+        const data = await resp.json();
 
         // insert asset url into parent components' state - needed to display gallery
         var newThumbImgs = tokenImagesThumb
-        newThumbImgs.splice(index, 0, resp["image_thumbnail_url"]);
+        newThumbImgs.splice(index, 0, data["image_thumbnail_url"]);
         var newFullImgs = tokenImagesFull
-        newFullImgs.splice(index, 0, resp["image_url"]);
+        newFullImgs.splice(index, 0, data["image_url"]);
 
         setTokenImagesThumb(newThumbImgs);
         setTokenImagesFull(newFullImgs);

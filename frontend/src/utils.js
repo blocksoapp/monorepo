@@ -107,3 +107,10 @@ export function formatTokenAmount(amount, decimals) {
     formatted = (+formatted).toFixed(4);  // truncate after 4 places
     return formatted;
 }
+
+/* 
+ * Sleep function for async/await.
+ */
+export function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
