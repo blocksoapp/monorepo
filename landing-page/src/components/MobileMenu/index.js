@@ -11,16 +11,13 @@ function MobileMenu({setMenuOpened}) {
                 <a href='#features' onClick={() => setMenuOpened(false)}>
                     Features
                 </a>
-                <a href='#blog' onClick={() => setMenuOpened(false)}>
-                    Blog
-                </a>
                 <a href='#testimonials' onClick={() => setMenuOpened(false)}>
                     Testimonials
                 </a>
             </div>
             <div className={classes.bottom}>
                 <div className={classes.launchBtn}>
-                    Launch App
+                    <a href="https://app.blockso.fun">Launch App</a>
                 </div>
                 <SocialLinks />
             </div>

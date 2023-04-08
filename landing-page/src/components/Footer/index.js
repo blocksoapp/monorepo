@@ -9,16 +9,18 @@ function Footer() {
     <footer className={classes.footer}>
       <img src={logo} className={classes.logo} alt='logo' />
       <div className={classes.desc}>
-        with <span>❤</span> love
+        with <span>❤</span>
       </div>
       <div className={classes.footerBar}>
         <div className={classes.left}>
           blockso. all rights reserved
         </div>
+        {/*
         <div className={classes.middle}>
           <a href='/'>Terms of Service</a>
           <a href='/'>Privacy Policy</a>
         </div>
+        */}
         <div className={classes.right}>
           <SocialLinks />
         </div>

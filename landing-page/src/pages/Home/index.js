@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
 import classes from './Home.module.scss';
 import banner_2 from '../../assets/img/banner_2.png';
-import banner_3 from '../../assets/img/banner_3.png';
-import banner_3_mobile from '../../assets/img/banner_3_mobile.png';
+import banner_3 from '../../assets/img/banner_3.svg';
+import banner_3_mobile from '../../assets/img/banner_3_mobile.svg';
 import featureImg_1 from '../../assets/img/feature_image_1.png';
 import featureImg_2 from '../../assets/img/feature_image_2.png';
 import featureImg_3 from '../../assets/img/feature_image_3.png';
 import featureImg_4 from '../../assets/img/feature_image_4.png';
-import chat_1 from '../../assets/img/feature_chat_1.png';
-import chat_2 from '../../assets/img/feature_chat_2.png';
-import chat_3 from '../../assets/img/feature_chat_3.png';
-import chat_4 from '../../assets/img/feature_chat_4.png';
-import chat_5 from '../../assets/img/feature_chat_5.png';
-import chat_6 from '../../assets/img/feature_chat_6.png';
-import chat_7 from '../../assets/img/feature_chat_7.png';
-import chat_8 from '../../assets/img/feature_chat_8.png';
-import chat_9 from '../../assets/img/feature_chat_9.png';
-import chains from '../../assets/img/feature_chains.png';
-import metamask from '../../assets/img/feature_metamask.png';
-import walletConnect from '../../assets/img/feature_wallet_connect.png';
-import rainbow from '../../assets/img/feature_rainbow.png';
-import coinbase from '../../assets/img/feature_coinbase.png';
-import blog_1 from '../../assets/img/blog_1.png';
-import blog_2 from '../../assets/img/blog_2.png';
+import chat_1 from '../../assets/img/feature_chat_1.svg';
+import chat_2 from '../../assets/img/feature_chat_2.svg';
+import chat_3 from '../../assets/img/feature_chat_3.svg';
+import chat_4 from '../../assets/img/feature_chat_4.svg';
+import chat_5 from '../../assets/img/feature_chat_5.svg';
+import chat_6 from '../../assets/img/feature_chat_6.svg';
+import chat_7 from '../../assets/img/feature_chat_7.svg';
+import chat_8 from '../../assets/img/feature_chat_8.svg';
+import chat_9 from '../../assets/img/feature_chat_9.svg';
+import chains from '../../assets/img/feature_chains.svg';
+import metamask from '../../assets/img/feature_metamask.svg';
+import walletConnect from '../../assets/img/feature_wallet_connect.svg';
+import rainbow from '../../assets/img/feature_rainbow.svg';
+import coinbase from '../../assets/img/feature_coinbase.svg';
+import blog_1 from '../../assets/img/blog_1.svg';
+import blog_2 from '../../assets/img/blog_2.svg';
 import read_1 from '../../assets/img/read_1.png';
 import read_2 from '../../assets/img/read_2.png';
 import read_3 from '../../assets/img/read_3.png';
-import testimonial_1 from '../../assets/img/testimonial_1.png';
-import testimonial_2 from '../../assets/img/testimonial_2.png';
-import testimonial_3 from '../../assets/img/testimonial_3.png';
-import star from '../../assets/img/star.png';
-import starActive from '../../assets/img/star_active.png';
+import testimonial_1 from '../../assets/img/testimonial_1.svg';
+import testimonial_2 from '../../assets/img/testimonial_2.svg';
+import testimonial_3 from '../../assets/img/testimonial_3.svg';
+import star from '../../assets/img/star.svg';
+import starActive from '../../assets/img/star_active.svg';
 
 function Home() {
   const [featureTab, setFeatureTab] = useState(0);
@@ -38,8 +38,8 @@ function Home() {
 
   const featureData = [
     {
-      title: 'Find Alpha',
-      desc: <>Use wallet connect to join blockso.<br />Progress in a secure and anonymous ecosystem. Personalize your profile with your assets.</>,
+      title: 'Activity Stream',
+      desc: <>Stay ahead of the game by watching the activity of your friends and communities in real-time!</>,
       img: featureImg_1,
       contents: <>
         <img className={classes.chat_1} src={chat_1} alt='chat-1' />
@@ -48,8 +48,8 @@ function Home() {
       </>
     },
     {
-      title: 'Feed Track',
-      desc: <>Did you just see a suspicious transaction for a token you’re holding? Tag your friends to GTFO! Even better, tag all the token holders!</>,
+      title: 'Feeds',
+      desc: <>Create Feeds to group accounts and their activity! <br/><br/> Explore Feeds that others have created to learn something new!</>,
       img: featureImg_2,
       contents: <>
         <img className={classes.chat_4} src={chat_4} alt='chat-4' />
@@ -59,7 +59,7 @@ function Home() {
     },
     {
       title: 'Wallet Messaging',
-      desc: <>Track the activity of your friends and communities across all EVM-compatible blockchains, allowing you to stay ahead of the game!</>,
+      desc: <>Chat with friends and randos alike, using messaging protocols like XMTP and Chainmail!</>,
       img: featureImg_3,
       contents: <>
         <img className={classes.chat_7} src={chat_7} alt='chat-7' />
@@ -68,8 +68,16 @@ function Home() {
       </>
     },
     {
-      title: 'One Click Connect',
-      desc: <>Blockso puts you closer to the things that you normally share with your friends, faster!</>,
+      title: 'Cross-Chain',
+      desc: <>Get a full picture by seeing what's happening across all EVM-based chains and L2's!<br/><br/>Blockso puts you closer to the things that you normally share with your friends, faster!</>,
+      img: featureImg_4,
+      contents: <>
+        <img className={classes.chains} src={chains} alt='chains' />
+      </>
+    },
+    {
+      title: 'One-Click Connect',
+      desc: <>Sign in using your favorite wallet! No need to create an account!</>,
       img: featureImg_4,
       contents: <>
         <img className={classes.metamask} src={metamask} alt='metamask' />
@@ -78,41 +86,33 @@ function Home() {
         <img className={classes.coinbase} src={coinbase} alt='coinbase' />
       </>
     },
-    {
-      title: 'Activity From All Chains',
-      desc: <>Blockso puts you closer to the things that you normally share with your friends, faster!</>,
-      img: featureImg_4,
-      contents: <>
-        <img className={classes.chains} src={chains} alt='chains' />
-      </>
-    },
   ]
 
   const testimonialData = [
     {
-      name: 'Angella Marvc. Junior',
-      job: <>CEO at <strong>SocialApp</strong></>,
+      name: "Digital Dealer",
+      job: <>MINT Marketplace Founder & Active User</>,
       avatar: testimonial_1,
-      title: 'UX is easy to use',
-      stars: 4,
-      desc: <>My favorite thing to do is scroll through the feed and discover new projects.<br />
-        It feels like Instagram for web3!</>
+      title: "Feels good to be early!",
+      stars: 5,
+      desc: <>Blockso helped me find hype projects, <strong>early</strong>, on multiple occasions! Keep it up!!</>
     },
     {
-      name: 'Axel Bitblaze',
-      job: <>Influencer <strong>500k</strong> Subscribers</>,
+      name: "Power",
+      job: <>Purveyor of Fine Digital Art</>,
       avatar: testimonial_2,
-      title: 'Finding alpha is Super Easy',
+      title: "It's honestly entertaining!",
       stars: 4,
-      desc: <>Blockso has helped me find alpha on multiple occasions!</>
+      desc: <>I really enjoy scrolling through the feed and discovering new projects!<br />
+        It feels like Instagram for web3! 4 stars because the UX can be improved.</>
     },
     {
-      name: 'Julliete Bold',
-      job: <>Crypto user</>,
+      name: "Rich BTC Maxi",
+      job: <>Active Trader</>,
       avatar: testimonial_3,
-      title: 'Made copy-trade easy',
-      stars: 4,
-      desc: <>I copy-traded franklinisbored.eth on the Old Rocks NFT and made a nice profit!</>
+      title: "Loving the social aspect!",
+      stars: 5,
+      desc: <>I love it when my friends tag me on transactions! It's made it easier to hunt for gains with my tribe!</>
     }
   ]
 
@@ -120,15 +120,17 @@ function Home() {
     <div className={classes.home}>
       <section className={classes.banner}>
         <div className={classes.title}>
-          blockso keeps you on top of your WEB3!
+          Stay ahead of the curve!
         </div>
         <div className={classes.desc}>
-          Discover alpha, learn strategies, avoid exploits, share insights, and more
-          using Blockso's revolutionary social tool!
+          Find alpha, dodge exploits, learn new strategies, and share insights!
+        </div>
+        <div className={classes.desc}>
+          All with your frens, all within the app!
         </div>
         <div className={classes.launch}>
           <div className={classes.launchBtn}>
-            Launch App
+            <a href="https://app.blockso.fun">Launch App</a>
           </div>
           <img className={classes.img_1} src={banner_2} alt='banner_2' />
           <img className={classes.img_2} src={banner_3} alt='banner_3' />
@@ -137,12 +139,10 @@ function Home() {
       </section>
       <section className={classes.features} id='features'>
         <div className={classes.title}>
-          The social<br />
-          network of the web3.0
+          Power-packed Features!
         </div>
         <div className={classes.desc}>
-          Connect your wallet and follow your friends, total strangers, alpha groups, influencers, DAOs.<br />
-          You can see all that they do in a vibrant and fun way, Build the next social network owned by its users.
+          Click through to see some of what Blockso has to offer.
         </div>
         <div className={classes.feature}>
           <div className={classes.tabs}>
@@ -156,7 +156,6 @@ function Home() {
           </div>
           <div className={classes.content}>
             <div className={classes.left}>
-              <img className={classes.avatar} src={featureData[featureTab].img} alt='feature-avatar' />
               <div className={classes.title}>
                 {featureData[featureTab].title}
               </div>
@@ -173,34 +172,31 @@ function Home() {
       <section className={classes.blog}>
         <div className={classes.left}>
           <div className={classes.title}>
-            Stay Informed with
-            Real-Time Alerts 🔔
+            🔔 Web3 Notifications
           </div>
           <div className={classes.desc}>
-            Receive real-time alerts and notifications on important blockchain activity,
-            allowing you to stay informed and connected.
+            Stay connected with real-time alerts from all dapps in web3. Blockso shows you all your notifications in one place!
           </div>
           <img src={blog_1} alt='blog-1' />
         </div>
         <div className={classes.line} />
         <div className={classes.right}>
           <div className={classes.title}>
-            User-Friendly Interface
+            <span style={{color: "red"}}>❤</span> User-Friendly Interface
           </div>
           <div className={classes.desc}>
-            Enjoy an intuitive and user-friendly interface that makes it easy to navigate
-            and explore your blockchain insights
+            Simple and intuitive interface makes it enjoyable to keep up with what's going on!
           </div>
           <img src={blog_2} alt='blog-2' />
         </div>
       </section>
+      {/*
       <section className={classes.read} id="blog">
         <div className={classes.title}>
-          Useful to Read
+          Case Studies
         </div>
         <div className={classes.desc}>
-          Connect your wallet and follow your friends, total strangers, alpha groups, influencers, DAOs.<br />
-          You can see all that they do in a vibrant and fun way, Build the next social network owned by its users.
+          Below are case studies of people that used Blockso and benefited!
         </div>
         <div className={classes.content}>
           <img src={read_1} alt='read-1' />
@@ -208,13 +204,13 @@ function Home() {
           <img src={read_3} alt='read-3' />
         </div>
       </section>
+      */}
       <section className={classes.testimonials} id='testimonials'>
         <div className={classes.title}>
           Testimonials
         </div>
         <div className={classes.desc}>
-          Connect your wallet and follow your friends, total strangers, alpha groups, influencers, DAOs.<br />
-          You can see all that they do in a vibrant and fun way, Build the next social network owned by its users.
+          Read what some users have to say about Blockso!
         </div>
         <div className={classes.content}>
           <div className={classes.left}>
@@ -256,19 +252,15 @@ function Home() {
       </section>
       <section className={classes.join}>
         <div className={classes.content}>
-          <div className={classes.subtitle}>
-            Hope that’s enough!
-          </div>
           <div className={classes.title}>
-            Eager to join blockso ?
+            What are you waiting for?
           </div>
           <div className={classes.desc}>
-            It’s still early and there’s lots to do! Have an idea?<br />
-            We’d love it if you use the app and provide feedback! We want to build features to make web3 more fun for you!
+            Jump in and see what the fuss is about!
           </div>
         </div>
         <div className={classes.demoBtn}>
-          Live Demo
+          <a href="https://app.blockso.fun">Launch App</a>
         </div>
       </section>
     </div>

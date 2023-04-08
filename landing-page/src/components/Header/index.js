@@ -20,12 +20,12 @@ function Header() {
                         <div className={classes.nav}>
                             <a href="#">Home</a>
                             <a href="#features">Features</a>
-                            <a href="#blog">Blog</a>
+                            {/*<a href="#blog">Blog</a>*/}
                             <a href="#testimonials">Testimonials</a>
                         </div>
                         <SocialLinks />
                         <button className={classes.launchBtn}>
-                            Launch App
+                            <a href="https://app.blockso.fun">Launch App</a>
                         </button>
                     </div>
                     <button className={classes.menuBtn} onClick={() => setMenuOpened(p => !p)}>

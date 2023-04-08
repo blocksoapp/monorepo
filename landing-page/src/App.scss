@@ -1,4 +1,5 @@
 @import url('./assets/fonts/Nexa/font.scss');
+@import url('./assets/fonts/OpenSans/font.scss');
 
 * {
     margin: 0;
@@ -50,7 +51,7 @@ input {
 
 #root {
     height: 100%;
-    font-family: 'Nexa-light';
+    font-family: 'OpenSans-Regular';
     color: #000000;
 }
 
