@@ -26,7 +26,6 @@ function NavbarComponent() {
       handleSearch();
     }
   };
-  
 
   return (
     <Navbar bg="light" expand="lg" className="mb-5">
@@ -43,10 +42,7 @@ function NavbarComponent() {
               </Nav.Link>
             )}
             {user !== null && signedIn && (
-              <Nav.Link
-                as={Link}
-                to={`/feeds`}
-                eventKey={`/feeds`}>
+              <Nav.Link as={Link} to={`/feeds`} eventKey={`/feeds`}>
                 Feeds
               </Nav.Link>
             )}
@@ -62,7 +58,8 @@ function NavbarComponent() {
               <Nav.Link
                 as={Link}
                 to={`${user["address"]}/profile`}
-                eventKey={`${user["address"]}/profile`}>
+                eventKey={`${user["address"]}/profile`}
+              >
                 My Posts
               </Nav.Link>
             )}

@@ -1,8 +1,9 @@
 import React, { useContext } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import MyFeed from "../components/feed/read/MyFeed";
 import { UserContext } from "../contexts/UserContext";
 import { useSIWE } from "connectkit";
+import SideNavbar from "../components/ui/sidenavbar/SideNavbar";
 
 function Home() {
   // constants
@@ -10,7 +11,7 @@ function Home() {
   const { signedIn } = useSIWE();
 
   return (
-    <Container>
+    <Container className="">
       {user !== null && signedIn ? (
         <MyFeed className="mt-5" profileData={user} />
       ) : (

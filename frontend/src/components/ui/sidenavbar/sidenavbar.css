@@ -1,0 +1,95 @@
+:root {
+  --dark-theme-color: #000000; /* black */
+  --light-theme-color: #ffffff; /* white */
+  --primary-color: #1da1f2; /* blockso blue color */
+  --darker-primary-color: #0b98f0cc; /* a darker shade of #1DA1F2 */
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(
+    --darker-primary-color
+  ); /* a darker shade of your custom primary color */
+  border-color: var(--darker-primary-color);
+}
+
+.sidebar {
+  font-family: "Nexa", sans-serif;
+  background-color: var(--light-theme-color);
+  padding: 15px;
+  height: 100vh;
+  max-width: 300px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-x: hidden;
+  border-right: 1px solid #e6ecf0;
+}
+
+.logo img {
+  padding: 8px 16px;
+  margin-bottom: 15px;
+  max-width: 170px;
+}
+
+.sidebar .icon {
+  font-size: 22px;
+  margin-right: 10px;
+  color: var(--dark-theme-color);
+}
+
+.sidebar .nav-link.active {
+  font-weight: 900;
+}
+
+.sidebar .nav-link.active .icon {
+  font-weight: 900;
+}
+
+.nav-link {
+  font-size: 20px;
+  color: var(--dark-theme-color);
+  padding: 1rem;
+}
+
+.nav-link:hover {
+  background-color: #f8f9fa;
+  border-radius: 30px;
+  color: var(--dark-theme-color);
+}
+
+.post-button {
+  margin-top: 1rem;
+}
+
+.siwe-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+  padding: 8px 16px;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    width: 88px;
+  }
+
+  .sidebar .nav-link span {
+    display: none;
+  }
+
+  .sidebar .nav-link .icon {
+    margin-right: 0;
+  }
+
+  .tweet-button {
+    display: none;
+  }
+}

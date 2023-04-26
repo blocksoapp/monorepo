@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Container, Row, Col } from "react-bootstrap";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Explore from "./pages/Explore";
 import Home from "./pages/Home";
@@ -14,6 +15,7 @@ import FeedFollow from "./pages/FeedFollow";
 import Follow from "./pages/Follow";
 import { apiGetUser } from "./api";
 import { useSIWE } from "connectkit";
+import SideNavbar from "./components/ui/sidenavbar/SideNavbar";
 
 function App(props) {
   // Constants
@@ -41,7 +43,7 @@ function App(props) {
   }, []);
 
   return (
-    <>
+    <Container className="">
       <UserContext.Provider
         value={{
           user,
@@ -49,30 +51,50 @@ function App(props) {
         }}
       >
         <Router>
-          <NavbarComponent />
-          <Routes>
-            {user !== null && signedIn ? (
-              <Route path="/" element={<Home />}></Route>
-            ) : (
-              <Route path="/" element={<Explore />}></Route>
-            )}
-            <Route path="/home" element={<Home />}></Route>
-            <Route path="/explore" element={<Explore />}></Route>
-            <Route path="/edit-profile" element={<EditProfile />}></Route>
-            <Route path="/feeds/:feedId/edit" element={<EditFeed />}></Route>
-            <Route path="/feeds/:feedId/follow" element={<FeedFollow />}></Route>
-            <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
-            <Route path="/feeds" element={<Feeds />}></Route>
-            <Route path="/:urlInput/profile/" element={<ViewProfile />}></Route>
-            <Route path="/posts/:postId" element={<PostPage />}></Route>
-            <Route
-              path="/:urlInput/profile/follow"
-              element={<Follow />}
-            ></Route>
-          </Routes>
+          <Row>
+            {/* side navbar */}
+            <Col sm={3} md={3}>
+              <SideNavbar />
+            </Col>
+            {/* main content */}
+            <Col sm={9} md={9}>
+              <div className="outline-red" style={{ marginLeft: "auto" }}>
+                <Routes>
+                  {user !== null && signedIn ? (
+                    <Route path="/" element={<Home />}></Route>
+                  ) : (
+                    <Route path="/" element={<Explore />}></Route>
+                  )}
+                  <Route path="/home" element={<Home />}></Route>
+                  <Route path="/explore" element={<Explore />}></Route>
+                  <Route path="/edit-profile" element={<EditProfile />}></Route>
+                  <Route
+                    path="/feeds/:feedId/edit"
+                    element={<EditFeed />}
+                  ></Route>
+                  <Route
+                    path="/feeds/:feedId/follow"
+                    element={<FeedFollow />}
+                  ></Route>
+                  <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
+                  <Route path="/feeds" element={<Feeds />}></Route>
+                  <Route
+                    path="/:urlInput/profile/"
+                    element={<ViewProfile />}
+                  ></Route>
+                  <Route path="/posts/:postId" element={<PostPage />}></Route>
+                  <Route
+                    path="/:urlInput/profile/follow"
+                    element={<Follow />}
+                  ></Route>
+                </Routes>
+              </div>
+              {/* div for side content */}
+            </Col>
+          </Row>
         </Router>
       </UserContext.Provider>
-    </>
+    </Container>
   );
 }
 
