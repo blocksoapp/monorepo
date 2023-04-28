@@ -16,6 +16,7 @@ import Follow from "./pages/Follow";
 import { apiGetUser } from "./api";
 import { useSIWE } from "connectkit";
 import SideNavbar from "./components/ui/sidenavbar/SideNavbar";
+import SideContent from "./components/sidecontent/SideContent";
 
 function App(props) {
   // Constants
@@ -43,7 +44,7 @@ function App(props) {
   }, []);
 
   return (
-    <Container className="">
+    <Container fluid className="">
       <UserContext.Provider
         value={{
           user,
@@ -51,45 +52,45 @@ function App(props) {
         }}
       >
         <Router>
-          <Row>
+          <SideNavbar />
+          <Row className="content-container gap-3">
             {/* side navbar */}
-            <Col sm={3} md={3}>
-              <SideNavbar />
-            </Col>
+
             {/* main content */}
-            <Col sm={9} md={9}>
-              <div className="outline-red" style={{ marginLeft: "auto" }}>
-                <Routes>
-                  {user !== null && signedIn ? (
-                    <Route path="/" element={<Home />}></Route>
-                  ) : (
-                    <Route path="/" element={<Explore />}></Route>
-                  )}
-                  <Route path="/home" element={<Home />}></Route>
-                  <Route path="/explore" element={<Explore />}></Route>
-                  <Route path="/edit-profile" element={<EditProfile />}></Route>
-                  <Route
-                    path="/feeds/:feedId/edit"
-                    element={<EditFeed />}
-                  ></Route>
-                  <Route
-                    path="/feeds/:feedId/follow"
-                    element={<FeedFollow />}
-                  ></Route>
-                  <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
-                  <Route path="/feeds" element={<Feeds />}></Route>
-                  <Route
-                    path="/:urlInput/profile/"
-                    element={<ViewProfile />}
-                  ></Route>
-                  <Route path="/posts/:postId" element={<PostPage />}></Route>
-                  <Route
-                    path="/:urlInput/profile/follow"
-                    element={<Follow />}
-                  ></Route>
-                </Routes>
-              </div>
+            <Col className="main-content">
+              <Routes>
+                {user !== null && signedIn ? (
+                  <Route path="/" element={<Home />}></Route>
+                ) : (
+                  <Route path="/" element={<Explore />}></Route>
+                )}
+                <Route path="/home" element={<Home />}></Route>
+                <Route path="/explore" element={<Explore />}></Route>
+                <Route path="/edit-profile" element={<EditProfile />}></Route>
+                <Route
+                  path="/feeds/:feedId/edit"
+                  element={<EditFeed />}
+                ></Route>
+                <Route
+                  path="/feeds/:feedId/follow"
+                  element={<FeedFollow />}
+                ></Route>
+                <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
+                <Route path="/feeds" element={<Feeds />}></Route>
+                <Route
+                  path="/:urlInput/profile/"
+                  element={<ViewProfile />}
+                ></Route>
+                <Route path="/posts/:postId" element={<PostPage />}></Route>
+                <Route
+                  path="/:urlInput/profile/follow"
+                  element={<Follow />}
+                ></Route>
+              </Routes>
+            </Col>
+            <Col className="side-content">
               {/* div for side content */}
+              <SideContent />
             </Col>
           </Row>
         </Router>

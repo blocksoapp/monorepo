@@ -1,3 +1,14 @@
+:root {
+  --dark-theme-color: #000000; /* black */
+  --light-theme-color: #ffffff; /* white */
+  --primary-color: #1da1f2; /* blockso blue color */
+  --darker-primary-color: #0b98f0cc; /* a darker shade of #1DA1F2 */
+
+  /* padding and spacing */
+  --page-top-padding: 2rem;
+  --page-bottom-padding: 2rem;
+}
+
 a {
   text-decoration: none;
   color: #0076ff;
@@ -16,8 +27,23 @@ code {
     monospace;
 }
 
-.primary-color {
-  color: #00a8e8;
+/* home page grid */
+.content-container {
+  padding-top: var(--page-top-padding);
+  padding-bottom: var(--page-bottom-padding);
+}
+/* main content column */
+.main-content {
+  border: solid 2px red;
+  padding-left: 270px;
+  width: 600px;
+  height: auto;
+}
+
+.side-content {
+  max-width: 350px;
+  height: 100vh;
+  border: solid 2px blue;
 }
 
 .fullheight-container {

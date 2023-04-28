@@ -1,10 +1,3 @@
-:root {
-  --dark-theme-color: #000000; /* black */
-  --light-theme-color: #ffffff; /* white */
-  --primary-color: #1da1f2; /* blockso blue color */
-  --darker-primary-color: #0b98f0cc; /* a darker shade of #1DA1F2 */
-}
-
 .btn-primary {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
@@ -22,7 +15,7 @@
   background-color: var(--light-theme-color);
   padding: 15px;
   height: 100vh;
-  max-width: 300px;
+  max-width: 250px;
   position: fixed;
   left: 0;
   top: 0;
@@ -76,7 +69,7 @@
   width: 100%;
 }
 
-@media (max-width: 992px) {
+/* @media (max-width: 992px) {
   .sidebar {
     width: 88px;
   }
@@ -90,6 +83,12 @@
   }
 
   .tweet-button {
+    display: none;
+  }
+} */
+
+@media (max-width: 475px) {
+  .sidebar {
     display: none;
   }
 }
