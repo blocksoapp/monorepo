@@ -6,7 +6,7 @@ import SearchBar from "../searchbar/SearchBar";
 
 function SideContent() {
   return (
-    <Container>
+    <Container className="py-1">
       {/* search bar here fixed to top */}
       <SearchBar />
       {/* feeds to follow */}

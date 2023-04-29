@@ -24,7 +24,9 @@ function SideNavbar() {
   return (
     <Container className="sidebar">
       <div className="logo">
-        <Image src={BlocksoSVG} alt="Blockso Logo" />
+        <Link to="/">
+          <Image src={BlocksoSVG} alt="Blockso Logo" />
+        </Link>
       </div>
       <Nav className="flex-column" activeKey={routerLocation.pathname}>
         {user !== null && signedIn && (
