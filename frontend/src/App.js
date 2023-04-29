@@ -44,7 +44,7 @@ function App(props) {
   }, []);
 
   return (
-    <Container fluid className="">
+    <Container className="">
       <UserContext.Provider
         value={{
           user,
@@ -52,10 +52,12 @@ function App(props) {
         }}
       >
         <Router>
-          <SideNavbar />
           <Row className="content-container gap-3">
             {/* side navbar */}
-
+            <Col className="side-navbar">
+              {/* make sidenavbar hide at 987px and below */}
+              <SideNavbar />
+            </Col>
             {/* main content */}
             <Col className="main-content outline-red">
               <Routes>

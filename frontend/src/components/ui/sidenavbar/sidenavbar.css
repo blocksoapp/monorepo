@@ -10,16 +10,16 @@
   border-color: var(--darker-primary-color);
 }
 
-.sidebar {
+.side-navbar {
+  max-width: 275px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 100vh;
+  overflow: auto;
   font-family: "Nexa", sans-serif;
   background-color: var(--light-theme-color);
-  padding: 15px;
-  height: 100vh;
-  max-width: 250px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  overflow-x: hidden;
+  overflow-x: auto;
   border-right: 1px solid #e6ecf0;
 }
 
