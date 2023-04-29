@@ -34,7 +34,7 @@ function PostForm({
   return (
     <Container>
       <Row className="justify-content-center">
-        <Col xs={12} lg={6}>
+        <Col>
           <Card style={{ backgroundColor: "#fffff0" }}>
             {/* Card body that includes the post form details. */}
             <Card.Body>
@@ -107,7 +107,7 @@ function PostForm({
                                   : ""
                               }
                             >
-                              Submit
+                              Post
                             </Button>
                           </Col>
                         </Row>

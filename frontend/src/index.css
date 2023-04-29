@@ -34,12 +34,12 @@ code {
 .main-content {
   width: 600px;
   height: auto;
+  overflow: auto;
 }
 
 .side-content {
   max-width: 350px;
   max-height: 100vh;
-  border: solid 2px blue;
   overflow: auto;
   position: sticky;
   top: 0;

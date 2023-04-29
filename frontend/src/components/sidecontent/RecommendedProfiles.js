@@ -13,6 +13,24 @@ function RecommendedProfiles() {
         tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
         consequuntur sint ullam.
       </p>
+      <p>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
+        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
+        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
+        consequuntur sint ullam.
+      </p>
+      <p>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
+        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
+        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
+        consequuntur sint ullam.
+      </p>
+      <p>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
+        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
+        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
+        consequuntur sint ullam.
+      </p>
     </Container>
   );
 }

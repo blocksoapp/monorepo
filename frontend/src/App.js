@@ -52,14 +52,14 @@ function App(props) {
         }}
       >
         <Router>
-          <Row className="content-container gap-3">
+          <Row className="content-container">
             {/* side navbar */}
-            <Col className="side-navbar">
+            <Col className="side-navbar p-0">
               {/* make sidenavbar hide at 987px and below */}
               <SideNavbar />
             </Col>
             {/* main content */}
-            <Col className="main-content outline-red">
+            <Col className="main-content outline-red p-0">
               <Routes>
                 {user !== null && signedIn ? (
                   <Route path="/" element={<Home />}></Route>
@@ -90,7 +90,7 @@ function App(props) {
                 ></Route>
               </Routes>
             </Col>
-            <Col className="side-content">
+            <Col className="side-content p-0">
               {/* make sidecontent hide at 987px and below */}
               <SideContent />
             </Col>
