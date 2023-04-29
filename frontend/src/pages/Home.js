@@ -11,7 +11,7 @@ function Home() {
   const { signedIn } = useSIWE();
 
   return (
-    <Container className="border p-0">
+    <Container className="p-0">
       {user !== null && signedIn ? (
         <MyFeed className="mt-5" profileData={user} />
       ) : (

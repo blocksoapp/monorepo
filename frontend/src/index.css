@@ -29,12 +29,9 @@ code {
 
 /* home page grid */
 .content-container {
-  padding-top: var(--page-top-padding);
-  padding-bottom: var(--page-bottom-padding);
 }
 /* main content column */
 .main-content {
-  border: solid 2px red;
   padding-left: 270px;
   width: 600px;
   height: auto;
@@ -42,8 +39,18 @@ code {
 
 .side-content {
   max-width: 350px;
-  height: 100vh;
+  max-height: 100vh;
   border: solid 2px blue;
+  overflow: auto;
+  position: sticky;
+  top: 0;
+  bottom: 0;
+}
+
+@media (max-width: 987px) {
+  .side-content {
+    display: none;
+  }
 }
 
 .fullheight-container {

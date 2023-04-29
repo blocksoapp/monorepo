@@ -5,8 +5,8 @@ import "./sidecontent.css";
 //
 function RecommendedProfiles() {
   return (
-    <Container className="suggested-profiles">
-      <h1 className="sidecontent-h1">Who To Follow</h1>
+    <Container className="side-content-card">
+      <h1 className="">Who To Follow</h1>
       <p>
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
         velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga

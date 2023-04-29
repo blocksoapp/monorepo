@@ -96,7 +96,7 @@ function MyFeed({ profileData }) {
   }, [reachedPageBottom]);
 
   return (
-    <Container className="outline-red p-0">
+    <Container className="p-0">
       {/* Poll for new feed items in background */}
       <PollNewItems
         interval={30000} // 30 seconds

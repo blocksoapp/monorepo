@@ -57,7 +57,7 @@ function App(props) {
             {/* side navbar */}
 
             {/* main content */}
-            <Col className="main-content">
+            <Col className="main-content outline-red">
               <Routes>
                 {user !== null && signedIn ? (
                   <Route path="/" element={<Home />}></Route>
@@ -89,7 +89,7 @@ function App(props) {
               </Routes>
             </Col>
             <Col className="side-content">
-              {/* div for side content */}
+              {/* make sidecontent hide at 987px and below */}
               <SideContent />
             </Col>
           </Row>

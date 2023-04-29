@@ -11,9 +11,17 @@ input[type="text"]::placeholder {
   color: #a2a2a2;
 }
 
-button {
+.search button {
+  background-color: #e8f0fe;
   border: none;
-  background-color: transparent;
-  padding: 12px;
+  color: #a2a2a2;
+  border-radius: 50px;
+  font-size: 16px;
+  padding: 12px 16px;
   margin-left: -50px;
+  cursor: pointer;
+}
+
+.search button:hover {
+  background-color: #d5e1fa;
 }
