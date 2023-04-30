@@ -84,6 +84,10 @@
     justify-content: center;
   }
 
+  .sidebar .icon {
+    margin-right: 0;
+  }
+
   .siwe-button {
     display: none;
   }

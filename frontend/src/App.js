@@ -59,7 +59,7 @@ function App(props) {
               <SideNavbar />
             </Col>
             {/* main content */}
-            <Col className="main-content outline-red p-0">
+            <Col className="main-content p-0">
               <Routes>
                 {user !== null && signedIn ? (
                   <Route path="/" element={<Home />}></Route>
