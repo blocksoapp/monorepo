@@ -52,7 +52,7 @@ function App(props) {
         }}
       >
         <Router>
-          <Row className="content-container">
+          <Row>
             {/* side navbar */}
             <Col className="side-navbar p-0">
               {/* make sidenavbar hide at 987px and below */}
