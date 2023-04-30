@@ -32,7 +32,8 @@ code {
 }
 /* main content column */
 .main-content {
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   height: auto;
   overflow: auto;
 }
@@ -47,6 +48,9 @@ code {
 }
 
 @media (max-width: 987px) {
+  .main-content {
+    width: calc(100% - 363px);
+  }
   .side-content {
     display: none;
   }

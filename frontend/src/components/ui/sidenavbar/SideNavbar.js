@@ -32,25 +32,25 @@ function SideNavbar() {
         {user !== null && signedIn && (
           <Nav.Link as={Link} to="/" eventKey="/">
             <FontAwesomeIcon icon={faHome} className="icon" />
-            My Feed
+            <span>My Feed</span>
           </Nav.Link>
         )}
         <Nav.Link as={Link} to="/explore" eventKey="/explore">
           <FontAwesomeIcon icon={faHashtag} className="icon" />
-          Explore
+          <span>Explore</span>
         </Nav.Link>
 
         {user !== null && signedIn && (
           <Nav.Link href="#">
             <FontAwesomeIcon icon={faBell} className="icon" />
-            Notifications
+            <span>Notifications</span>
           </Nav.Link>
         )}
 
         {user !== null && signedIn && (
           <Nav.Link as={Link} to={`/feeds`} eventKey={`/feeds`}>
             <FontAwesomeIcon icon={faRss} className="icon" />
-            Feeds
+            <span>Feeds</span>
           </Nav.Link>
         )}
 
@@ -61,14 +61,14 @@ function SideNavbar() {
             eventKey={`${user["address"]}/profile`}
           >
             <FontAwesomeIcon icon={faUser} className="icon" />
-            Profile
+            <span>Profile</span>
           </Nav.Link>
         )}
 
         {user !== null && signedIn && (
           <Nav.Link as={Link} to="/edit-profile" eventKey="/edit-profile">
             <FontAwesomeIcon icon={faCog} className="icon" />
-            Settings
+            <span>Settings</span>
           </Nav.Link>
         )}
 
