@@ -4,6 +4,7 @@ import MyFeed from "../components/feed/read/MyFeed";
 import { UserContext } from "../contexts/UserContext";
 import { useSIWE } from "connectkit";
 import SideNavbar from "../components/ui/sidenavbar/SideNavbar";
+import MainHeader from "../components/ui/MainHeader";
 
 function Home() {
   // constants
@@ -12,6 +13,7 @@ function Home() {
 
   return (
     <Container className="p-0">
+      <MainHeader header="My Feed" />
       {user !== null && signedIn ? (
         <MyFeed className="mt-5" profileData={user} />
       ) : (

@@ -4,6 +4,7 @@ import { Container } from "react-bootstrap";
 import { UserContext } from "../contexts/UserContext";
 import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
 import { useSIWE } from "connectkit";
+import MainHeader from "../components/ui/MainHeader";
 
 function EditProfile() {
   // Constant
@@ -56,9 +57,9 @@ function EditProfile() {
   }, [signedIn]);
 
   return (
-    <div className="p-sm-4">
+    <div className="">
+      <MainHeader header="Edit Profile" />
       <Container>
-        <h2 className="fw-bold mb-5">Edit Your Blockso Profile</h2>
         {user ? (
           <EditProfileForm
             formProfile={formProfile}
