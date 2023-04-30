@@ -44,7 +44,7 @@ function App(props) {
   }, []);
 
   return (
-    <Container className="">
+    <Container fluid="md">
       <UserContext.Provider
         value={{
           user,
