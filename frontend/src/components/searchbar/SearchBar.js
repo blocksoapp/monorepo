@@ -23,7 +23,7 @@ function SearchBar() {
   };
 
   return (
-    <InputGroup className="search">
+    <InputGroup className="MySearchComponent">
       <Form.Control
         type="text"
         placeholder="Search ENS or address"
