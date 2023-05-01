@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "./sidenavbar.css";
 import BlocksoSVG from "../../../assets/img/blockso.svg";
+import BlocksoSmSVG from "../../../assets/img/blockso-sm.svg";
 import SignInButton from "../../authentication/SignInButton";
 import { UserContext } from "../../../contexts/UserContext";
 
@@ -25,7 +26,12 @@ function SideNavbar() {
     <Container className="sidebar">
       <div className="logo">
         <Link to="/">
-          <Image src={BlocksoSVG} alt="Blockso Logo" />
+          <Image className="logo-image" src={BlocksoSVG} alt="Blockso Logo" />
+          <Image
+            className="logo-image-sm"
+            src={BlocksoSmSVG}
+            alt="Blockso Logo"
+          />
         </Link>
       </div>
       <Nav className="flex-column" activeKey={routerLocation.pathname}>
