@@ -13,16 +13,18 @@ import NavbarComponent from "./components/ui/Navbar";
 import { UserContext } from "./contexts/UserContext";
 import FeedFollow from "./pages/FeedFollow";
 import Follow from "./pages/Follow";
-import { apiGetUser } from "./api";
+import { apiGetUser, apiGetExplore } from "./api";
 import { useSIWE } from "connectkit";
 import SideNavbar from "./components/ui/sidenavbar/SideNavbar";
 import SideContent from "./components/sidecontent/SideContent";
+import { SuggestedUserContext } from "./contexts/SuggestedUserContext";
 
 function App(props) {
   // Constants
   const { signedIn } = useSIWE();
   // State
   const [user, setUser] = useState(null);
+  const [suggestedFeedData, setSuggestedFeedData] = useState(null);
 
   const loadUserContext = async () => {
     const res = await apiGetUser();
@@ -34,6 +36,17 @@ function App(props) {
     }
   };
 
+  const loadSuggestedFeedData = async () => {
+    const res = await apiGetExplore();
+    if (res.ok) {
+      const json = await res.json();
+      console.log("suggested feed data: ", json);
+      setSuggestedFeedData(json);
+    } else {
+      console.log("Failed to load suggested feed data.");
+    }
+  };
+
   useEffect(() => {
     if (!signedIn) return;
     loadUserContext();
@@ -41,8 +54,10 @@ function App(props) {
 
   useEffect(() => {
     loadUserContext();
+    loadSuggestedFeedData();
   }, []);
 
+  console.log("app feed", suggestedFeedData);
   return (
     <Container fluid="md">
       <UserContext.Provider
@@ -51,51 +66,55 @@ function App(props) {
           setUser,
         }}
       >
-        <Router>
-          <Row>
-            {/* side navbar */}
-            <Col className="side-navbar p-0">
-              {/* make sidenavbar hide at 987px and below */}
-              <SideNavbar />
-            </Col>
-            {/* main content */}
-            <Col className="main-content p-0">
-              <Routes>
-                {user !== null && signedIn ? (
-                  <Route path="/" element={<Home />}></Route>
-                ) : (
-                  <Route path="/" element={<Explore />}></Route>
-                )}
-                <Route path="/home" element={<Home />}></Route>
-                <Route path="/explore" element={<Explore />}></Route>
-                <Route path="/edit-profile" element={<EditProfile />}></Route>
-                <Route
-                  path="/feeds/:feedId/edit"
-                  element={<EditFeed />}
-                ></Route>
-                <Route
-                  path="/feeds/:feedId/follow"
-                  element={<FeedFollow />}
-                ></Route>
-                <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
-                <Route path="/feeds" element={<Feeds />}></Route>
-                <Route
-                  path="/:urlInput/profile/"
-                  element={<ViewProfile />}
-                ></Route>
-                <Route path="/posts/:postId" element={<PostPage />}></Route>
-                <Route
-                  path="/:urlInput/profile/follow"
-                  element={<Follow />}
-                ></Route>
-              </Routes>
-            </Col>
-            <Col className="side-content p-0">
-              {/* make sidecontent hide at 987px and below */}
-              <SideContent />
-            </Col>
-          </Row>
-        </Router>
+        <SuggestedUserContext.Provider
+          value={{ suggestedFeedData, setSuggestedFeedData }}
+        >
+          <Router>
+            <Row>
+              {/* side navbar */}
+              <Col className="side-navbar p-0">
+                {/* make sidenavbar hide at 987px and below */}
+                <SideNavbar />
+              </Col>
+              {/* main content */}
+              <Col className="main-content p-0">
+                <Routes>
+                  {user !== null && signedIn ? (
+                    <Route path="/" element={<Home />}></Route>
+                  ) : (
+                    <Route path="/" element={<Explore />}></Route>
+                  )}
+                  <Route path="/home" element={<Home />}></Route>
+                  <Route path="/explore" element={<Explore />}></Route>
+                  <Route path="/edit-profile" element={<EditProfile />}></Route>
+                  <Route
+                    path="/feeds/:feedId/edit"
+                    element={<EditFeed />}
+                  ></Route>
+                  <Route
+                    path="/feeds/:feedId/follow"
+                    element={<FeedFollow />}
+                  ></Route>
+                  <Route path="/feeds/:feedId" element={<ViewFeed />}></Route>
+                  <Route path="/feeds" element={<Feeds />}></Route>
+                  <Route
+                    path="/:urlInput/profile/"
+                    element={<ViewProfile />}
+                  ></Route>
+                  <Route path="/posts/:postId" element={<PostPage />}></Route>
+                  <Route
+                    path="/:urlInput/profile/follow"
+                    element={<Follow />}
+                  ></Route>
+                </Routes>
+              </Col>
+              <Col className="side-content p-0">
+                {/* make sidecontent hide at 987px and below */}
+                <SideContent />
+              </Col>
+            </Row>
+          </Router>
+        </SuggestedUserContext.Provider>
       </UserContext.Provider>
     </Container>
   );

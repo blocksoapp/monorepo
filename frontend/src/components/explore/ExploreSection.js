@@ -1,53 +1,37 @@
-import React, { useState, useEffect } from 'react'
-import { apiGetExplore } from '../../api'
-import FeaturedProfiles from './FeaturedProfiles';
-import FeaturedFeeds from './FeaturedFeeds';
-import FeaturedFeed from './FeaturedFeed';
-
+import React, { useState, useEffect, useContext } from "react";
+import { apiGetExplore } from "../../api";
+import FeaturedProfiles from "./FeaturedProfiles";
+import FeaturedFeeds from "./FeaturedFeeds";
+import FeaturedFeed from "./FeaturedFeed";
+import { SuggestedUserContext } from "../../contexts/SuggestedUserContext";
 
 function ExploreSection() {
-    // constants
+  // constants
+  const { suggestedFeedData } = useContext(SuggestedUserContext);
+  // state
+  const [featuredFeedItems, setFeaturedFeedItems] = useState([]);
+  const [featuredProfileItems, setFeaturedProfileItems] = useState([]);
 
-    // state
-    const [featuredFeedItems, setFeaturedFeedItems] = useState([]);
-    const [featuredProfileItems, setFeaturedProfileItems] = useState([]);
-
-    // effects
-
-    /*
-     * Called on component mount.
-     * Gets all the API data for the explore page.
-     */
-    useEffect(() => {
-        const fetchExploreItems = async () => {
-            const resp = await apiGetExplore();
-            const data = await resp.json();
-            setFeaturedFeedItems(data["feeds"]);
-            setFeaturedProfileItems(data["profiles"]);
-        }
-        fetchExploreItems();
-    }, [])
-    
+  // effects
+  useEffect(() => {
+    // Set the data from props to state
+    if (!suggestedFeedData) return;
+    setFeaturedFeedItems(suggestedFeedData.feeds);
+    setFeaturedProfileItems(suggestedFeedData.profiles);
+  }, [suggestedFeedData]);
 
   return (
     <div>
-        {/* show activity for a random feed */}
-        <h3 className="display-6 my-5 text-center text-muted">Latest activity from...</h3>
-        {featuredFeedItems.length > 0 && 
-            <FeaturedFeed
-                feedId={featuredFeedItems[
-                    Math.floor(
-                        Math.random()*featuredFeedItems.length
-                    )
-                ].id
-                }
-            />
-        }
+      {/* show activity for a random feed */}
+      <h3 className="display-6 my-5 text-center text-muted">
+        Latest activity from...
+      </h3>
+      <FeaturedFeed feed={featuredFeedItems} />
 
-        <h3 className="display-6 my-5 text-center text-muted">Discover Feeds</h3>
-        <FeaturedFeeds feeds={featuredFeedItems} />
-  </div>
-  )
+      <h3 className="display-6 my-5 text-center text-muted">Discover Feeds</h3>
+      <FeaturedFeeds feeds={featuredFeedItems} />
+    </div>
+  );
 }
 
 export default ExploreSection;
