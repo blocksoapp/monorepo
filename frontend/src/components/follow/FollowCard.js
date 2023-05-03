@@ -51,7 +51,7 @@ function FollowCard(props) {
           <div className="d-flex flex-column">
             <ClickableEnsAndAddress
               address={props.address}
-              className="fs-5 primary-color-hover pointer"
+              className="fs-6 primary-color-hover pointer"
               onClick={navigateProfile}
             />
             <Badge className="text-dark bg-light align-self-sm-start align-self-center">
@@ -67,7 +67,7 @@ function FollowCard(props) {
           )}
         </div>
         <div className="">
-          {props.bio && (
+          {props.bio && props.showBio && (
             <p className="fs-6 pt-1 px-sm-0 px-3 bio">{abbrBio(props.bio)}</p>
           )}
         </div>

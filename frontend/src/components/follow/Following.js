@@ -78,6 +78,7 @@ function Following() {
                   followedByMe={following.followedByMe}
                   numFollowers={following.numFollowers}
                   showFollowButton={true}
+                  showBio={true}
                 />
               );
             })
