@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import "./sidecontent.css";
 import { SuggestedUserContext } from "../../contexts/SuggestedUserContext";
+import FollowCard from "../follow/FollowCard";
 
 //
 function RecommendedProfiles() {
@@ -18,20 +19,15 @@ function RecommendedProfiles() {
 
   return (
     <Container className="side-content-card">
-      <h1 className="">Who To Follow</h1>
+      <h1 className="text-center">Suggested Profiles</h1>
       <div className="d-flex flex-column">
         {featuredProfiles.map((profile, index) => (
-          <div className="d-flex flex-row" key={index}>
-            <img
-              className="rounded-circle"
-              src={profile.profilePicture}
-              alt="profile"
-              width="50"
-              height="50"
+          <div className="" key={index}>
+            <FollowCard
+              address={profile.address}
+              imageUrl={profile.imageUrl}
+              numFollowers={profile.numFollowers}
             />
-            <div className="d-flex flex-column">
-              <p className="">{profile.address}</p>
-            </div>
           </div>
         ))}
       </div>
