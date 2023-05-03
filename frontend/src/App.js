@@ -57,7 +57,6 @@ function App(props) {
     loadSuggestedFeedData();
   }, []);
 
-  console.log("app feed", suggestedFeedData);
   return (
     <Container fluid="md">
       <UserContext.Provider
