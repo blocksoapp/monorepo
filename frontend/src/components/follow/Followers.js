@@ -56,7 +56,7 @@ function Followers() {
   }, []);
 
   return (
-    <Container className="">
+    <Container className="following-container">
       {isLoading ? (
         <FollowPlaceholder />
       ) : followError ? (

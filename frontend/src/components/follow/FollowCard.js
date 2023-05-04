@@ -34,7 +34,7 @@ function FollowCard(props) {
   };
 
   return (
-    <Container className="d-flex align-items-center py-sm-3 py-1 follow-card">
+    <Container className="d-flex follow-card">
       <PfpResolver
         address={props.address}
         imgUrl={props.imgUrl}
@@ -42,7 +42,7 @@ function FollowCard(props) {
         width="48px"
         fontSize=".6rem"
         onClick={navigateProfile}
-        className="pointer d-flex justify-content-center mt-2"
+        className="pointer d-flex justify-content-center"
       />
       <div className="flex-grow-1 ps-sm-4">
         <div className="follow-body">

@@ -20,9 +20,15 @@
   min-height: 100vh;
 }
 
+.following-container {
+  padding: 0;
+  /*  overflow: hidden; */
+}
+
 .follow-card {
   width: 100%;
   transition: transform 0.2s ease-in-out;
+  padding: 1rem;
 }
 
 .follow-card:hover {
@@ -32,7 +38,6 @@
 .follow-body {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 .follow-body button {
@@ -61,10 +66,12 @@
 }
 
 @media (max-width: 575px) {
+  .follow-card {
+    padding: 1rem 0rem;
+  }
   .follow-body {
     align-items: center;
     justify-content: space-around;
-    margin-top: 1rem;
   }
   .follow-btn {
     padding-top: 1rem;
