@@ -94,12 +94,6 @@ code {
   text-decoration-thickness: 1%;
 }
 
-.arrow:hover {
-  background-color: whitesmoke;
-  padding: 0.5rem;
-  border-radius: 2rem;
-}
-
 .liked-by-me {
   border-width: 1px !important;
   border-color: #dc3545 !important;

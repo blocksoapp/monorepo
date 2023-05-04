@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import FollowNav from "./FollowNav";
 import FollowCard from "./FollowCard";
 import "./follow-custom.css";
 import { apiGetFollowing, apiGetUrl } from "../../api";
@@ -55,8 +54,7 @@ function Following() {
   }, []);
 
   return (
-    <Container className="border p-0">
-      <FollowNav address={urlInput} />
+    <Container className="following-container">
       {isLoading ? (
         <FollowPlaceholder />
       ) : followingError ? (

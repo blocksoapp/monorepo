@@ -56,8 +56,7 @@ function Followers() {
   }, []);
 
   return (
-    <Container className="border p-0">
-      <FollowNav address={urlInput} active={active} />
+    <Container className="">
       {isLoading ? (
         <FollowPlaceholder />
       ) : followError ? (

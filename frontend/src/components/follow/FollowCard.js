@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { Button, Badge } from "react-bootstrap";
-import { json, useNavigate } from "react-router-dom";
+import { Badge, Container } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import PfpResolver from "../PfpResolver";
 import ClickableEnsAndAddress from "../ClickableEnsAndAddress";
-import { apiPostFollow, apiPostUnfollow, apiGetProfile } from "../../api";
 import "./follow-custom.css";
 import FollowButton from "./FollowButton";
 
 function FollowCard(props) {
   const navigate = useNavigate();
-  const [profileData, setProfileData] = useState(props);
   const [readMore, setReadMore] = useState(false);
 
   const navigateProfile = () => {
@@ -36,7 +34,7 @@ function FollowCard(props) {
   };
 
   return (
-    <div className="d-flex flex-sm-row flex-column align-items-sm-center py-sm-3 py-1 px-sm-2 px-lg-5 light-hover">
+    <Container className="d-flex align-items-center py-sm-3 py-1 follow-card">
       <PfpResolver
         address={props.address}
         imgUrl={props.imgUrl}
@@ -58,21 +56,23 @@ function FollowCard(props) {
               {props.numFollowers}{" "}
               {props.numFollowers === 1 ? "follower" : "followers"}{" "}
             </Badge>
+
+            {props.bio && props.showBio && (
+              <p className="fs-6 pt-1 px-sm-0 bio">{abbrBio(props.bio)}</p>
+            )}
           </div>
-          {props.showFollowButton && (
-            <FollowButton
-              address={props.address}
-              followedByMe={props.followedByMe}
-            />
-          )}
-        </div>
-        <div className="">
-          {props.bio && props.showBio && (
-            <p className="fs-6 pt-1 px-sm-0 px-3 bio">{abbrBio(props.bio)}</p>
-          )}
+
+          <div>
+            {props.showFollowButton && (
+              <FollowButton
+                address={props.address}
+                followedByMe={props.followedByMe}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

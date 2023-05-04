@@ -52,13 +52,13 @@
   font-weight: 900;
 }
 
-.nav-link {
+.sidebar .nav-link {
   font-size: 20px;
   color: var(--dark-theme-color);
   padding: 1rem;
 }
 
-.nav-link:hover {
+.sidebar .nav-link:hover {
   background-color: #f8f9fa;
   border-radius: 30px;
   color: var(--dark-theme-color);
