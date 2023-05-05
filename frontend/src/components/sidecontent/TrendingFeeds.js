@@ -1,28 +1,36 @@
-import React from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
+import { SuggestedUserContext } from "../../contexts/SuggestedUserContext";
+import SideFeed from "./SideFeed";
 
 function TrendingFeeds() {
+  // constants
+  const { suggestedFeedData } = useContext(SuggestedUserContext);
+  // state
+  const [trendingFeeds, setTrendingFeeds] = useState([]);
+
+  useEffect(() => {
+    // Set the data from props to state
+    if (!suggestedFeedData) return;
+    setTrendingFeeds(suggestedFeedData.feeds);
+  }, [suggestedFeedData]);
+
   return (
     <Container className="side-content-card margin-top-1">
-      <h1 className="text-center">Feeds To Follow</h1>
-      <p>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
-        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
-        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
-        consequuntur sint ullam.
-      </p>
-      <p>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
-        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
-        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
-        consequuntur sint ullam.
-      </p>
-      <p>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores soluta
-        velit labore deleniti aliquid, porro doloribus, tempora quis veniam fuga
-        tenetur aspernatur recusandae blanditiis, culpa voluptatem? Similique
-        consequuntur sint ullam.
-      </p>
+      <h1>Discover Feeds</h1>
+      <div className="d-flex flex-column">
+        {trendingFeeds.map((feed) => (
+          <div key={feed.id}>
+            <SideFeed
+              id={feed.id}
+              name={feed.name}
+              image={feed.image}
+              description={feed.description}
+              numFollowers={feed.numFollowers}
+            />
+          </div>
+        ))}
+      </div>
     </Container>
   );
 }

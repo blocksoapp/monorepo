@@ -28,7 +28,7 @@
 .follow-card {
   width: 100%;
   transition: transform 0.2s ease-in-out;
-  padding: 1rem;
+  padding: 0.5rem 0;
 }
 
 .follow-card:hover {
@@ -38,6 +38,7 @@
 .follow-body {
   display: flex;
   justify-content: space-between;
+  padding: 0 0.5rem;
 }
 
 .follow-body button {

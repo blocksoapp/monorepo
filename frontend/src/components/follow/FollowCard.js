@@ -44,32 +44,31 @@ function FollowCard(props) {
         onClick={navigateProfile}
         className="pointer d-flex justify-content-center"
       />
-      <div className="flex-grow-1 ps-sm-4">
-        <div className="follow-body">
-          <div className="d-flex flex-column">
-            <ClickableEnsAndAddress
+
+      <div className="flex-grow-1 follow-body">
+        <div className="d-flex flex-column">
+          <ClickableEnsAndAddress
+            address={props.address}
+            className="fs-6 primary-color-hover pointer"
+            onClick={navigateProfile}
+          />
+          <Badge className="text-dark bg-light align-self-sm-start align-self-center">
+            {props.numFollowers}{" "}
+            {props.numFollowers === 1 ? "follower" : "followers"}{" "}
+          </Badge>
+
+          {props.bio && props.showBio && (
+            <p className="fs-6 pt-1 px-sm-0 bio">{abbrBio(props.bio)}</p>
+          )}
+        </div>
+
+        <div>
+          {props.showFollowButton && (
+            <FollowButton
               address={props.address}
-              className="fs-6 primary-color-hover pointer"
-              onClick={navigateProfile}
+              followedByMe={props.followedByMe}
             />
-            <Badge className="text-dark bg-light align-self-sm-start align-self-center">
-              {props.numFollowers}{" "}
-              {props.numFollowers === 1 ? "follower" : "followers"}{" "}
-            </Badge>
-
-            {props.bio && props.showBio && (
-              <p className="fs-6 pt-1 px-sm-0 bio">{abbrBio(props.bio)}</p>
-            )}
-          </div>
-
-          <div>
-            {props.showFollowButton && (
-              <FollowButton
-                address={props.address}
-                followedByMe={props.followedByMe}
-              />
-            )}
-          </div>
+          )}
         </div>
       </div>
     </Container>

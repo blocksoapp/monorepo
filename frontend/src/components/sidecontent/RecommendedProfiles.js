@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import "./sidecontent.css";
 import { SuggestedUserContext } from "../../contexts/SuggestedUserContext";
-import FollowCard from "../follow/FollowCard";
+import SideProfile from "./SideProfile";
 
 //
 function RecommendedProfiles() {
@@ -19,13 +19,13 @@ function RecommendedProfiles() {
 
   return (
     <Container className="side-content-card">
-      <h1 className="text-center">Suggested Profiles</h1>
+      <h1>Who To Follow</h1>
       <div className="d-flex flex-column">
         {featuredProfiles.map((profile, index) => (
           <div className="" key={index}>
-            <FollowCard
+            <SideProfile
               address={profile.address}
-              imageUrl={profile.imageUrl}
+              image={profile.image}
               numFollowers={profile.numFollowers}
             />
           </div>
