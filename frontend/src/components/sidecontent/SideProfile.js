@@ -14,10 +14,7 @@ function SideProfile(props) {
     navigate(`/${props.address}/profile`);
   };
   return (
-    <Container
-      className="side-feed follow-card pointer"
-      onClick={handleNavigateProfile}
-    >
+    <Container className="side-feed follow-card pointer">
       <PfpResolver
         imgUrl={props.image}
         height="48px"
@@ -27,7 +24,7 @@ function SideProfile(props) {
         className={"pointer d-flex justify-content-center"}
       />
       <div className="flex-grow-1 d-flex justify-content-between align-items-center">
-        <div className="side-feed-content">
+        <div className="side-feed-content" onClick={handleNavigateProfile}>
           <ClickableEnsAndAddress
             address={props.address}
             className="fs-6 primary-color-hover pointer header-padding"
