@@ -79,8 +79,8 @@ function PostForm({
                       <PfpResolver
                         address={address}
                         imgUrl={image}
-                        height="100px"
-                        width="100px"
+                        height="48px"
+                        width="48px"
                         fontSize="1rem"
                       />
                     </Col>

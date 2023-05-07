@@ -253,13 +253,13 @@ function Post({ data, bgColor }) {
                 )}
 
                 {/* post author pfp, address, created time. */}
-                <Row className="align-items-end">
+                <Row className="align-item-start">
                   <Col className="col-auto">
                     <PfpResolver
                       address={postData.author.address}
                       imgUrl={postData.author.image}
-                      height="100px"
-                      width="100px"
+                      height="45px"
+                      width="45px"
                       fontSize="1rem"
                     />
                   </Col>
