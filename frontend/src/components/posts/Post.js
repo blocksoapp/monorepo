@@ -258,8 +258,8 @@ function Post({ data, bgColor }) {
                     <PfpResolver
                       address={postData.author.address}
                       imgUrl={postData.author.image}
-                      height="45px"
-                      width="45px"
+                      height="48px"
+                      width="48px"
                       fontSize="1rem"
                     />
                   </Col>
