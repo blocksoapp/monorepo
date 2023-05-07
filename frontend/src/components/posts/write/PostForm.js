@@ -22,6 +22,7 @@ function PostForm({
   taggedUsers,
   setTaggedUsers,
   handleSubmit,
+  padding,
 }) {
   // hooks
   const { user } = useContext(UserContext);
@@ -34,7 +35,7 @@ function PostForm({
   return (
     <Container>
       <Row className="justify-content-center">
-        <Col>
+        <Col className={padding}>
           <Card style={{ backgroundColor: "#fffff0" }}>
             {/* Card body that includes the post form details. */}
             <Card.Body>

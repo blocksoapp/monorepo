@@ -314,7 +314,10 @@ function Profile(props) {
       <Container>
         {/* New Post if profile is the current user */}
         {user !== null && user["address"] === props.address && (
-          <NewPost submitPostCallback={(post) => setPosts([post, ...posts])} />
+          <NewPost
+            padding="p-0"
+            submitPostCallback={(post) => setPosts([post, ...posts])}
+          />
         )}
 
         {/* Posts Section -- show placeholder or posts */}
