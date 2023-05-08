@@ -82,6 +82,10 @@
   display: none;
 }
 
+.collapse-container {
+  padding: 0.5rem 0;
+}
+
 @media screen and (max-width: 1264px) {
   .side-navbar {
     max-width: 88px;
