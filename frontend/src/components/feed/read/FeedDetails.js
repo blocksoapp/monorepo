@@ -25,8 +25,8 @@ function FeedDetails({ feed, inEditFeed, inThumbnail }) {
         <Col xs="auto">
           <FeedPfp
             imgUrl={feed.image}
-            height={breakpoint === "xs" ? 100 : 150}
-            width={breakpoint === "xs" ? 100 : 150}
+            height={breakpoint === "xs" ? 48 : 133.5}
+            width={breakpoint === "xs" ? 48 : 133.5}
           />
         </Col>
 
