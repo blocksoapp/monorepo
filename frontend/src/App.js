@@ -69,6 +69,7 @@ function App(props) {
           value={{ suggestedFeedData, setSuggestedFeedData }}
         >
           <Router>
+            <NavbarComponent />
             <Row>
               {/* side navbar */}
               <Col className="side-navbar p-0">

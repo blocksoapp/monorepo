@@ -78,6 +78,10 @@
   width: 100%;
 }
 
+.top-navbar {
+  display: none;
+}
+
 @media screen and (max-width: 1264px) {
   .side-navbar {
     max-width: 88px;
@@ -114,5 +118,16 @@
 
   .side-navbar .nav-link span {
     display: none;
+  }
+}
+
+@media screen and (max-width: 499px) {
+  .side-navbar {
+    display: none;
+  }
+  .top-navbar {
+    display: block;
+    background-color: #ffffff;
+    margin-bottom: 1rem;
   }
 }

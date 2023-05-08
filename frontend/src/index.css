@@ -27,6 +27,11 @@ code {
     monospace;
 }
 
+@media (max-width: 499px) {
+  .app-container {
+  }
+}
+
 /* home page grid */
 .content-container {
 }

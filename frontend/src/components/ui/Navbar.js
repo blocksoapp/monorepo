@@ -6,6 +6,7 @@ import SignInButton from "../authentication/SignInButton";
 import NotificationsDropdown from "../notifications/NotificationsDropdown";
 import { UserContext } from "../../contexts/UserContext";
 import { useSIWE } from "connectkit";
+import "./sidenavbar/sidenavbar.css";
 
 function NavbarComponent() {
   const routerLocation = useLocation();
@@ -28,11 +29,8 @@ function NavbarComponent() {
   };
 
   return (
-    <Navbar bg="light" expand="lg" className="mb-5">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
-          Blockso
-        </Navbar.Brand>
+    <Navbar expand="lg" className="top-navbar sticky-top">
+      <Container className="p-0">
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="w-100" activeKey={routerLocation.pathname}>
