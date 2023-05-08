@@ -18,6 +18,7 @@ import { useSIWE } from "connectkit";
 import SideNavbar from "./components/ui/sidenavbar/SideNavbar";
 import SideContent from "./components/sidecontent/SideContent";
 import { SuggestedUserContext } from "./contexts/SuggestedUserContext";
+import Notifications from "./pages/Notifications";
 
 function App(props) {
   // Constants
@@ -87,6 +88,10 @@ function App(props) {
                   <Route path="/home" element={<Home />}></Route>
                   <Route path="/explore" element={<Explore />}></Route>
                   <Route path="/edit-profile" element={<EditProfile />}></Route>
+                  <Route
+                    path="/notifications"
+                    element={<Notifications />}
+                  ></Route>
                   <Route
                     path="/feeds/:feedId/edit"
                     element={<EditFeed />}

@@ -47,7 +47,7 @@ function SideNavbar() {
         </Nav.Link>
 
         {user !== null && signedIn && (
-          <Nav.Link href="#">
+          <Nav.Link as={Link} to="/notifications" eventKey={`/notifications`}>
             <FontAwesomeIcon icon={faBell} className="icon" />
             <span>Notifications</span>
           </Nav.Link>
