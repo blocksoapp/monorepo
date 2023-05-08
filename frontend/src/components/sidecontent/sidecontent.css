@@ -16,17 +16,12 @@
   margin-bottom: 0.5rem;
 }
 
-.side-content-card p {
-  font-size: 0.8rem;
-  font-weight: 200;
-  margin-bottom: 0.5rem;
-}
-
 .margin-top-1 {
   margin-top: 1rem;
 }
 
-.side-feed {
+.side-feed,
+.side-profile-feed {
   display: flex;
   padding: 0.5rem 0;
 }

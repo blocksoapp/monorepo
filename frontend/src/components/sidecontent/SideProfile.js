@@ -14,8 +14,9 @@ function SideProfile(props) {
     navigate(`/${props.address}/profile`);
   };
   return (
-    <Container className="side-feed follow-card pointer">
+    <Container className="side-profile-feed follow-card pointer">
       <PfpResolver
+        address={props.address}
         imgUrl={props.image}
         height="48px"
         width="48px"
