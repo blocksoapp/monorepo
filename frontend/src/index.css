@@ -182,6 +182,17 @@ code {
   color: white;
 }
 
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
 /* Form PFP */
 .delete-icon {
   font-size: 15px;
