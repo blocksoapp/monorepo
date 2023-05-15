@@ -72,7 +72,7 @@ function App(props) {
             <NavbarComponent />
             <Row>
               {/* side navbar */}
-              <Col className="side-navbar p-0">
+              <Col className="side-navbar pt-2">
                 {/* make sidenavbar hide at 987px and below */}
                 <SideNavbar />
               </Col>
