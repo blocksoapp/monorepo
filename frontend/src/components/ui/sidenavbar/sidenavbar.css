@@ -1,0 +1,137 @@
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(
+    --darker-primary-color
+  ); /* a darker shade of your custom primary color */
+  border-color: var(--darker-primary-color);
+}
+
+.side-navbar {
+  width: 100%;
+  max-width: 275px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 100vh;
+  overflow: auto;
+  font-family: "Nexa", sans-serif;
+  background-color: var(--light-theme-color);
+  overflow-x: auto;
+  border-right: 1px solid #e6ecf0;
+}
+
+.logo img {
+  padding: 8px 16px;
+  margin-bottom: 15px;
+  max-width: 170px;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.logo-image-sm {
+  display: none;
+}
+
+.sidebar .icon {
+  font-size: 22px;
+  margin-right: 10px;
+  color: var(--dark-theme-color);
+}
+
+.sidebar .nav-link.active {
+  font-weight: 900;
+}
+
+.sidebar .nav-link.active .icon {
+  font-weight: 900;
+}
+
+.sidebar .nav-link {
+  font-size: 20px;
+  color: var(--dark-theme-color);
+  padding: 1rem;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #f8f9fa;
+  border-radius: 30px;
+  color: var(--dark-theme-color);
+}
+
+.post-button {
+  margin-top: 1rem;
+}
+
+.siwe-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+  padding: 8px 16px;
+  width: 100%;
+}
+
+.top-navbar {
+  display: none;
+}
+
+.collapse-container {
+  padding: 0.5rem 0;
+}
+
+@media screen and (max-width: 1264px) {
+  .side-navbar {
+    max-width: 88px;
+  }
+
+  .logo-image {
+    display: none;
+  }
+
+  .logo-image-sm {
+    display: block;
+  }
+
+  .logo img {
+    padding-top: 0.5rem;
+  }
+
+  .side-navbar .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .side-navbar .nav-link {
+    justify-content: center;
+  }
+
+  .sidebar .icon {
+    margin-right: 0;
+  }
+
+  .siwe-button {
+    display: none;
+  }
+
+  .side-navbar .nav-link span {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 499px) {
+  .side-navbar {
+    display: none;
+  }
+  .top-navbar {
+    display: block;
+    background-color: #ffffff;
+    margin-bottom: 1rem;
+  }
+}

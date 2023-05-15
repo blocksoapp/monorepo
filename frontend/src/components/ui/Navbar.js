@@ -6,6 +6,8 @@ import SignInButton from "../authentication/SignInButton";
 import NotificationsDropdown from "../notifications/NotificationsDropdown";
 import { UserContext } from "../../contexts/UserContext";
 import { useSIWE } from "connectkit";
+import "./sidenavbar/sidenavbar.css";
+import SearchBar from "../searchbar/SearchBar";
 
 function NavbarComponent() {
   const routerLocation = useLocation();
@@ -26,16 +28,12 @@ function NavbarComponent() {
       handleSearch();
     }
   };
-  
 
   return (
-    <Navbar bg="light" expand="lg" className="mb-5">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
-          Blockso
-        </Navbar.Brand>
+    <Navbar expand="lg" className="top-navbar sticky-top">
+      <Container className="p-0">
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
+        <Navbar.Collapse id="basic-navbar-nav" className="collapse-container">
           <Nav className="w-100" activeKey={routerLocation.pathname}>
             {user !== null && signedIn && (
               <Nav.Link as={Link} to="/" eventKey="/">
@@ -43,10 +41,7 @@ function NavbarComponent() {
               </Nav.Link>
             )}
             {user !== null && signedIn && (
-              <Nav.Link
-                as={Link}
-                to={`/feeds`}
-                eventKey={`/feeds`}>
+              <Nav.Link as={Link} to={`/feeds`} eventKey={`/feeds`}>
                 Feeds
               </Nav.Link>
             )}
@@ -62,30 +57,13 @@ function NavbarComponent() {
               <Nav.Link
                 as={Link}
                 to={`${user["address"]}/profile`}
-                eventKey={`${user["address"]}/profile`}>
+                eventKey={`${user["address"]}/profile`}
+              >
                 My Posts
               </Nav.Link>
             )}
             <Col className="col-auto"></Col>
-            <Col xs={10} lg={5}>
-              <Form.Control
-                type="search"
-                placeholder="Search ENS or address"
-                className="me-2"
-                aria-label="Search"
-                value={searchVal}
-                onChange={(event) => {
-                  setSearchVal(event.target.value);
-                }}
-                onKeyPress={onKeyPress}
-              />
-            </Col>
-            &nbsp;
-            <Col xs={2}>
-              <Button variant="outline-dark" onClick={handleSearch}>
-                Search
-              </Button>
-            </Col>
+            <SearchBar />
           </Nav>
         </Navbar.Collapse>
 

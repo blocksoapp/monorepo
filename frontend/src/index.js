@@ -114,8 +114,8 @@ root.render(
           theme="soft"
           customTheme={{
             "--ck-connectbutton-color": "#ffffff",
-            "--ck-connectbutton-background": "#0d6efd",
-            "--ck-connectbutton-hover-background": "#0b5ed7",
+            "--ck-connectbutton-background": "#1da1f2",
+            "--ck-connectbutton-hover-background": "#0B98F0CC",
             "--ck-connectbutton-font-size": "1rem",
             "--ck-connectbutton-border-radius": ".375rem",
           }}

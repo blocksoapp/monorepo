@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap"
-import { apiGetMyFeed, apiGetUrl } from '../../../api';
-import { usePageBottom } from '../../../hooks/usePageBottom';
-import NewPost from '../../posts/NewPost.js';
-import Post from '../../posts/Post.js'; 
-import PostsError from '../../posts/PostsError';
-import PostsPlaceholder from '../../posts/PostsPlaceholder';
-import FeedError from './FeedError';
-import PollNewItems from './PollNewItems';
-
+import { Container } from "react-bootstrap";
+import { apiGetMyFeed, apiGetUrl } from "../../../api";
+import { usePageBottom } from "../../../hooks/usePageBottom";
+import NewPost from "../../posts/NewPost.js";
+import Post from "../../posts/Post.js";
+import PostsError from "../../posts/PostsError";
+import PostsPlaceholder from "../../posts/PostsPlaceholder";
+import FeedError from "./FeedError";
+import PollNewItems from "./PollNewItems";
 
 function MyFeed({ profileData }) {
   // constants
@@ -89,57 +88,55 @@ function MyFeed({ profileData }) {
    * Paginate once user scrolls to bottom.
    */
   useEffect(() => {
-    if (!reachedPageBottom) return
-    if (!feedItemsNextPage) return
+    if (!reachedPageBottom) return;
+    if (!feedItemsNextPage) return;
 
     // paginate the feed items
     fetchMoreFeedItems();
   }, [reachedPageBottom]);
 
+  return (
+    <Container className="p-0">
+      {/* Poll for new feed items in background */}
+      <PollNewItems
+        interval={30000} // 30 seconds
+        apiFunction={apiGetMyFeed}
+        apiFunctionArgs={[]}
+        oldItems={feedItems}
+        callback={fetchFeed}
+        text="There are new items in your feed!"
+      />
 
-    return (
+      {/* New Post Form */}
+      <NewPost
+        profileData={profileData}
+        submitPostCallback={submitPostCallback}
+      />
+
+      {/* Feed or Placeholder */}
+      {loadingFeedItems === true ? (
+        <PostsPlaceholder />
+      ) : feedItemsError === true ? (
+        <FeedError retryAction={fetchFeed} />
+      ) : (
         <Container>
-
-            {/* Poll for new feed items in background */}
-            <PollNewItems
-                interval={30000}  // 30 seconds
-                apiFunction={apiGetMyFeed}
-                apiFunctionArgs={[]}
-                oldItems={feedItems}
-                callback={fetchFeed}
-                text="There are new items in your feed!"
-            />
-
-            {/* New Post Form */}
-            <NewPost
-                profileData={profileData}
-                submitPostCallback={submitPostCallback}
-            />
-
-            {/* Feed or Placeholder */}
-            {loadingFeedItems === true
-            ? <PostsPlaceholder />
-            : feedItemsError === true
-                ? <FeedError retryAction={fetchFeed} />
-                : <Container>
-                    {feedItems && feedItems.map(post => (
-                        <Post key={post.id} data={post} />
-                    ))}
-                </Container>
-            }
-
-            {/* Pagination loading placeholder or error*/}
-            {feedItemsNextPage === null || loadingFeedItems
-                ? <></>
-                : moreFeedItemsLoading === true
-                    ? <PostsPlaceholder />
-                    : moreFeedItemsError === true
-                        ? <PostsError retryAction={fetchMoreFeedItems} />
-                        : <></>
-            }
-
+          {feedItems &&
+            feedItems.map((post) => <Post key={post.id} data={post} />)}
         </Container>
-    );
+      )}
+
+      {/* Pagination loading placeholder or error*/}
+      {feedItemsNextPage === null || loadingFeedItems ? (
+        <></>
+      ) : moreFeedItemsLoading === true ? (
+        <PostsPlaceholder />
+      ) : moreFeedItemsError === true ? (
+        <PostsError retryAction={fetchMoreFeedItems} />
+      ) : (
+        <></>
+      )}
+    </Container>
+  );
 }
 
 export default MyFeed;

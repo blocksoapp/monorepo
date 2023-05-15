@@ -1,31 +1,47 @@
 #nav-notifications-dropdown::before {
-    display: none;
+  display: none;
 }
 
 .dropdown-menu {
-    height: auto;
-    max-height: 75vh;
-    overflow: scroll;
+  height: auto;
+  max-height: 75vh;
+  overflow: scroll;
 }
 
 .popup-width {
-    width: 25vw;
+  width: 25vw;
 }
 
 .notif-item {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .notif-item:hover {
-    background-color: #e9ecef!important;
+  background-color: #e9ecef !important;
+}
+
+.notif-item-p {
+  padding: 1rem;
+}
+
+.notifications {
+  min-height: 90vh;
+}
+
+.notif-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  display: inline-block;
+  border-bottom: 4px solid var(--primary-color);
 }
 
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 0px;
+  width: 4px;
+  height: 0px;
 }
 
 ::-webkit-scrollbar-thumb {
-    border-radius: 1px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }

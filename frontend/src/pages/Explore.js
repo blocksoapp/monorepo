@@ -1,15 +1,14 @@
-import React from 'react'
-import { Container } from 'react-bootstrap'
-import InfoSection from '../components/explore/InfoSection';
-import ExploreSection from '../components/explore/ExploreSection';
+import React from "react";
+import { Container } from "react-bootstrap";
+import ExploreSection from "../components/explore/ExploreSection";
+import MainHeader from "../components/ui/MainHeader";
 
 function Explore() {
- 
   return (
     <div>
       <Container fluid>
-            <InfoSection/>
-            <ExploreSection />
+        <MainHeader header="Explore" />
+        <ExploreSection />
       </Container>
     </div>
   );

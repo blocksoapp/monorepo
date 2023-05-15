@@ -1,3 +1,14 @@
+:root {
+  --dark-theme-color: #000000; /* black */
+  --light-theme-color: #ffffff; /* white */
+  --primary-color: #1da1f2; /* blockso blue color */
+  --darker-primary-color: #0b98f0cc; /* a darker shade of #1DA1F2 */
+
+  /* padding and spacing */
+  --page-top-padding: 2rem;
+  --page-bottom-padding: 2rem;
+}
+
 a {
   text-decoration: none;
   color: #0076ff;
@@ -5,32 +16,72 @@ a {
 
 body {
   margin: 0;
-  font-family: Roboto, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+  font-family: Roboto, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
-.primary-color{
-  color: #00A8E8
+@media (max-width: 499px) {
+  .app-container {
+  }
+}
+
+/* home page grid */
+.content-container {
+}
+/* main content column */
+.main-content {
+  width: 100%;
+  height: auto;
+  overflow: auto;
+}
+
+.side-content {
+  max-width: 350px;
+  max-height: 100vh;
+  overflow: auto;
+  position: sticky;
+  top: 0;
+  bottom: 0;
+}
+
+@media (max-width: 987px) {
+  .main-content {
+    width: calc(100% - 363px);
+  }
+  .side-content {
+    display: none;
+  }
 }
 
 .fullheight-container {
   min-height: 100vh;
 }
 
+.outline-red {
+  outline: 2px solid red;
+}
+
+.outline-green {
+  outline: 2px solid green;
+}
+
+.outline-blue {
+  outline: 2px solid blue;
+}
 
 .pointer:hover {
   cursor: pointer;
 }
 
-.tab-min-height{
-  min-height: 20vh
+.tab-min-height {
+  min-height: 20vh;
 }
 
 .link-style {
@@ -38,65 +89,58 @@ code {
 }
 
 .link-style:hover {
-  color:#4285F4;
+  color: #4285f4;
   text-decoration: underline;
 }
 
 .link-active {
   text-decoration: underline;
-  text-decoration-color:#00A8E8;
+  text-decoration-color: #00a8e8;
   text-decoration-thickness: 1%;
 }
 
-.arrow:hover {
-  background-color: whitesmoke;
-  padding: .5rem;
-  border-radius: 2rem;
-}
-
 .liked-by-me {
-  border-width: 1px!important;
-  border-color: #dc3545!important;
-  background-color: transparent!important;
-  box-shadow: none!important;
-  color: #dc3545!important;
+  border-width: 1px !important;
+  border-color: #dc3545 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #dc3545 !important;
 }
 
 .liked-by-me:active:hover {
-  box-shadow: 0 0 0 0.1rem rgba(220,53,69, .5)!important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.5) !important;
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
 
 .liked-by-me:active:hover::after {
-    opacity: 1;
+  opacity: 1;
 }
 
 .not-liked-by-me {
   border-width: 1px;
-  border-color: transparent!important;
-  background-color: transparent!important;
-  box-shadow: none!important;
-  color: #000!important;
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #000 !important;
 }
 
 .not-liked-by-me:active:hover {
-  box-shadow: 0 0 0 0.1rem rgba(220,53,69, .5)!important;
-  color: #dc3545!important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.5) !important;
+  color: #dc3545 !important;
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
 
 .not-liked-by-me:active:hover::after {
-    opacity: 1;
+  opacity: 1;
 }
-
 
 /* EXPLORE PAGE */
 
 .info-container {
   background-color: #003459;
-  color: #fff
+  color: #fff;
 }
 
 .info-container h1 {
@@ -115,27 +159,38 @@ code {
   text-transform: none;
 }
 
-.card-body:hover{
+.card-body:hover {
   background-color: #f8f9fa;
 }
 
 .btn-primary.custom-btn {
-  background-color: #00A8E8;
+  background-color: #00a8e8;
 }
 
 .btn-primary.custom-btn:hover {
-  background-color: #007EA7;
+  background-color: #007ea7;
 }
 
 .btn-secondary {
   background-color: white;
-  color:#00A8E8;
-  border-color:#00A8E8
+  color: #00a8e8;
+  border-color: #00a8e8;
 }
 
 .btn-secondary:hover {
-  background-color: #00A8E8;
+  background-color: #00a8e8;
   color: white;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* Form PFP */
@@ -145,22 +200,6 @@ code {
 
 .delete-icon:hover {
   color: red;
-}
-/* Used for testing UI */
-.red-border {
-  border: red solid 2px;
-}
-
-.blue-border {
-  border: blue solid 2px;
-}
-
-.green-border {
-  border: green solid 2px;
-}
-
-.yellow-border {
-  border: yellow solid 2px;
 }
 
 .w-min-100 {
@@ -174,14 +213,22 @@ code {
 /* luckiest-guy-regular - latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-  font-family: 'Luckiest Guy';
+  font-family: "Luckiest Guy";
   font-style: normal;
   font-weight: 400;
-  src: url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot'); /* IE9 Compat Modes */
-  src: url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.svg#LuckiestGuy') format('svg'); /* Legacy iOS */
+  src: url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot"); /* IE9 Compat Modes */
+  src: url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-IE8 */
+      url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff2")
+      format("woff2"),
+    /* Super Modern Browsers */
+      url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.woff")
+      format("woff"),
+    /* Modern Browsers */
+      url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.ttf")
+      format("truetype"),
+    /* Safari, Android, iOS */
+      url("./assets/fonts/luckiest-guy/luckiest-guy-v18-latin-regular.svg#LuckiestGuy")
+      format("svg"); /* Legacy iOS */
 }
-

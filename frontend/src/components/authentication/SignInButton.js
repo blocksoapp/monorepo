@@ -3,17 +3,16 @@ import { ConnectKitButton, SIWEButton, useSIWE } from "connectkit";
 import { UserContext } from "../../contexts/UserContext";
 import { apiGetUser } from "../../api";
 import ToastComponent from "./ToastComponent";
+import "../ui/sidenavbar/sidenavbar.css";
 
 function SignInButton({ buttonText }) {
   // Constants
-  const { setUser } = useContext(UserContext);
-  const { signedIn } = useSIWE();
 
   // State
   const [toggleToast, setToggleToast] = useState(Boolean);
 
   return (
-    <div className="pb-1">
+    <div className="">
       <ToastComponent
         isToggle={toggleToast}
         setIsToggle={setToggleToast}
