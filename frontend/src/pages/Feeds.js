@@ -6,12 +6,12 @@ import MainHeader from "../components/ui/MainHeader";
 
 function Feeds() {
   return (
-    <Container>
+    <Container className="">
       <MainHeader header="Feeds" />
-      <Row>
+      <Row className="px-2">
         <CreateFeedButton />
       </Row>
-      <Row>
+      <Row className="">
         <h3 className="display-6 mt-3 mb-5 text-muted">Feeds I Follow</h3>
         <FeedsFollowedByMe />
       </Row>
