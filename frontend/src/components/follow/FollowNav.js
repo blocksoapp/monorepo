@@ -13,24 +13,32 @@ function FollowNav(props) {
     navigate(`/${props.address}/profile`);
   };
 
+  const navigateBack = () => {
+    navigate(-1); // navigate back to the previous page
+  };
+
   return (
     <Container className="follow-header d-flex border-bottom align-items-center">
       <div className="arrow">
         <FontAwesomeIcon
           icon={faArrowLeft}
-          onClick={navigateProfile}
+          onClick={props.address ? navigateProfile : navigateBack}
           className="p-2 fa-lg pointer"
         />
       </div>
-      <div className="px-1">
-        <span>
-          <ClickableEnsAndAddress
-            address={props.address}
-            onClick={navigateProfile}
-            className="pointer fs-5"
-          />
-        </span>
-      </div>
+      {props.address ? (
+        <div className="px-1">
+          <span>
+            <ClickableEnsAndAddress
+              address={props.address}
+              onClick={navigateProfile}
+              className="pointer fs-5"
+            />
+          </span>
+        </div>
+      ) : (
+        <span className="fs-5">Back</span>
+      )}
     </Container>
   );
 }
