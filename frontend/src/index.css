@@ -201,22 +201,6 @@ code {
 .delete-icon:hover {
   color: red;
 }
-/* Used for testing UI */
-.red-border {
-  border: red solid 2px;
-}
-
-.blue-border {
-  border: blue solid 2px;
-}
-
-.green-border {
-  border: green solid 2px;
-}
-
-.yellow-border {
-  border: yellow solid 2px;
-}
 
 .w-min-100 {
   min-width: 100vw;
