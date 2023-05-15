@@ -21,15 +21,20 @@ function RecommendedProfiles() {
     <Container className="side-content-card">
       <h1>Who To Follow</h1>
       <div className="d-flex flex-column">
-        {featuredProfiles.map((profile, index) => (
-          <div className="" key={index}>
-            <SideProfile
-              address={profile.address}
-              image={profile.image}
-              numFollowers={profile.numFollowers}
-            />
-          </div>
-        ))}
+        {featuredProfiles.map(
+          (profile, index) =>
+            // Only render the profile if it is not followed by the user
+            !profile.followedByMe && (
+              <div className="" key={index}>
+                <SideProfile
+                  address={profile.address}
+                  image={profile.image}
+                  numFollowers={profile.numFollowers}
+                  followedByMe={profile.followedByMe}
+                />
+              </div>
+            )
+        )}
       </div>
     </Container>
   );
