@@ -78,9 +78,9 @@ function SideNavbar() {
           </Nav.Link>
         )}
 
-        <Button className="post-button" disabled={!signedIn}>
+        {/*      <Button className="post-button" disabled={!signedIn}>
           Post
-        </Button>
+        </Button> */}
       </Nav>
       <div className="siwe-button">
         <SignInButton />
