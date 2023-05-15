@@ -84,8 +84,7 @@ function FeedFollowers() {
   }, []);
 
   return (
-    <Container className="border p-0">
-      <FeedFollowNav feedId={feedId} active={active} />
+    <Container className="p-0">
       {isLoading ? (
         <FollowPlaceholder />
       ) : followError ? (
