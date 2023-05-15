@@ -14,22 +14,24 @@ function TrendingFeeds() {
     if (!suggestedFeedData) return;
     setTrendingFeeds(suggestedFeedData.feeds);
   }, [suggestedFeedData]);
-
   return (
     <Container className="side-content-card margin-top-1">
       <h1>Discover Feeds</h1>
       <div className="d-flex flex-column">
-        {trendingFeeds.map((feed) => (
-          <div key={feed.id}>
-            <SideFeed
-              id={feed.id}
-              name={feed.name}
-              image={feed.image}
-              description={feed.description}
-              numFollowers={feed.numFollowers}
-            />
-          </div>
-        ))}
+        {trendingFeeds.map(
+          (feed) =>
+            !feed.followedByMe && (
+              <div key={feed.id}>
+                <SideFeed
+                  id={feed.id}
+                  name={feed.name}
+                  image={feed.image}
+                  description={feed.description}
+                  numFollowers={feed.numFollowers}
+                />
+              </div>
+            )
+        )}
       </div>
     </Container>
   );

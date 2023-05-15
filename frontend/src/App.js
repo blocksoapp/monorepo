@@ -41,7 +41,6 @@ function App(props) {
     const res = await apiGetExplore();
     if (res.ok) {
       const json = await res.json();
-      console.log("suggested feed data: ", json);
       setSuggestedFeedData(json);
     } else {
       console.log("Failed to load suggested feed data.");
