@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Card, Col, Collapse, Row } from "react-bootstrap";
+import { Card, Col, Collapse, Image, Row } from "react-bootstrap";
 import Lightbox from "react-image-lightbox";
 import TxAddress from "../TxAddress";
 import ERC721ThumbAndCaption from "./ERC721ThumbAndCaption";
+import EtherscanLogo from "../../assets/img/etherscan.svg";
+import OpenseaLogo from "../../assets/img/opensea.svg";
 
 
-function ERC721Post({author, transfers}) {
+function ERC721Post({author, transfers, txHash}) {
 
     // state
     const [ tokenImagesThumb, setTokenImagesThumb] = useState([]);
@@ -55,7 +57,37 @@ function ERC721Post({author, transfers}) {
                 />
             )}
 
-            {/* card body details, shows nft thumbnail, id, and recipient */}
+            {/* links to view on opensea and etherscan */}
+            <Row className="justify-content-end fs-6">
+                {/* opensea */}
+                <Col className="col-auto pe-0">
+                    <a href={`https://opensea.io/assets/ethereum/${transfers[0].contract_address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Image
+                            src={OpenseaLogo}
+                            height="20px"
+                            width="20px"
+                        />
+                    </a>
+                </Col>
+                {/* etherscan */}
+                <Col className="col-auto">
+                    <a href={`https://etherscan.io/tx/${txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Image
+                            src={EtherscanLogo}
+                            height="20px"
+                            width="20px"
+                        />
+                    </a>
+                </Col>
+            </Row>
+
+            {/* nft thumbnail, id, and recipient */}
             <ERC721ThumbAndCaption
                 key={0}
                 author={author}

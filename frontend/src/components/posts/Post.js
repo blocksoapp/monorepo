@@ -31,6 +31,8 @@ import AuthorAddress from "./AuthorAddress";
 import TxAddress from "../TxAddress";
 import ERC20Post from "./ERC20Post";
 import ERC721Post from "./ERC721Post";
+import GenericTxPost from "./GenericTxPost";
+
 
 function Post({ data, bgColor }) {
   // constants
@@ -229,7 +231,7 @@ function Post({ data, bgColor }) {
   const render = function () {
     // only show transactions we have rich support for atm
     // so that feeds looks more alive
-    if (erc20Transfers.length > 1 || txType === txTypes.Transaction) return;
+    if (erc20Transfers.length > 1) return;
 
     return (
       <Container id={postData.id} className="mt-4">
@@ -309,37 +311,17 @@ function Post({ data, bgColor }) {
                   <ERC721Post
                     author={postData.author.address}
                     transfers={erc721Transfers}
+                    txHash={postData.refTx.tx_hash}
                   />
                 )}
 
               {/* All other Transactions */}
               {txType === txTypes.Transaction && (
-                <Card.Body>
-                  <Row>
-                    <Col className="col-auto">
-                      <Card.Text>
-                        Sent a&nbsp;
-                        <a
-                          className="text-success"
-                          href={`https://etherscan.io/tx/${postData.refTx.tx_hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontStyle: "italic", color: "black" }}
-                        >
-                          transaction
-                        </a>
-                        {postData.refTx.value !== "0" && (
-                          <span>
-                            &nbsp;worth{" "}
-                            {formatTokenAmount(postData.refTx.value, 18)} ETH
-                          </span>
-                        )}
-                        &nbsp;to&nbsp;
-                        <TxAddress address={postData.refTx["to_address"]} />
-                      </Card.Text>
-                    </Col>
-                  </Row>
-                </Card.Body>
+                  <GenericTxPost
+                      txHash={postData.refTx.tx_hash}
+                      recipient={postData.refTx.to_address}
+                  />
+                      
               )}
 
               {/* Card footer that includes the action buttons. */}
