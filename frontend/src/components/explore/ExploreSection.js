@@ -23,9 +23,6 @@ function ExploreSection() {
   return (
     <div>
       {/* show activity for a random feed */}
-      <h3 className="display-6 my-5 text-center text-muted">
-        Latest activity from...
-      </h3>
       <FeaturedFeed feed={featuredFeedItems} />
 
       <h3 className="display-6 my-5 text-center text-muted">Discover Feeds</h3>

@@ -319,7 +319,9 @@ function Post({ data, bgColor }) {
               {txType === txTypes.Transaction && (
                   <GenericTxPost
                       txHash={postData.refTx.tx_hash}
-                      recipient={postData.refTx.to_address}
+                      fromAddress={postData.refTx.from_address}
+                      toAddress={postData.refTx.to_address}
+                      author={postData.author.address}
                   />
                       
               )}

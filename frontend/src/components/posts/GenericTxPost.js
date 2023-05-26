@@ -7,7 +7,7 @@ import TxAddress from "../TxAddress";
 import EtherscanLogo from "../../assets/img/etherscan.svg";
 
 
-function GenericTxPost({txHash, recipient}) {
+function GenericTxPost({author, fromAddress, toAddress, txHash}) {
 
     return (
         <Card.Body>
@@ -15,9 +15,14 @@ function GenericTxPost({txHash, recipient}) {
             {/* link to view on etherscan */}
             <Row className="justify-content-end fs-6">
                 <Col>
-                    <Card.Text>
-                        Sent a transaction to <TxAddress address={recipient} />
-                  </Card.Text>
+                    {author.toLowerCase() === fromAddress.toLowerCase()
+                        ? <Card.Text>
+                            Sent a transaction to <TxAddress address={toAddress} />
+                          </Card.Text>
+                        : <Card.Text>
+                            Received a transaction from <TxAddress address={fromAddress} />
+                          </Card.Text>
+                    }
                 </Col>
                 <Col className="col-auto">
                     <a href={`https://etherscan.io/tx/${txHash}`}
