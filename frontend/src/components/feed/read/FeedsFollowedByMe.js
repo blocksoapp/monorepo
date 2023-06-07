@@ -1,9 +1,9 @@
 import { useContext, useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom';
 import { Col, Container, Row } from "react-bootstrap";
-import { ConnectKitButton, SIWEButton } from "connectkit";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { apiGetFeedsFollowedByMe } from '../../../api'
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 import PaginateButton from "../../ui/PaginateButton";
 import FeedThumbnail from "./FeedThumbnail";
 import FeedsPlaceholder from "./FeedsPlaceholder";
@@ -12,7 +12,7 @@ import FeedError from "./FeedError";
 
 function FeedsFollowedByMe() {
     // hooks
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
     const routerLocation = useLocation();
 
     // state
@@ -71,9 +71,7 @@ function FeedsFollowedByMe() {
             : user === null
                 ?   <Row className="justify-content-center text-center">
                         <p className="text-muted">You are not signed in.</p>
-                        <ConnectKitButton label="Sign In">
-                            <SIWEButton />
-                        </ConnectKitButton>
+                        <ConnectButton />
                     </Row>
                 : feedsError
                     ? <FeedError retryAction={fetchFeedsFollowedByMe} />

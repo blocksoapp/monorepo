@@ -1,12 +1,12 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 
 function NoFeedItems({ feedId }) {
   // hooks
   const navigate = useNavigate();
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
 
   // render
   return (

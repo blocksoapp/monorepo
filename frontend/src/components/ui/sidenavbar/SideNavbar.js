@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { Nav, Container, Button, Image } from "react-bootstrap";
 import { useLocation, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useSIWE } from "connectkit";
 import {
   faHome,
   faBell,
@@ -15,12 +14,11 @@ import "./sidenavbar.css";
 import BlocksoSVG from "../../../assets/img/blockso.svg";
 import BlocksoSmSVG from "../../../assets/img/blockso-sm.svg";
 import SignInButton from "../../authentication/SignInButton";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 
 function SideNavbar() {
   const routerLocation = useLocation();
-  const { user } = useContext(UserContext);
-  const { signedIn } = useSIWE();
+  const { user } = useUser();
 
   return (
     <Container className="sidebar">
@@ -35,7 +33,7 @@ function SideNavbar() {
         </Link>
       </div>
       <Nav className="flex-column" activeKey={routerLocation.pathname}>
-        {user !== null && signedIn && (
+        {user !== null && (
           <Nav.Link as={Link} to="/" eventKey="/">
             <FontAwesomeIcon icon={faHome} className="icon" />
             <span>My Feed</span>
@@ -46,21 +44,21 @@ function SideNavbar() {
           <span>Explore</span>
         </Nav.Link>
 
-        {user !== null && signedIn && (
+        {user !== null && (
           <Nav.Link as={Link} to="/notifications" eventKey={`/notifications`}>
             <FontAwesomeIcon icon={faBell} className="icon" />
             <span>Notifications</span>
           </Nav.Link>
         )}
 
-        {user !== null && signedIn && (
+        {user !== null && (
           <Nav.Link as={Link} to={`/feeds`} eventKey={`/feeds`}>
             <FontAwesomeIcon icon={faRss} className="icon" />
             <span>Feeds</span>
           </Nav.Link>
         )}
 
-        {user !== null && signedIn && (
+        {user !== null && (
           <Nav.Link
             as={Link}
             to={`${user["address"]}/profile`}
@@ -71,14 +69,14 @@ function SideNavbar() {
           </Nav.Link>
         )}
 
-        {user !== null && signedIn && (
+        {user !== null && (
           <Nav.Link as={Link} to="/edit-profile" eventKey="/edit-profile">
             <FontAwesomeIcon icon={faCog} className="icon" />
             <span>Settings</span>
           </Nav.Link>
         )}
 
-        {/*      <Button className="post-button" disabled={!signedIn}>
+        {/*      <Button className="post-button" disabled={!user}>
           Post
         </Button> */}
       </Nav>

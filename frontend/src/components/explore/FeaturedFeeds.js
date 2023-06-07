@@ -1,12 +1,10 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { UserContext } from "../../contexts/UserContext.js";
 import FeedThumbnail from "../feed/read/FeedThumbnail.js";
 
 function FeaturedFeeds({ feeds }) {
   // hooks
-  const { user, setUser, isAuthenticated } = useContext(UserContext);
   const navigate = useNavigate();
 
   // render

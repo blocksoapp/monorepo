@@ -11,7 +11,7 @@ import CommentsNotFound from "./comments/CommentsNotFound";
 import MoreComments from "./comments/MoreComments";
 import PostPlaceholder from "./PostPlaceholder";
 import PostsPlaceholder from "./PostsPlaceholder";
-import { UserContext } from '../../contexts/UserContext'
+import { useUser } from '../../hooks/useUser';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 function ViewPost(props) {
     // constants
     const { postId } = useParams();
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
     const navigate = useNavigate()
 
     // state

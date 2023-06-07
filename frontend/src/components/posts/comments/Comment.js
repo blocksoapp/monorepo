@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Container, Card, Col, Image, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useEnsAvatar, useEnsName } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHeart,

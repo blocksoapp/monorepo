@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import { useEnsAddress, useEnsName, useProvider } from "wagmi";
-import { utils as ethersUtils } from "ethers";
+import { useEnsAddress, useEnsName, usePublicClient } from "wagmi";
+import { getAddress } from "viem";
 import { zeroAddress } from "../../../utils";
 import ContractProfile from "./ContractProfile";
 import Profile from "./Profile";
@@ -12,9 +12,13 @@ import MainHeader from "../../ui/MainHeader";
 function ProfileResolver() {
   // constants
   const { urlInput } = useParams();
-  const ensAddressHook = useEnsAddress({ name: urlInput });
-  const ensNameHook = useEnsName({ address: urlInput });
-  const provider = useProvider();
+  const ensAddressHook = useEnsAddress(
+      urlInput.endsWith(".eth") ? {name: urlInput} : {} 
+  );
+  const ensNameHook = useEnsName(
+      urlInput.endsWith(".eth") ? {} : {address: urlInput}
+  );
+  const publicClient = usePublicClient();
 
   // state
   const [address, setAddress] = useState(null);
@@ -30,8 +34,8 @@ function ProfileResolver() {
    */
   const determineContractOrEOA = async (address) => {
     // get address code
-    const code = await provider.getCode(address);
-    return code === "0x" && address !== zeroAddress
+    const code = await publicClient.getBytecode({address});
+    return (code === undefined && address !== zeroAddress)
       ? setIsEOA(true)
       : setIsEOA(false);
   };
@@ -40,12 +44,6 @@ function ProfileResolver() {
    * Resolve the given address from the url when the profile is navigated to.
    */
   useEffect(() => {
-    // reset the state
-    setProfileInvalid(false);
-    setIsEOA(true);
-    setAddress(null);
-    setEnsName(null);
-
     // set profile as invalid if url input is null or undefined
     if (!urlInput) {
       setProfileInvalid(true);
@@ -55,17 +53,25 @@ function ProfileResolver() {
     // validate non-ens address
     if (!urlInput.endsWith(".eth")) {
       try {
-        ethersUtils.getAddress(urlInput);
-        setAddress(urlInput);
+        const address = getAddress(urlInput);
+        setAddress(address);
 
         // determine whether address is
         // an EOA or a Contract
-        determineContractOrEOA(urlInput);
+        determineContractOrEOA(address);
       } catch (error) {
         console.error(error);
         setProfileInvalid(true);
         return;
       }
+    }
+
+    // reset state on component unmount
+    return () => {
+        setProfileInvalid(false);
+        setIsEOA(true);
+        setAddress(null);
+        setEnsName(null);
     }
   }, [urlInput]);
 
@@ -74,27 +80,23 @@ function ProfileResolver() {
    * Set profile to be invalid if ens name does not resolve to address.
    */
   useEffect(() => {
-    if (ensAddressHook.isLoading) {
-      return;
-    }
-
-    if (ensAddressHook.data !== null) {
+    if (ensAddressHook.data) {
       setAddress(ensAddressHook.data);
     } else {
       if (urlInput.endsWith(".eth")) {
         setProfileInvalid(true);
       }
     }
-  }, [ensAddressHook, urlInput]);
+  }, [urlInput, ensAddressHook?.data]);
 
   /*
    * Set the ENS Name if it exists.
    */
   useEffect(() => {
-    if (!ensNameHook.isLoading && ensNameHook.data !== null) {
+    if (!ensNameHook.isLoading && ensNameHook.data) {
       setEnsName(ensNameHook.data);
     }
-  }, [ensNameHook, urlInput]);
+  }, [urlInput, ensNameHook]);
 
   return (
     <>

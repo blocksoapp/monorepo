@@ -2,13 +2,13 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Badge, Button } from "react-bootstrap";
 import { apiDeleteFollowFeed, apiPostFollowFeed } from "../../../api";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 
 
 function FeedFollowersFollowingBadges({ feed }) {
     // hooks
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     // state
     const [feedData, setFeedData] = useState(feed);

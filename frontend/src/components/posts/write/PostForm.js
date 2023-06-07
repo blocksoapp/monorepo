@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 import useBreakpoint from "../../../hooks/useBreakpoint";
 import SignInButton from "../../authentication/SignInButton";
 import PfpResolver from "../../PfpResolver";
@@ -25,7 +25,7 @@ function PostForm({
   padding,
 }) {
   // hooks
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const breakpoint = useBreakpoint();
 
   // state
