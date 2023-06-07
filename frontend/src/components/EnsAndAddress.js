@@ -4,10 +4,11 @@ import { abbrAddress } from "../utils.js";
 
 function EnsAndAddress(props) {
     // constants
-    const { data, isError, isLoading } = useEnsName({
-        address: props.address,
-    })
+    const { data, isError, isLoading } = useEnsName(
+        props.address === undefined ? {} : {address: props.address}
+    )
 
+    console.log("props: ", props);
     // returns
     if (!props.address) return <span>Searching address</span>
     if (isLoading) return <span>Fetching ENS name…</span>
