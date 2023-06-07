@@ -2,7 +2,7 @@ import { useEffect, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { apiGetFeed } from '../../../api';
-import { UserContext } from '../../../contexts/UserContext';
+import { useUser } from '../../../hooks/useUser';
 import FeedDetails from '../read/FeedDetails';
 import FeedFollowing from '../read//FeedFollowing';
 import EditFeedDetails from './EditFeedDetails';
@@ -13,7 +13,7 @@ import DeleteFeedButton from './DeleteFeedButton';
 function EditFeed() {
 
     // hooks
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
     const { feedId } = useParams();
 
     // state

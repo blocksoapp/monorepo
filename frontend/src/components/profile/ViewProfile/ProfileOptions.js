@@ -2,14 +2,14 @@ import { useContext, useState } from 'react';
 import { Button, Container, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-import { UserContext } from '../../../contexts/UserContext';
+import { useUser } from '../../../hooks/useUser';
 import AddToFeedModal from '../../feed/write/AddToFeedModal';
 import "../../feed/read/feed-option-styles.css";
 
 
 function ProfileOptions({profile}) {
     // hooks
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     // state
     const [showAddToFeedModal, setShowAddToFeedModal] = useState(false);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Container, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-import { UserContext } from '../../../contexts/UserContext';
+import { useUser } from '../../../hooks/useUser';
 import DeleteFeedModal from '../write/DeleteFeedModal';
 import "./feed-option-styles.css";
 
@@ -11,7 +11,7 @@ import "./feed-option-styles.css";
 function FeedOptions({feed}) {
     // hooks
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     // state
     const [showDeleteModal, setShowDeleteModal] = useState(false);

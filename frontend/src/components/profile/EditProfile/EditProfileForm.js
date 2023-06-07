@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import { baseAPI, getCookie } from "../../../utils";
@@ -28,7 +28,6 @@ function EditProfileForm({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  //const { user, setUser } = useContext(UserContext);
 
   // Form State Update
   const handleChange = (event) => {

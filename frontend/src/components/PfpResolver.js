@@ -22,8 +22,8 @@ import Pfp from "./Pfp.js";
 function PfpResolver({address, imgUrl, height, width, fontSize, className, onClick}) {
 
     // constants
-    const ensAvatarHook = useEnsAvatar({addressOrName: address});
     const ensNameHook = useEnsName({address: address});
+    const ensAvatarHook = useEnsAvatar({name: ensNameHook.data});
 
     // state
     const [pfpEnsName, setPfpEnsName] = useState(null);

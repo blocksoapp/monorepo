@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import { UserContext } from "../contexts/UserContext";
+import { useUser } from "../hooks/useUser";
 import EditProfileForm from "../components/profile/EditProfile/EditProfileForm";
-import { useSIWE } from "connectkit";
 import MainHeader from "../components/ui/MainHeader";
 
 function EditProfile() {
   // Constant
-  const { user, setUser } = useContext(UserContext);
-  const { signedIn } = useSIWE();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
   // State
   const [pfp, setPfp] = useState(null);
@@ -51,10 +49,10 @@ function EditProfile() {
 
   // Redirect to home page on disconnect
   useEffect(() => {
-    if (!signedIn) {
+    if (!user) {
       return navigate("/");
     }
-  }, [signedIn]);
+  }, [user]);
 
   return (
     <div className="">

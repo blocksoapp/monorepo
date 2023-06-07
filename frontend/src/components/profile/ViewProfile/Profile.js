@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useLocation, useParams } from "react-router-dom";
 import { Badge, Button, Col, Container, Image, Row } from "react-bootstrap";
-import { useAccount, useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
-import { utils as ethersUtils } from "ethers";
 import {
   apiGetPosts,
   apiGetProfile,
@@ -11,7 +8,7 @@ import {
   apiPostUnfollow,
   apiGetUrl,
 } from "../../../api";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 import { usePageBottom } from "../../../hooks/usePageBottom";
 import NewPost from "../../posts/NewPost.js";
 import Post from "../../posts/Post.js";
@@ -28,7 +25,7 @@ import ProfileOptions from "./ProfileOptions";
 
 function Profile(props) {
   // constants
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const navigate = useNavigate();
   const reachedPageBottom = usePageBottom();
 

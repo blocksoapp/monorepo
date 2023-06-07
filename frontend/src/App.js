@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useUser } from "./hooks/useUser";
 import Explore from "./pages/Explore";
 import Home from "./pages/Home";
 import EditProfile from "./pages/EditProfile";
@@ -10,64 +11,18 @@ import EditFeed from "./components/feed/write/EditFeed";
 import ViewFeed from "./components/feed/read/ViewFeed";
 import PostPage from "./pages/PostPage";
 import NavbarComponent from "./components/ui/Navbar";
-import { UserContext } from "./contexts/UserContext";
 import FeedFollow from "./pages/FeedFollow";
 import Follow from "./pages/Follow";
-import { apiGetUser, apiGetExplore } from "./api";
-import { useSIWE } from "connectkit";
 import SideNavbar from "./components/ui/sidenavbar/SideNavbar";
 import SideContent from "./components/sidecontent/SideContent";
-import { SuggestedUserContext } from "./contexts/SuggestedUserContext";
 import Notifications from "./pages/Notifications";
 
 function App(props) {
-  // Constants
-  const { signedIn } = useSIWE();
-  // State
-  const [user, setUser] = useState(null);
-  const [suggestedFeedData, setSuggestedFeedData] = useState(null);
-
-  const loadUserContext = async () => {
-    const res = await apiGetUser();
-    if (res.ok) {
-      const json = await res.json();
-      setUser(json);
-    } else {
-      console.log("Failed to load user data.");
-    }
-  };
-
-  const loadSuggestedFeedData = async () => {
-    const res = await apiGetExplore();
-    if (res.ok) {
-      const json = await res.json();
-      setSuggestedFeedData(json);
-    } else {
-      console.log("Failed to load suggested feed data.");
-    }
-  };
-
-  useEffect(() => {
-    if (!signedIn) return;
-    loadUserContext();
-  }, [signedIn]);
-
-  useEffect(() => {
-    loadUserContext();
-    loadSuggestedFeedData();
-  }, []);
+    // constants
+    const { user } = useUser();
 
   return (
-    <Container fluid="md">
-      <UserContext.Provider
-        value={{
-          user,
-          setUser,
-        }}
-      >
-        <SuggestedUserContext.Provider
-          value={{ suggestedFeedData, setSuggestedFeedData }}
-        >
+      <Container fluid="md">
           <Router>
             <NavbarComponent />
             <Row>
@@ -79,7 +34,7 @@ function App(props) {
               {/* main content */}
               <Col className="main-content pt-2">
                 <Routes>
-                  {user !== null && signedIn ? (
+                  {user !== null ? (
                     <Route path="/" element={<Home />}></Route>
                   ) : (
                     <Route path="/" element={<Explore />}></Route>
@@ -118,9 +73,7 @@ function App(props) {
               </Col>
             </Row>
           </Router>
-        </SuggestedUserContext.Provider>
-      </UserContext.Provider>
-    </Container>
+      </Container>
   );
 }
 

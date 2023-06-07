@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
-import { utils as ethersUtils } from 'ethers';
-import { useEnsName, useProvider } from 'wagmi';
+import { getAddress } from "viem";
+import { useEnsName, usePublicClient } from 'wagmi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTimes, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 
 function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
     // hooks
-    const provider = useProvider();
-    const ensNameHook = useEnsName({address: address});                             
+    const publicClient = usePublicClient();
+    const ensNameHook = useEnsName({address: address});
 
     // state
     const [inputAddress, setInputAddress] = useState(address);
@@ -62,7 +62,7 @@ function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
 
         // resolve ENS name to an address
         if (addressToSave.endsWith(".eth")) {
-            const resolvedAddress = await provider.resolveName(addressToSave);
+            const resolvedAddress = await publicClient.resolveName(addressToSave);
             if (resolvedAddress) {
                 addressToSave = resolvedAddress;
                 isValid = true;
@@ -71,7 +71,7 @@ function FeedFollowingProfileInput({address, handleSubmit, handleDelete}) {
         // validate non-ENS address
         else {
             try {
-                addressToSave = ethersUtils.getAddress(addressToSave);
+                getAddress(addressToSave);
                 isValid = true;
             }
             catch (error) {

@@ -331,6 +331,35 @@ export const apiPostCommentLike = async (postId, commentId) => {
   return resp;
 };
 
+/* Returns the response for logging in.  */
+export const apiPostLogin = async (message, signature) => {
+  const url = `${baseAPI}/auth/login/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+    body: JSON.stringify({ message, signature }),
+  });
+  return resp;
+};
+
+/* Returns the response for logging out.  */
+export const apiPostLogout = async () => {
+  const url = `${baseAPI}/auth/logout/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+    credentials: "include",
+  });
+  return resp;
+};
+
 /* Returns the response for liking a post.  */
 export const apiPostPostLike = async (postId) => {
   const url = `${baseAPI}/post/${postId}/likes/`;

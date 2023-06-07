@@ -102,6 +102,8 @@ def auth_login(request):
     # set request.body to play nicely with auth backend of
     # django-siwe-auth package
     request.body = json.dumps(request.data)
+    request.data['message']['issued_at'] = request.data['message']['issuedAt']
+    request.data['message']['chaind_id'] = request.data['message']['chainId']
 
     # prepare data from the request for the authentication backend
     auth_kwargs = {
@@ -127,7 +129,10 @@ def auth_login(request):
             )
             Socials.objects.get_or_create(profile=profile)  # create socials
 
-            return Response(status=200)
+            return Response(
+                status=200,
+                data=serializers.UserSerializer(request.user).data
+            )
         else:
             return Response(status=401)
 

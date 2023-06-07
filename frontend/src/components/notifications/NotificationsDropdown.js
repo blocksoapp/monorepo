@@ -67,7 +67,6 @@ function NotificationsDropdown() {
 
     if (resp.status === 200) {
       const data = await resp.json();
-      console.log("notif data: ", data["results"] || "");
       setNotifs(data["results"]);
       setNotifsError(false);
       setNotifsLoading(false);

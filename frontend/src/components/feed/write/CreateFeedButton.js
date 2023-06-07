@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { UserContext } from "../../../contexts/UserContext";
+import { useUser } from "../../../hooks/useUser";
 import CreateFeedModal from "./CreateFeedModal";
 
 function CreateFeedButton() {
   // hooks
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
 
   // state
   // show or hide modal when the button is clicked

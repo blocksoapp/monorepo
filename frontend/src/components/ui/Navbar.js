@@ -4,15 +4,13 @@ import { Button, Container, Col, Form, Nav, Navbar } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import SignInButton from "../authentication/SignInButton";
 import NotificationsDropdown from "../notifications/NotificationsDropdown";
-import { UserContext } from "../../contexts/UserContext";
-import { useSIWE } from "connectkit";
+import { useUser } from "../../hooks/useUser";
 import "./sidenavbar/sidenavbar.css";
 import SearchBar from "../searchbar/SearchBar";
 
 function NavbarComponent() {
   const routerLocation = useLocation();
-  const { user } = useContext(UserContext);
-  const { signedIn } = useSIWE();
+  const { user } = useUser();
   const navigate = useNavigate();
   const [searchVal, setSearchVal] = useState("");
 
@@ -35,12 +33,12 @@ function NavbarComponent() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="collapse-container">
           <Nav className="w-100" activeKey={routerLocation.pathname}>
-            {user !== null && signedIn && (
+            {user !== null && (
               <Nav.Link as={Link} to="/" eventKey="/">
                 My Feed
               </Nav.Link>
             )}
-            {user !== null && signedIn && (
+            {user !== null && (
               <Nav.Link as={Link} to={`/feeds`} eventKey={`/feeds`}>
                 Feeds
               </Nav.Link>
@@ -48,12 +46,12 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/explore" eventKey="/explore">
               Explore
             </Nav.Link>
-            {user !== null && signedIn && (
+            {user !== null && (
               <Nav.Link as={Link} to="/edit-profile" eventKey="/edit-profile">
                 Edit Profile
               </Nav.Link>
             )}
-            {user !== null && signedIn && (
+            {user !== null && (
               <Nav.Link
                 as={Link}
                 to={`${user["address"]}/profile`}
@@ -68,7 +66,7 @@ function NavbarComponent() {
         </Navbar.Collapse>
 
         {/* Notifications */}
-        {user !== null && signedIn && <NotificationsDropdown />}
+        {user !== null && <NotificationsDropdown />}
 
         {/* Sign In/Out */}
         <SignInButton buttonText="Sign In" />
