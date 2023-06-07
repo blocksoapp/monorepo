@@ -23,7 +23,7 @@ function WagmiMiddleware({children}) {
     // Set up client
     const { connectors } = getDefaultWallets({
         appName: 'Blockso',
-        projectId: 'bbbd3dae6f2812fbe09bf3ace159e43f',
+        projectId: process.env.REACT_APP_WALLETCONNECT_PROJECTID,
         chains
     });
 
