@@ -4,20 +4,20 @@ import { abbrAddress } from "../utils.js";
 
 function EnsAndAddress(props) {
     // constants
-    const { data, isError, isLoading } = useEnsName(
+    const ensNameHook = useEnsName(
         props.address === undefined ? {} : {address: props.address}
     )
 
-    console.log("props: ", props);
+    console.log("props:", props, " data:", ensNameHook.data, " isError:", ensNameHook.isError, " isLoading:", ensNameHook.isLoading, " ensNameHook:", ensNameHook);
     // returns
     if (!props.address) return <span>Searching address</span>
-    if (isLoading) return <span>Fetching ENS name…</span>
-    if (isError) return <span>Error fetching ENS name</span>
+    if (ensNameHook.isLoading) return <span>Fetching ENS name…</span>
+    if (ensNameHook.isError) return <span>Error fetching ENS name</span>
 
     // ens name found
-    if (data !== null) return (
+    if (ensNameHook.data !== null) return (
         <span>
-            {data}
+            {ensNameHook.data}
         </span>
     )
 
