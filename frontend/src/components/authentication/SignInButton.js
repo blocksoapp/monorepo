@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from '@nullbitx8/rainbowkit';
 import "../ui/sidenavbar/sidenavbar.css";
 
 function SignInButton({ buttonText }) {

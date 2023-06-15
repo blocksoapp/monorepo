@@ -1,5 +1,5 @@
 import { useNetwork } from "wagmi";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider } from "@nullbitx8/rainbowkit";
 
 
 function RainbowkitProviderMiddleware({children}) {

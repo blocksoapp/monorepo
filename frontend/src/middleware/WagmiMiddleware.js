@@ -6,7 +6,7 @@ import {
 import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { infuraProvider } from "wagmi/providers/infura";
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
+import { getDefaultWallets } from "@nullbitx8/rainbowkit";
 
 
 function WagmiMiddleware({children}) {

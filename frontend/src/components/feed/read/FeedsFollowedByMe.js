@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom';
 import { Col, Container, Row } from "react-bootstrap";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from '@nullbitx8/rainbowkit';
 import { apiGetFeedsFollowedByMe } from '../../../api'
 import { useUser } from "../../../hooks/useUser";
 import PaginateButton from "../../ui/PaginateButton";
