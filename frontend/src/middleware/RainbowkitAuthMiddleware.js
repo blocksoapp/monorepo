@@ -1,7 +1,7 @@
 import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
-} from '@rainbow-me/rainbowkit';
+} from '@nullbitx8/rainbowkit';
 import { SiweMessage } from 'siwe';
 import { useAuth } from "../hooks/useAuth";
 import { baseAPI } from "../utils";
