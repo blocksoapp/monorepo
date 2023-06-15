@@ -5,7 +5,6 @@ import {
 } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { infuraProvider } from "wagmi/providers/infura";
 import { getDefaultWallets } from "@nullbitx8/rainbowkit";
 
 
@@ -15,7 +14,6 @@ function WagmiMiddleware({children}) {
     const { chains, publicClient } = configureChains(
         [mainnet, polygon, optimism, arbitrum],
         [
-            infuraProvider({ apiKey: process.env.REACT_APP_INFURA_KEY }),
             publicProvider()
         ]
     );
